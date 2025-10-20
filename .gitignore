@@ -1,0 +1,32 @@
+#Verificar que este git Ingote todos los archivos de python no deseados
+*.pyc
+pycache/
+
+
+.env
+.flaskenv
+
+venv/
+env/
+/venv
+/env
+
+/dist
+/build
+*.egg-info/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ipynb_checkpoints
+*.log
+*.sqlite3
+/media
+/static
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+#para html
