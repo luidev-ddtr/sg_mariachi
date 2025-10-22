@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # --- CONFIGURACIÓN ---
     # Define el rango de años que quieres generar
     anio_inicio = 2025
-    anio_fin = 2030
+    anio_fin = 2031
     archivo_salida = "insert_dim_dates.sql"
     # ---------------------
 
