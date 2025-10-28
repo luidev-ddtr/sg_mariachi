@@ -1,5 +1,5 @@
 import random
-from src.dim_people.people_service import PeopleService
+from src.dim_people.people_handler import PeopleService
 
 def test_insert_person():
     people_options = PeopleService()
@@ -10,10 +10,10 @@ def test_insert_person():
     message, status = people_options.create_people({
         "DIM_Name": name,
         "DIM_SecondName": "perez",
-        "DIM_LastName": "Garcia",
+        "DIM_LastName": "Garcia", 
         "DIM_SecondLastName": "Cruz",
         "DIM_PhoneNumber": "123456789",
         "DIM_SecondPhoneNumber": "123456789",
-        "DIM_Address": "123 Main St"
+        "DIM_Address": "123 Main St"    
     })
     assert message == "Persona creada exitosamente"

@@ -7,6 +7,10 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
 
+#Importaciones de todos los blueprinbts
+from src.routes.people_route import people_route
+from src.routes.reservation_route import reservation_route
+
 # --- CORRECCIÓN 1: Cargar el .env PRIMERO ---
 # Esta línea DEBE estar al principio, antes de acceder a cualquier variable de entorno.
 #load_dotenv()
@@ -27,13 +31,14 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=1)
 
 jwt = JWTManager(app)
 
-
-#Blueprints van aqui ...
 """
+#Blueprints van aqui ...
+app.register_blueprint(people_route)
+app.register_blueprint(reservation_route)
 
 
 #frontend_urls = os.environ.get("URL_FRONTEND", "http://localhost:5173")
-frontend_urls = ["http://localhost:5173", "http://localhost:5173"]
+frontend_urls = """http://localhost:5173", "http://localhost:5173"""
 # Convertir a lista si hay múltiples URLs separadas por coma
 origins_list = [url.strip() for url in frontend_urls]
 
