@@ -3,7 +3,7 @@ from typing import Literal
 from flask import Blueprint, request
 from flask.wrappers import Response
 from typing import Any
-from src.dim_people.people_service import PeopleService
+from src.dim_people.people_handler import PeopleService
 
 from src.routes.handle_message import send_error, send_success
 

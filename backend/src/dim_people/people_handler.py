@@ -14,7 +14,6 @@ class PeopleService:
     def create_people(self, data_people: dict) -> tuple[str, int]:
         """
         Crea una nueva entrada de persona en la tabla dimensional `dim_people`.
-
         Este método gestiona toda la lógica para preparar e insertar un nuevo registro
         de persona, incluyendo la generación de IDs y la asociación con la dimensión de fechas.
         
@@ -60,7 +59,6 @@ class PeopleService:
             result = insert_people(data_format, conexion)
             
             if result:
-                conexion.save_changes()
                 return "Persona creada exitosamente", 201
             else:
                 return "Error al crear la persona", 500
