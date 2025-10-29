@@ -1,37 +1,34 @@
 /*
- * Este archivo (registro-evento.js) maneja únicamente
- * la lógica del formulario en 'registro-evento.html'.
+ * Este archivo (registro-evento.js) maneja la lógica
+ * del formulario en 'registro-evento.html'.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Seleccionamos los elementos del formulario
   const eventForm = document.getElementById('event-form');
   const messageEl = document.getElementById('form-message');
+  
+  // Elementos de Fecha y Hora
   const fechaInput = document.getElementById('fecha');
   const horaInicioEl = document.getElementById('hora_inicio');
   const horaFinalEl = document.getElementById('hora_final');
-  const totalHorasEl = document.getElementById('total_horas');
+  const totalHorasEl = document.getElementById('total_horas_display'); // Renombrado
 
-  // Si no encontramos el formulario en esta página, no hacemos nada.
   if (!eventForm) {
     return;
   }
   
   // 2. Lógica de inicialización del formulario
   
-  // Asigna la fecha mínima al input de fecha (no se pueden seleccionar días pasados)
+  // Asigna la fecha mínima al input de fecha
   const hoy = new Date();
   const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, '0'); // +1 porque Enero es 0
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
   const dd = String(hoy.getDate()).padStart(2, '0');
   fechaInput.min = `${yyyy}-${mm}-${dd}`;
   
   // 3. Añadimos los 'listeners'
-  
-  // Listener principal para el envío (submit)
   eventForm.addEventListener('submit', handleSubmit);
-  
-  // Listeners para calcular el total de horas automáticamente
   horaInicioEl.addEventListener('change', calcularTotalHoras);
   horaFinalEl.addEventListener('change', calcularTotalHoras);
 
@@ -41,72 +38,78 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function handleSubmit(event) {
     event.preventDefault(); // Evitamos que la página se recargue
-
-    // Limpia mensajes anteriores
     messageEl.textContent = '';
     messageEl.className = '';
 
-    // --- VALIDACIÓN ---
-    const nombre = document.getElementById('nombre').value.trim();
-    const apellido = document.getElementById('apellido').value.trim();
-    const telefono = document.getElementById('telefono').value.trim();
+    // --- OBTENER VALORES ---
+    // Leemos todos los valores de los inputs
+    
+    // Cliente
+    const dim_name = document.getElementById('dim_name').value.trim();
+    const dim_secondname = document.getElementById('dim_secondname').value.trim();
+    const dim_lastname = document.getElementById('dim_lastname').value.trim();
+    const dim_secondlastname = document.getElementById('dim_secondlastname').value.trim();
+    const dim_phonenumber = document.getElementById('dim_phonenumber').value.trim();
+    const dim_secondphonenumber = document.getElementById('dim_secondphonenumber').value.trim();
+    const dim_address = document.getElementById('dim_address').value.trim();
+
+    // Evento
     const fecha = fechaInput.value;
     const horaInicio = horaInicioEl.value;
     const horaFinal = horaFinalEl.value;
-    
-    // Validación básica (campos vacíos)
-    if (!nombre || !apellido || !telefono || !fecha || !horaInicio || !horaFinal) {
+    const totalHorasString = totalHorasEl.value; // ej. "05:00"
+    const dim_totalamount_raw = document.getElementById('dim_totalamount').value;
+    const dim_eventaddress = document.getElementById('dim_eventaddress').value.trim();
+    const dim_notes = document.getElementById('dim_notes').value.trim();
+
+    // --- VALIDACIÓN BÁSICA ---
+    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal || !dim_totalamount_raw || !dim_eventaddress) {
       showFormMessage('Por favor, completa todos los campos obligatorios.', 'error');
       return; 
     }
 
-    // Validación específica (teléfono)
-    const telefonoRegex = /^\d{10}$/;
-    if (!telefonoRegex.test(telefono)) {
-      showFormMessage('El teléfono debe tener 10 dígitos.', 'error');
-      return; 
-    }
+    // --- TRANSFORMACIÓN DE DATOS ---
+    // Convertimos los datos al formato exacto del JSON
+    
+    // 1. Convertir "HH:MM" a número decimal para DIM_NHours
+    const [horas, minutos] = totalHorasString.split(':').map(Number);
+    const dim_nhours = horas + (minutos / 60);
 
-    // --- PREPARACIÓN DE DATOS ---
+    // 2. Convertir monto a número (float)
+    const dim_totalamount = parseFloat(dim_totalamount_raw);
+
+    // 3. Crear fechas en formato YYYY-MM-DD HH:MM:SS
+    const dim_startdate = `${fecha} ${horaInicio}:00`;
+    const dim_enddate = `${fecha} ${horaFinal}:00`;
+
+    // --- CREAR EL "DICCIONARIO" ---
     const formData = {
-      nombre: nombre,
-      apellido: apellido,
-      telefono: telefono,
-      fecha: fecha,
-      localidad: document.getElementById('localidad').value.trim(),
-      municipio: document.getElementById('municipio').value,
-      estado: document.getElementById('estado').value,
-      direccion: document.getElementById('direccion').value.trim(),
-      hora_inicio: horaInicio,
-      hora_final: horaFinal,
-      descripcion: document.getElementById('descripcion').value.trim(),
-      total_horas: totalHorasEl.value // Se incluye el total calculado
+      DIM_EventAddress: dim_eventaddress,
+      DIM_StartDate: dim_startdate,
+      DIM_EndDate: dim_enddate,
+      DIM_NHours: dim_nhours, 
+      DIM_TotalAmount: dim_totalamount, 
+      DIM_Notes: dim_notes,
+      DIM_Name: dim_name,
+      DIM_SecondName: dim_secondname,
+      DIM_LastName: dim_lastname,
+      DIM_SecondLastName: dim_secondlastname,
+      DIM_PhoneNumber: dim_phonenumber,
+      DIM_SecondPhoneNumber: dim_secondphonenumber,
+      DIM_Address: dim_address
     };
 
-    // --- ENVÍO AL BACKEND ---
-    try {
-      // !! RECUERDA CAMBIAR ESTA URL por la de tu backend !!
-      const response = await fetch('http://127.0.0.1:5000/api/reservation', {
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData) 
-      });
-
-      if (response.ok) {
-        const result = await response.json(); 
-        showFormMessage('¡Evento registrado con éxito!', 'success');
-        eventForm.reset(); // Limpiamos el formulario
-        totalHorasEl.value = "00:00"; // Reseteamos el total
-        console.log('Respuesta del servidor:', result);
-      } else {
-        const errorData = await response.json();
-        showFormMessage(`Error: ${errorData.message || 'No se pudo registrar'}`, 'error');
-      }
-
-    } catch (error) {
-      console.error('Error de conexión:', error);
-      showFormMessage('Error de conexión. Revisa que el backend esté funcionando.', 'error');
-    }
+    // CUMPLE CON LOS REQUISITOS
+    // 1. Imprimimos el "diccionario" en la consola
+    console.log("Diccionario del formulario (Formato JSON):");
+    console.log(formData);
+    
+    // 2. Mostramos un mensaje de éxito en el formulario
+    showFormMessage('¡Datos impresos en la consola! Revisa con F12.', 'success');
+    
+    // 3. Limpiamos el formulario
+    eventForm.reset(); 
+    totalHorasEl.value = "00:00"; 
   }
   
   /**
@@ -118,42 +121,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   /**
-   * 6. Función para calcular el total de horas
+   * 6. Función para calcular el total de horas (Sin cambios)
    */
   function calcularTotalHoras() {
     const inicio = horaInicioEl.value;
     const final = horaFinalEl.value;
 
-    // Solo calculamos si ambos campos tienen un valor
     if (inicio && final) {
-      // Convertimos las horas "HH:MM" a minutos
       const [inicioH, inicioM] = inicio.split(':').map(Number);
       const totalMinInicio = (inicioH * 60) + inicioM;
       
       const [finalH, finalM] = final.split(':').map(Number);
       const totalMinFinal = (finalH * 60) + finalM;
 
-      // Calculamos la diferencia
       let diffMinutos = totalMinFinal - totalMinInicio;
 
-      // Si es negativo, asumimos que termina al día siguiente
       if (diffMinutos < 0) {
-        diffMinutos += 24 * 60; // 1440 minutos en un día
+        diffMinutos += 24 * 60; 
       }
 
-      // Convertimos los minutos de diferencia a "HH:MM"
       const horas = Math.floor(diffMinutos / 60);
       const minutos = diffMinutos % 60;
 
-      // Formateamos para que siempre tengan dos dígitos
       const hh = String(horas).padStart(2, '0');
       const mm = String(minutos).padStart(2, '0');
 
-      // Asignamos el valor al campo
       totalHorasEl.value = `${hh}:${mm}`;
       
     } else {
-      totalHorasEl.value = "00:00"; // Resetea si falta un valor
+      totalHorasEl.value = "00:00";
     }
   }
 
