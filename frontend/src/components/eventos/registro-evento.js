@@ -1,3 +1,5 @@
+import { crear_reservacion } from '../../api/api_reservacion';
+
 /*
  * Este archivo (registro-evento.js) maneja la lógica
  * del formulario en 'registro-evento.html'.
