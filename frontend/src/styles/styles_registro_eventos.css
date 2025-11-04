@@ -208,7 +208,7 @@ th {
   cursor: pointer;
 }
 
-/* --- Responsividad --- */
+/*  Responsividad  */
 @media (max-width: 900px) {
   .sidebar {
     width: 180px;
