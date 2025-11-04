@@ -1,6 +1,35 @@
 
 class Reservation():
-    
+    """
+    Modelo de datos para representar una Reserva (Reservation) en el sistema.
+
+    Esta clase actúa como un Data Transfer Object (DTO) o un modelo de dominio
+    para la dimensión 'dim_reservation' en un esquema de base de datos tipo
+    Data Warehouse (o dimensional). Contiene todos los atributos que definen
+    una reserva específica, incluyendo identificadores de clave subrogada
+    (IDs de otras dimensiones) y métricas relevantes.
+
+    Se utiliza para:
+    1. **Validación de Datos**: Asegurar que los datos pasados para una reserva
+       contengan todos los campos requeridos y con el tipo de dato esperado.
+    2. **Transferencia de Datos**: Mover datos de reserva entre las capas de
+       la aplicación (por ejemplo, desde la capa de servicio a la capa de persistencia).
+    3. **Serialización/Deserialización**: Convertir el objeto a formatos como
+       diccionarios o strings para su almacenamiento, transmisión o logging.
+
+    Atributos:
+        DIM_ReservationId (str): Clave primaria/Subrogada única de la reserva.
+        DIM_PeopleId (str): Clave foránea que referencia a la dimensión de Persona (Cliente).
+        DIM_StatusId (str): Clave foránea que referencia a la dimensión de Estatus (ej. Confirmada, Cancelada).
+        DIM_DateId (str): Clave foránea que referencia a la dimensión de Fecha de creación/registro.
+        DIM_ServiceOwnersId (str): Clave foránea que referencia a la dimensión de Propietarios de Servicio.
+        DIM_EventAddress (str): Dirección física donde se llevará a cabo el evento/servicio.
+        DIM_StartDate (str): Fecha y hora de inicio de la reserva (en formato string, típicamente ISO 8601).
+        DIM_EndDate (str): Fecha y hora de finalización de la reserva (en formato string, típicamente ISO 8601).
+        DIM_NHours (float): Número total de horas cubiertas por la reserva.
+        DIM_TotalAmount (int): Monto total monetario de la reserva.
+        DIM_Notes (str): Notas o comentarios adicionales relacionados con la reserva.
+    """
     def __init__(self,
                 DIM_ReservationId: str,
                 DIM_PeopleId: str,
@@ -13,6 +42,28 @@ class Reservation():
                 DIM_NHours: float,
                 DIM_TotalAmount: int,
                 DIM_Notes: str):
+        """
+        Constructor de la clase Reservation. Inicializa un nuevo objeto de reserva
+        con todos los datos necesarios.
+
+        Los tipos de datos son definidos para hinting, pero la representación
+        interna (ej. fecha como 'str' o 'datetime') dependerá del flujo de datos.
+        Aquí se usa 'str' para IDs y fechas, manteniendo consistencia con las
+        operaciones típicas de transferencia/almacenamiento.
+
+        Args:
+            DIM_ReservationId (str): ID de la reserva.
+            DIM_PeopleId (str): ID de la persona/cliente.
+            DIM_StatusId (str): ID del estatus de la reserva.
+            DIM_DateId (str): ID de la fecha.
+            DIM_ServiceOwnersId (str): ID del propietario del servicio.
+            DIM_EventAddress (str): Dirección.
+            DIM_StartDate (str): Fecha de inicio.
+            DIM_EndDate (str): Fecha de fin.
+            DIM_NHours (float): Número de horas.
+            DIM_TotalAmount (int): Monto total.
+            DIM_Notes (str): Notas.
+        """
         self.DIM_ReservationId = DIM_ReservationId
         self.DIM_PeopleId = DIM_PeopleId
         self.DIM_StatusId = DIM_StatusId
@@ -24,7 +75,28 @@ class Reservation():
         self.DIM_NHours = DIM_NHours
         self.DIM_TotalAmount = DIM_TotalAmount
         self.DIM_Notes = DIM_Notes
+        
+        
     def to_dict(self):
+        """
+        Convierte el objeto Reservation en un diccionario de Python.
+
+        Esta es una utilidad clave para la serialización, especialmente al
+        preparar datos para un API JSON o para la ingesta en bases de datos
+        que aceptan formatos clave-valor.
+
+        Detalles de implementación:
+            - **Conversión de Fechas**: Los campos 'DIM_StartDate' y 'DIM_EndDate'
+              se convierten explícitamente a `str()` si existen. Esto es crucial
+              si las fechas son objetos `datetime` y deben ser representadas como
+              cadenas de texto (ej. ISO 8601) para la serialización. Si el valor
+              es nulo (`None`), se asigna `None` al diccionario para evitar errores
+              de conversión.
+
+        Returns:
+            dict: Un diccionario donde las claves son los nombres de los atributos
+                  de la reserva y los valores son los datos correspondientes.
+        """
         return {
             'DIM_ReservationId': self.DIM_ReservationId,
             'DIM_PeopleId': self.DIM_PeopleId,
@@ -40,6 +112,16 @@ class Reservation():
         }
 
     def __str__(self):
+        """
+        Devuelve una representación en cadena del objeto Reservation.
+
+        Este método se utiliza para facilitar el debugging y el logging,
+        proporcionando una vista rápida y legible de los valores clave del objeto.
+
+        Returns:
+            str: Una cadena de texto formateada que lista los atributos principales
+                 y sus valores, separados por un ' | '.
+        """
         return (f"ReservationID: {self.DIM_ReservationId} | "
                 f"PeopleID: {self.DIM_PeopleId} | "
                 f"StatusID: {self.DIM_StatusId} | "
@@ -53,3 +135,99 @@ class Reservation():
                 f"Notes: {self.DIM_Notes} | "
                 )
         
+        
+
+class VIEWReservation():
+    """
+    Modelo de datos para representar una Reserva (VIEW).
+
+    Este modelo se utiliza para estructurar y transferir información 
+    detallada de una reserva hacia la capa de presentación (front-end).
+    Contiene todos los campos necesarios para mostrar una lista o un detalle 
+    de reservaciones en la interfaz de usuario. 
+    
+    Típicamente, los usuarios con acceso a la vista de reservaciones (ej. 
+    administradores, personal de atención al cliente) utilizarán datos 
+    estructurados bajo este modelo.
+    """
+    
+    def __init__(self,
+                    fullname: str,
+                    phone_number: str,
+                    full_date: str,  # Se usa 'str' ya que se espera el formato 'YYYY-MM-DD'
+                    start_date: str, # Se usa 'str' ya que se espera el formato 'YYYY-MM-DD:HH'
+                    end_date: str,   # Se usa 'str' ya que se espera el formato 'YYYY-MM-DD:HH'
+                    total_amount: int,
+                    status_name: str,
+                    date_id: str
+                    ) -> None:
+        """
+            Inicializa una nueva instancia de VIEWReservation.
+            
+            Este constructor asigna los valores de los parámetros de entrada 
+            a los atributos internos de la instancia (self.ATRIBUTO = parametro).
+            
+            Parámetros:
+                fullname (str): Nombre completo del cliente (DIM_fullname).
+                phone_number (str): Número de teléfono del cliente (DIM_PhoneNumber).
+                full_date (str): Fecha de la reserva en formato 'YYYY-MM-DD' (FullDate).
+                start_date (str): Fecha y hora de inicio en formato 'YYYY-MM-DD:HH' (DIM_StartDate).
+                end_date (str): Fecha y hora de fin en formato 'YYYY-MM-DD:HH' (DIM_EndDate).
+                total_amount (int): Cantidad total de la reserva (DIM_TotalAmount).
+                status_name (str): Nombre del estado actual de la reserva (DIM_StatusName).
+                date_id (str): Identificador único de la fecha/periodo de la reserva (DIM_DateId).
+                
+            Nota: Todos los valores de fecha/hora son almacenados como strings.
+        """
+        self.DIM_fullname = fullname
+        self.DIM_PhoneNumber = phone_number
+        self.DIM_StatusName = status_name
+        self.DIM_DateId = date_id
+        self.FullDate = full_date 
+        self.DIM_StartDate = start_date
+        self.DIM_EndDate = end_date
+        self.DIM_TotalAmount = total_amount
+        
+    def __str__(self):
+        """
+        Devuelve una representación en cadena del objeto Reservation.
+
+        Este método se utiliza para facilitar el debugging y el logging,
+        proporcionando una vista rápida y legible de los valores clave del objeto.
+
+        Returns:
+            str: Una cadena de texto formateada que lista los atributos principales
+                 y sus valores, separados por un ' | '.
+        """
+        return (f"FullName: {self.DIM_fullname} | "
+                f"PhoneNumber: {self.DIM_PhoneNumber} | "
+                f"StatusName: {self.DIM_StatusName} | "
+                f"DateID: {self.DIM_DateId} | "
+                f"FullDate: {self.FullDate} | "
+                f"StartDate: {self.DIM_StartDate} | "
+                f"EndDate: {self.DIM_EndDate} | "
+                f"TotalAmount: {self.DIM_TotalAmount} | "
+                )
+    
+    def to_dict(self):
+        """
+        Convierte la instancia de VIEWReservation en un diccionario.
+
+        Esta función es crucial para la serialización de datos, permitiendo que 
+        la información sea fácilmente enviada como respuesta JSON al front-end 
+        (por ejemplo, a través de una API REST).
+
+        Retorna:
+            dict: Un diccionario donde las claves son los nombres de los atributos 
+                y los valores son sus respectivos datos.
+        """
+        return {
+            'DIM_fullname': self.DIM_fullname,
+            'DIM_PhoneNumber': self.DIM_PhoneNumber,
+            'DIM_StatusName': self.DIM_StatusName,
+            'DIM_DateId': self.DIM_DateId,
+            'FullDate': self.FullDate,
+            'DIM_StartDate': self.DIM_StartDate,
+            'DIM_EndDate': self.DIM_EndDate,
+            'DIM_TotalAmount': self.DIM_TotalAmount,
+        }
