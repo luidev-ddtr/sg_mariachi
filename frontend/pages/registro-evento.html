@@ -1,87 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Evento</title>
-  <link rel="stylesheet" href="../src/styles/form.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de eventos | Mariachis San Nicolás</title>
+<link rel="stylesheet" href="../src/styles/styles_registro_eventos.css">
+
+
+ 
 </head>
+
 <body>
+  <!-- Contenedor general -->
+  <div class="container">
 
-  <div class="form-container">
-    <form id="event-form">
-      <h2>Nuevo evento</h2>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" name="nombre" required>
-        </div>
-        <div class="form-group">
-          <label for="apellido">Apellido</label>
-          <input type="text" id="apellido" name="apellido" required>
-        </div>
+    <!-- Barra lateral de navegación -->
+    <nav class="sidebar">
+      <div class="logo">
+        <img src="logo.png" alt="Logo Mariachis San Nicolás" id="logoMariachis" />
+        <h2>Mariachis<br>San Nicolás</h2>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="10 dígitos">
-        </div>
-        <div class="form-group">
-          <label for="fecha">Fecha</label>
-          <input type="date" id="fecha" name="fecha" required>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="localidad">Localidad</label>
-          <input type="text" id="localidad" name="localidad">
-        </div>
-        <div class="form-group">
-          <label for="municipio">Municipio</label>
-          <input type="text" id="municipio" name="municipio" value="Ixmiquilpan" readonly>
-        </div>
-        <div class="form-group">
-          <label for="estado">Estado</label>
-          <input type="text" id="estado" name="estado" value="Hgo." readonly>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="direccion">Dirección</label>
-        <input type="text" id="direccion" name="direccion" required>
-      </div>
+      <!-- Menú principal -->
+      <ul class="menu">
+        <li><a href="control_panel.html" id="btnPanel"><i class="icon">📊</i> Panel de control</a></li>
+        <li><a href="agenda.html" id="btnAgenda"><i class="icon">🗓️</i> Agenda</a></li>
+        <li class="active"><a href="registro-evento.html" id="btnEventos"><i class="icon">📅</i> Eventos</a></li>
+        <li><a href="generate_reports.html" id="btnReportes"><i class="icon">📋</i> Reportes</a></li>
+      </ul>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="hora_inicio">Hora de inicio</label>
-          <input type="time" id="hora_inicio" name="hora_inicio" required>
+      <!-- Botón salir -->
+      <div class="logout">
+        <a href="login.html" id="btnSalir">⏻ Salir</a>
+      </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+      <header class="header">
+        <h1 id="tituloPrincipal">Gestión de eventos</h1>
+      </header>
+
+      <!-- Sección de tarjetas con resumen -->
+      <section class="cards-section">
+        <div class="card completados">
+          <p>Eventos Completados</p>
+          <h2 id="totalCompletados">250</h2>
+          <span class="icon-card">✔️</span>
         </div>
-        <div class="form-group">
-          <label for="hora_final">Hora final</label>
-          <input type="time" id="hora_final" name="hora_final" required>
+
+        <div class="card pendientes">
+          <p>Eventos Pendientes</p>
+          <h2 id="totalPendientes">90</h2>
+          <span class="icon-card">⚠️</span>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="descripcion">Descripción</label>
-        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="total_horas">Total de horas</label>
-        <input type="text" id="total_horas" name="total_horas" value="00:00" readonly style="background-color: #eee;">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
+        <div class="card totales">
+          <p>Eventos Totales</p>
+          <h2 id="totalEventos">340</h2>
+          <span class="icon-card">📅</span>
+        </div>
+      </section>
 
-      <div id="form-message"></div>
+      <!-- Filtros -->
+      <section class="filters">
+        <input type="date" id="inputFecha" />
+        <select id="selectEstado">
+          <option value="todos">Estado: Todos</option>
+          <option value="completado">Completado</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
 
-      <button type="submit" class="submit-btn">Registrar evento</button>
-    </form>
+        <button id="btnFiltrar" class="btn red">🔍 Filtrar</button>
+        <button id="btnVerAgenda" class="btn blue">📆 Ver Agenda</button>
+        <button id="btnNuevaReserva" class="btn green">➕ Nueva reserva</button>
+      </section>
+
+      <!-- Tabla de eventos -->
+      <section class="table-section">
+        <table id="tablaEventos">
+          <thead>
+            <tr>
+              <th>No. Eventos</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Fecha</th>
+              <th>Hr Inicio</th>
+              <th>Hr Final</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td><td>Agustin Sanchez</td><td>7712469078</td><td>20/10/2025</td><td>12:00 pm</td><td>17:00 pm</td><td>$40,000.00</td>
+              <td><span class="estado completado">Completado</span></td>
+              <td><button class="acciones">⋮</button></td>
+            </tr>
+            <tr>
+              <td>2</td><td>Maria Hernandez</td><td>7712469078</td><td>03/03/2025</td><td>12:00 am</td><td>03:00 am</td><td>$40,000.00</td>
+              <td><span class="estado completado">Completado</span></td>
+              <td><button class="acciones">⋮</button></td>
+            </tr>
+            <tr>
+              <td>3</td><td>Jose Garcia</td><td>7712469078</td><td>19/10/2025</td><td>16:00 pm</td><td>20:00 pm</td><td>$40,000.00</td>
+              <td><span class="estado completado">Completado</span></td>
+              <td><button class="acciones">⋮</button></td>
+            </tr>
+            <tr>
+              <td>4</td><td>Ana Mendoza</td><td>7712469078</td><td>04/12/2025</td><td>11:00 am</td><td>15:00 pm</td><td>$40,000.00</td>
+              <td><span class="estado cancelado">Cancelado</span></td>
+              <td><button class="acciones">⋮</button></td>
+            </tr>
+            <tr>
+              <td>5</td><td>Juan Martinez</td><td>7712469078</td><td>16/02/2025</td><td>12:00 pm</td><td>17:00 pm</td><td>$40,000.00</td>
+              <td><span class="estado pendiente">Pendiente</span></td>
+              <td><button class="acciones">⋮</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
   </div>
-
-  <script type="module" src="../src/components/eventos/registro-evento.js"></script>
 </body>
 </html>
