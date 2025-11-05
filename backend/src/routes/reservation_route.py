@@ -25,3 +25,13 @@ def create_reservation():
         return send_success("Reserva creada exitosamente", None, 201)
     except Exception as e:
         return send_error(str(e), 500)
+
+@reservation_route.route('/prueba1', methods=['GET'])
+def prueba1():
+    """
+    Crea una nueva reserva en la tabla dim_people
+    """
+    try:
+        return send_success("Prueba creada exitosamente", None, 200)
+    except Exception as e:
+        return send_error(str(e), 500)
