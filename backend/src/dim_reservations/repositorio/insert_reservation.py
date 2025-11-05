@@ -53,7 +53,7 @@ INSERT INTO `dim_reservation` (
     )
     VALUES (
         %s,
-        %s,
+        %s, 
         %s,
         %s,
         %s,

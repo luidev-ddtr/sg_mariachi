@@ -38,10 +38,11 @@ app.register_blueprint(reservation_route)
 
 
 #frontend_urls = os.environ.get("URL_FRONTEND", "http://localhost:5173")
-frontend_urls = """http://localhost:5173", "http://localhost:5173"""
+frontend_urls = "http://localhost:5173,http://localhost:5173"
 # Convertir a lista si hay múltiples URLs separadas por coma
-origins_list = [url.strip() for url in frontend_urls]
+origins_list = [url.strip() for url in frontend_urls.split(",")]
 
+#print(origins_list) 
 CORS(app, resources={
     r"/*": {
         "origins": origins_list,  # Usar lista en lugar de string
@@ -62,7 +63,6 @@ CORS(app, resources={
         "always_send": True  # Enviar headers CORS siempre, incluso en OPTIONS
     }
 })
-
 
 if __name__ == '__main__':
     app.run(debug=True)

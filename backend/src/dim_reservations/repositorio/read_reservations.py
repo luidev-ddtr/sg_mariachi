@@ -27,9 +27,9 @@ def read_reservations_with_date_filter(year: int, month: int, week: int, object_
     """
     
     try:
-        cursor = object_conection.cursor()
-        cursor.execute(query, (year, month, week))
-        result = cursor.fetchall()
+        
+        object_conection.cursor.execute(query, (year, month, week))
+        result = object_conection.cursor.fetchall()
         if not result:
             return []
         
