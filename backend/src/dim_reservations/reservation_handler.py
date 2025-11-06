@@ -31,3 +31,6 @@ class ReservationService:
             return "Error al crear la reserva", 500
         finally:
             conexion.close_conexion()
+
+    def prueba1():
+        pass
