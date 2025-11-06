@@ -54,3 +54,5 @@ JOIN
 dates.DIM_DateId = rsv.DIM_DateId
 JOIN 
     DIM_Status AS estado ON rsv.DIM_StatusId = estado.DIM_StatusId;
+
+
