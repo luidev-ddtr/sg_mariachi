@@ -15,12 +15,15 @@ reservation_route = Blueprint('reservation_route', __name__, url_prefix='/api/re
 from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
 
 @reservation_route.route('/create', methods=['POST'])
-def create_reservation():
+def create_reservation() -> tuple[Any]:
     """
     Crea una nueva reserva en la tabla dim_people
     """
-    try:
+    try: 
         data_reservation = request.get_json()
+
+        for name in data_reservation:
+            print(f"{name}, {data_reservation[name]}", end="\n")
         reservation_options.create_reservation(data_reservation)
         return send_success("Reserva creada exitosamente", None, 201)
     except Exception as e:
