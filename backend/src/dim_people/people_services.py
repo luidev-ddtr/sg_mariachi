@@ -44,7 +44,7 @@ class PeopleService:
             - El resultado de `get_id_if_person_exists` (que es el ID o None) se mapea
               a una respuesta HTTP estilo (código, mensaje, ID).
 
-        Acceso/Uso:
+        Acceso/Uso:b
             - Es un método interno de la capa de servicios. No está diseñado para
               ser llamado directamente por un usuario final.
             - Es utilizado por otros servicios (ej. `SaleService`, `OrderService`)
@@ -52,8 +52,8 @@ class PeopleService:
         """
         result = get_id_if_person_exists(data_people["DIM_Name"], data_people["DIM_SecondName"],
                 data_people["DIM_LastName"], data_people["DIM_SecondLastName"],
-                data_people["DIM_Address"], data_people["DIM_Phone"],
-               data_people["DIM_SecondPhone"], conexion)
+                data_people["DIM_Address"], data_people["DIM_PhoneNumber"],
+               data_people["DIM_SecondPhoneNumber"], conexion)
         if result is None:
             return  404, "No se encontro la persona", ""
         else:
