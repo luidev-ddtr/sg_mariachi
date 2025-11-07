@@ -1,28 +1,26 @@
-import { crear_reservacion } from '../../api/api_reservacion';
-
 /*
  * Este archivo (registro-evento.js) maneja la lógica
  * del formulario en 'registro-evento.html'.
  */
+// Asegúrate que esta ruta sea correcta
+import { crear_reservacion } from '../../api/api_reservacion.js'; 
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Seleccionamos los elementos del formulario
   const eventForm = document.getElementById('event-form');
   const messageEl = document.getElementById('form-message');
   
-  // Elementos de Fecha y Hora
   const fechaInput = document.getElementById('fecha');
   const horaInicioEl = document.getElementById('hora_inicio');
   const horaFinalEl = document.getElementById('hora_final');
-  const totalHorasEl = document.getElementById('total_horas_display'); // Renombrado
+  const totalHorasEl = document.getElementById('total_horas'); 
 
   if (!eventForm) {
     return;
   }
   
-  // 2. Lógica de inicialización del formulario
-  
-  // Asigna la fecha mínima al input de fecha
+  // 2. Lógica de inicialización
   const hoy = new Date();
   const yyyy = hoy.getFullYear();
   const mm = String(hoy.getMonth() + 1).padStart(2, '0');
@@ -39,79 +37,90 @@ document.addEventListener('DOMContentLoaded', () => {
    * 4. Función principal para manejar el envío del formulario
    */
   async function handleSubmit(event) {
-    event.preventDefault(); // Evitamos que la página se recargue
+    event.preventDefault(); 
     messageEl.textContent = '';
     messageEl.className = '';
 
-    // --- OBTENER VALORES ---
-    // Leemos todos los valores de los inputs
-    
-    // Cliente
-    const dim_name = document.getElementById('dim_name').value.trim();
-    const dim_secondname = document.getElementById('dim_secondname').value.trim();
-    const dim_lastname = document.getElementById('dim_lastname').value.trim();
-    const dim_secondlastname = document.getElementById('dim_secondlastname').value.trim();
-    const dim_phonenumber = document.getElementById('dim_phonenumber').value.trim();
-    const dim_secondphonenumber = document.getElementById('dim_secondphonenumber').value.trim();
-    const dim_address = document.getElementById('dim_address').value.trim();
+    // --- OBTENER VALORES (SECCIÓN MODIFICADA) ---
+    const dim_name = document.getElementById('nombre').value.trim();
+    const dim_secondname = document.getElementById('segundo_nombre').value.trim();
+    const dim_lastname = document.getElementById('apellido_paterno').value.trim();
+    const dim_secondlastname = document.getElementById('apellido_materno').value.trim();
+    const dim_phonenumber = document.getElementById('telefono').value.trim();
+    const dim_address = document.getElementById('direccion').value.trim();
+    const dim_secondphonenumber = document.getElementById('telefono_secundario').value.trim();
+    const municipio = document.getElementById('municipio').value.trim();
+    const estado = document.getElementById('estado').value.trim();
 
     // Evento
     const fecha = fechaInput.value;
     const horaInicio = horaInicioEl.value;
     const horaFinal = horaFinalEl.value;
-    const totalHorasString = totalHorasEl.value; // ej. "05:00"
-    const dim_totalamount_raw = document.getElementById('dim_totalamount').value;
-    const dim_eventaddress = document.getElementById('dim_eventaddress').value.trim();
-    const dim_notes = document.getElementById('dim_notes').value.trim();
+    const totalHorasString = totalHorasEl.value;
+    const dim_notes = document.getElementById('descripcion').value.trim();
+    const montoInput = document.getElementById('dim_totalamount');
+    const dim_totalamount_raw = montoInput ? montoInput.value : '0';
 
     // --- VALIDACIÓN BÁSICA ---
-    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal || !dim_totalamount_raw || !dim_eventaddress) {
+    // Modificado para incluir apellido_paterno
+    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal) {
       showFormMessage('Por favor, completa todos los campos obligatorios.', 'error');
       return; 
     }
 
     // --- TRANSFORMACIÓN DE DATOS ---
-    // Convertimos los datos al formato exacto del JSON
-    
-    // 1. Convertir "HH:MM" a número decimal para DIM_NHours
     const [horas, minutos] = totalHorasString.split(':').map(Number);
     const dim_nhours = horas + (minutos / 60);
-
-    // 2. Convertir monto a número (float)
     const dim_totalamount = parseFloat(dim_totalamount_raw);
-
-    // 3. Crear fechas en formato YYYY-MM-DD HH:MM:SS
     const dim_startdate = `${fecha} ${horaInicio}:00`;
     const dim_enddate = `${fecha} ${horaFinal}:00`;
 
-    // --- CREAR EL "DICCIONARIO" ---
-    const formData = {
-      DIM_EventAddress: dim_eventaddress,
+    // --- CREAR EL "DICCIONARIO" (SECCIÓN MODIFICADA) ---
+    const datosParaAPI = {
+      DIM_EventAddress: `${dim_address}, ${municipio}, ${estado}`, // Combinamos dirección, municipio y estado
       DIM_StartDate: dim_startdate,
       DIM_EndDate: dim_enddate,
       DIM_NHours: dim_nhours, 
       DIM_TotalAmount: dim_totalamount, 
       DIM_Notes: dim_notes,
       DIM_Name: dim_name,
-      DIM_SecondName: dim_secondname,
+      DIM_SecondName: dim_secondname, // <-- CAMPO ACTUALIZADO
       DIM_LastName: dim_lastname,
-      DIM_SecondLastName: dim_secondlastname,
+      DIM_SecondLastName: dim_secondlastname, // <-- CAMPO ACTUALIZADO
       DIM_PhoneNumber: dim_phonenumber,
-      DIM_SecondPhoneNumber: dim_secondphonenumber,
-      DIM_Address: dim_address
+      DIM_SecondPhoneNumber: dim_secondphonenumber, // Tu HTML aún no tiene teléfono secundario
+      DIM_Address: dim_address // Mantenemos la dirección de calle por separado si la API lo requiere
     };
 
-    // CUMPLE CON LOS REQUISITOS
-    // 1. Imprimimos el "diccionario" en la consola
-    console.log("Diccionario del formulario (Formato JSON):");
-    console.log(formData);
-    
-    // 2. Mostramos un mensaje de éxito en el formulario
-    showFormMessage('¡Datos impresos en la consola! Revisa con F12.', 'success');
-    
-    // 3. Limpiamos el formulario
-    eventForm.reset(); 
-    totalHorasEl.value = "00:00"; 
+    console.log("Enviando a la API:", datosParaAPI);
+
+    // --- ENVIAR A LA API ---
+    const submitButton = eventForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    showFormMessage('Guardando reservación...', 'info');
+
+    try {
+        const respuesta = await crear_reservacion(datosParaAPI);
+        
+        if (respuesta.success) {
+            showFormMessage('¡Reservación creada con éxito!', 'success');
+            eventForm.reset(); 
+            totalHorasEl.value = "00:00";
+            
+            // AVISAR A LA PÁGINA PRINCIPAL PARA CERRAR EL MODAL
+            setTimeout(() => {
+                window.parent.postMessage('eventoRegistrado', '*');
+            }, 1500); 
+
+        } else {
+            showFormMessage(`Error: ${respuesta.message || 'Error desconocido'}`, 'error');
+        }
+    } catch (error) {
+        console.error("Error al enviar el formulario:", error);
+        showFormMessage(`Error al conectar con el servidor: ${error.message}`, 'error');
+    } finally {
+        submitButton.disabled = false;
+    }
   }
   
   /**
@@ -119,36 +128,30 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function showFormMessage(message, type) {
     messageEl.textContent = message;
-    messageEl.className = type; // 'success' o 'error'
+    messageEl.className = type; 
   }
   
   /**
-   * 6. Función para calcular el total de horas (Sin cambios)
+   * 6. Función para calcular el total de horas
    */
   function calcularTotalHoras() {
     const inicio = horaInicioEl.value;
     const final = horaFinalEl.value;
-
+ 
     if (inicio && final) {
-      const [inicioH, inicioM] = inicio.split(':').map(Number);
-      const totalMinInicio = (inicioH * 60) + inicioM;
-      
-      const [finalH, finalM] = final.split(':').map(Number);
-      const totalMinFinal = (finalH * 60) + finalM;
-
-      let diffMinutos = totalMinFinal - totalMinInicio;
-
-      if (diffMinutos < 0) {
-        diffMinutos += 24 * 60; 
+      // Extraemos solo la parte de la hora (ej: "14" de "14:00")
+      const inicioH = parseInt(inicio.split(':')[0], 10);
+      const finalH = parseInt(final.split(':')[0], 10);
+ 
+      let diffHoras = finalH - inicioH;
+ 
+      // Si la hora final es menor (ej: de 22:00 a 02:00), es un evento que cruza la medianoche
+      if (diffHoras < 0) {
+        diffHoras += 24;
       }
-
-      const horas = Math.floor(diffMinutos / 60);
-      const minutos = diffMinutos % 60;
-
-      const hh = String(horas).padStart(2, '0');
-      const mm = String(minutos).padStart(2, '0');
-
-      totalHorasEl.value = `${hh}:${mm}`;
+ 
+      const hh = String(diffHoras).padStart(2, '0');
+      totalHorasEl.value = `${hh}:00`;
       
     } else {
       totalHorasEl.value = "00:00";
