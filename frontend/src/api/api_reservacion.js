@@ -6,9 +6,10 @@ export const crear_reservacion = async (data) => {
         if (Object.keys(data).length === 0) {
             return { success: true, message: "No hay datos para crear la reservación.", data: [] };
         }
+        console.log("Payload enviado a api/reservation/create:", data);
 
         //console.log("Payload enviado a api/reservation/create:", data);
-        const response = await axiosInstance.post('reservation/create/', data);
+        const response = await axiosInstance.post('reservation/create', data);
         
         //console.log("Respuesta del servidor al crear reservación:", response.data);
          
