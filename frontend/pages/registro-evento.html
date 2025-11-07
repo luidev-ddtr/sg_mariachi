@@ -120,21 +120,57 @@
               <td><button class="acciones">⋮</button></td>
             </tr>
           </tbody>
-        </table>
-      </section>
-    </main>
-  </div>
+        </table>
+      </section>
+    </main>   </div> <div id="modalOverlay" class="modal-overlay">
+  <div class="modal-container">
+    <button id="modalClose" class="modal-close-btn">&times;</button>
+    <iframe id="modalFrame" src="about:blank" frameborder="0"></iframe>
+  </div>
+</div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnNuevaReserva = document.getElementById("btnNuevaReserva");
+  document.addEventListener("DOMContentLoaded", () => {
+    // Elementos del DOM
+    const btnNuevaReserva = document.getElementById("btnNuevaReserva");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalFrame = document.getElementById("modalFrame");
+    const modalClose = document.getElementById("modalClose");
 
-    btnNuevaReserva.addEventListener("click", () => {
-      window.location.href = "../src/components/eventos/formulario_nvo_evento.html";
-    });
-  });
+    // URL del formulario que se cargará en el modal
+    const modalUrl = "../src/components/eventos/formulario_nvo_evento.html";
+
+    // 1. Abrir el modal al hacer clic en "Nueva Reserva"
+    btnNuevaReserva.addEventListener("click", () => {
+      console.log("Abriendo modal...");
+      // Cargamos la URL en el iframe
+      modalFrame.src = modalUrl;
+      // Mostramos el modal añadiendo la clase 'visible'
+      modalOverlay.classList.add("visible");
+    });
+
+    // 2. Función para cerrar y limpiar el modal
+    function closeModal() {
+      modalOverlay.classList.remove("visible");
+      // Limpiamos el src para detener cualquier proceso en el iframe
+      modalFrame.src = "about:blank";
+    }
+
+    // 3. Cerrar el modal con el botón 'X'
+    modalClose.addEventListener("click", () => {
+      closeModal();
+    });
+
+    // 4. (Opcional) Cerrar el modal al hacer clic en el fondo oscuro
+    modalOverlay.addEventListener("click", (event) => {
+      // Si el clic fue directamente en el fondo (overlay) y no en el contenido
+      if (event.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+  });
 </script>
-
 
 </body>
 </html>
