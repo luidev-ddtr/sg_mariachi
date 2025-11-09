@@ -1,102 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Evento</title>
-  <link rel="stylesheet" href="../../styles/form_nvo_evento.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Evento</title>
+
+  <!-- GOOGLE FONTS: ROBOTO (todos los pesos) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+
+  <!-- Enlace al archivo CSS -->
+  <link rel="stylesheet" href="../../styles/form_nvo_evento.css">
 </head>
 <body>
 
-  <div class="form-container">
-    <form id="event-form">
-      <h2>Nuevo evento</h2>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" name="nombre" required>
-        </div>
-        <div class="form-group">
-          <label for="segundo_nombre">Segundo Nombre</label>
-          <input type="text" id="segundo_nombre" name="segundo_nombre">
-        </div>
-      </div>
+    <div class="modal-wrapper">
+    <!-- Panel de imagen -->
+    <div class="image-section">
+      <img src="../../../public/images/mariachis-bg.jpg" alt="Mariachis" />
+    </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="apellido_paterno">Apellido Paterno</label>
-          <input type="text" id="apellido_paterno" name="apellido_paterno" required>
-        </div>
-        <div class="form-group">
-          <label for="apellido_materno">Apellido Materno</label>
-          <input type="text" id="apellido_materno" name="apellido_materno">
-        </div>
-      </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="10 dígitos">
-        </div>
-        <div class="form-group">
-          <label for="telefono_secundario">Teléfono 2 (Opcional)</label>
-          <input type="tel" id="telefono_secundario" name="telefono_secundario" pattern="[0-9]{10}" placeholder="10 dígitos">
-        </div>
-        <div class="form-group">
-          <label for="fecha">Fecha</label>
-          <input type="date" id="fecha" name="fecha" required>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="localidad">Localidad</label>
-          <input type="text" id="localidad" name="localidad">
-        </div>
-        <div class="form-group">
-          <label for="municipio">Municipio</label>
-          <input type="text" id="municipio" name="municipio" value="Ixmiquilpan" readonly>
-        </div>
-        <div class="form-group">
-          <label for="estado">Estado</label>
-          <input type="text" id="estado" name="estado" value="Hgo." readonly>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="direccion">Dirección</label>
-        <input type="text" id="direccion" name="direccion" required>
-      </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="hora_inicio">Hora de inicio</label>
-          <input type="time" id="hora_inicio" name="hora_inicio" required step="3600">
-        </div>
-        <div class="form-group">
-          <label for="hora_final">Hora final</label>
-          <input type="time" id="hora_final" name="hora_final" required step="3600">
-        </div>
-      </div>
+  <div class="form-container">
+    <form id="event-form">
+      <h2>Nuevo evento</h2>
 
-      <div class="form-group full-width">
-        <label for="descripcion">Descripción</label>
-        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
-      </div>
-      <div class="form-group full-width">
-        <label for="total_horas">Total de horas</label>
-        <input type="text" id="total_horas" name="total_horas" value="00:00" readonly style="background-color: #eee;">
-      </div>
-      <div class="form-group full-width">
-         <label for="dim_totalamount">Monto Total</label>
-        <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required>
-      </div>
-      
-      <div id="form-message"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre *</label>
+          <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <div class="form-group">
+          <label for="segundo_nombre">Segundo Nombre</label>
+          <input type="text" id="segundo_nombre" name="segundo_nombre">
+        </div>
+      </div>
 
-      <button type="submit" class="submit-btn">Registrar evento</button>
-    </form>
-  </div>
-  <script type="module" src="registro-evento.js"></script>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="apellido_paterno">Apellido Paterno *</label>
+          <input type="text" id="apellido_paterno" name="apellido_paterno" required>
+        </div>
+        <div class="form-group">
+          <label for="apellido_materno">Apellido Materno *</label>
+          <input type="text" id="apellido_materno" name="apellido_materno">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefono">Teléfono *</label>
+          <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="10 dígitos">
+        </div>
+        <div class="form-group">
+          <label for="telefono_secundario">Teléfono 2</label>
+          <input type="tel" id="telefono_secundario" name="telefono_secundario" pattern="[0-9]{10}" placeholder="10 dígitos">
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha *</label>
+          <input type="date" id="fecha" name="fecha" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="localidad">Localidad *</label>
+          <input type="text" id="localidad" name="localidad">
+        </div>
+        <div class="form-group">
+          <label for="municipio">Municipio *</label>
+          <input type="text" id="municipio" name="municipio" required>
+        </div>
+        <div class="form-group">
+          <label for="estado">Estado *</label>
+          <input type="text" id="estado" name="estado" required>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="direccion">Dirección *</label>
+        <input type="text" id="direccion" name="direccion" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hora_inicio">Hora de inicio *</label>
+          <input type="time" id="hora_inicio" name="hora_inicio" required step="3600">
+        </div>
+        <div class="form-group">
+          <label for="hora_final">Hora final *</label>
+          <input type="time" id="hora_final" name="hora_final" required step="3600">
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="descripcion">Descripción *</label>
+        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="total_horas">Total de horas *</label>
+        <input type="text" id="total_horas" name="total_horas" value="00:00" readonly style="background-color: #eee;">
+      </div>
+
+      <div class="form-group full-width">
+        <label for="dim_totalamount">Monto Total *</label>
+        <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required>
+      </div>
+
+      <div id="form-message"></div>
+
+      <button type="submit" class="submit-btn">Registrar evento</button>
+    </form>
+  </div>
+  
+
+  <script type="module" src="registro-evento.js"></script>
 </body>
 </html>
