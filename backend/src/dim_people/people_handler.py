@@ -4,14 +4,14 @@ from src.dim_people.people_model import DIM_PEOPLE
 from src.utils.id_generator import create_id
 
 from src.dim_people.repository.insert import insert_people
-class PeopleService:
+class PeopleHandler:
     """
     Clase que representa el servicio de la tabla People
     manejara todo el crud y la logica principald e la informacion sobre las 
     perosnas que son agregaras a la tabla dim_people
     """
     
-    def create_people(self, data_people: dict) -> tuple[str, int]:
+    def create_people(self, data_people: dict) -> tuple[str, int, str]:
         """
         Crea una nueva entrada de persona en la tabla dimensional `dim_people`.
         Este método gestiona toda la lógica para preparar e insertar un nuevo registro
@@ -59,11 +59,11 @@ class PeopleService:
             result = insert_people(data_format, conexion)
             
             if result:
-                return "Persona creada exitosamente", 201
+                return "Persona creada exitosamente", 201, data_people["DIM_PeopleId"]
             else:
-                return "Error al crear la persona", 500
+                return "Error al crear la persona", 500,  ""
         except Exception as e:
             print(f"Error al crear la persona: {e}")
-            return "Error al crear la persona", 500
+            return "Error al crear la persona", 500,  ""
         finally:
             conexion.close_conexion()
