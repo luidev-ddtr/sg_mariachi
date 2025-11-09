@@ -54,7 +54,7 @@ html, body {
   border-radius: 0 10px 10px 0; /* ← DER superior + DER inferior */
   overflow-y: auto; /* scroll si es necesario */
   background: rgba(255, 253, 251, 0.6);
-  padding: 25px 40px;
+  padding: 25px 30px;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
 }
 
@@ -93,6 +93,7 @@ h2 {
   flex: 1; /* Cada grupo ocupa el mismo ancho posible */
   display: flex;
   flex-direction: column; /* Pone etiqueta e input en columna */
+  margin-bottom: 10px; /* Espaciado vertical entre filas */
 }
 
 /* Campos que ocupan el ancho completo */
