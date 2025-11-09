@@ -17,7 +17,7 @@ class ReservaService:
 
     def validate_overlaps(
         self,
-        service_owners_id: str,  # Mariachi
+        service_owners_id: str,  # administrador
         start_str: str = "",  # ISO: "2025-11-05T10:00:00"
         end_str: str = "",
     ) -> None:
