@@ -100,8 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
     showFormMessage('Guardando reservación...', 'info');
 
     try {
+        console.log("Entrando al try");
         const respuesta = await crear_reservacion(datosParaAPI);
-        
+        console.log("Respuesta de la API:", respuesta);
         if (respuesta.success) {
             showFormMessage('¡Reservación creada con éxito!', 'success');
             eventForm.reset(); 
