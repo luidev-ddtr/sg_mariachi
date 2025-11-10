@@ -1,9 +1,6 @@
 from src.utils.conexion import Conexion
 from datetime import date
 from typing import List, Dict
-import logging
-
-logger = logging.getLogger(__name__)
 
 def get_dates_reservations(
     obj_conn: Conexion,
@@ -50,9 +47,9 @@ def get_dates_reservations(
             for row in rows
         ]
         
-        logger.info(f"✅ Obtenidas {len(reservations)} reservas para validación")
+        print(f"✅ Obtenidas {len(reservations)} reservas para validación")
         return reservations
     
     except Exception as err:
-        logger.error(f"❌ Error en query de reservas: {err}")
+        print(f"❌ Error en query de reservas: {err}")
         return []

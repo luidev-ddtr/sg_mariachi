@@ -20,7 +20,7 @@ class ReservationService:
     utilizando servicios de negocio y repositorios.
     """
     
-    def create_reservation(self, _reservation: dict) -> tuple[str, int]:
+    def create_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[str, int]:
         """
         Orquesta la creación de una nueva reserva.
         1. Valida datos de entrada.
@@ -29,7 +29,9 @@ class ReservationService:
         4. Llama al repositorio para insertar en la base de datos.
         5. Maneja la transacción y la respuesta.
         """
-        conexion = Conexion()
+        # Usa la conexión existente si se proporciona, de lo contrario crea una nueva.
+        # Esto es clave para que las pruebas puedan compartir una transacción.
+        conexion = conn or Conexion()
         dim_date_service = DIM_DATE(conexion)
         date_id = dim_date_service.dateId
         try:
@@ -81,10 +83,6 @@ class ReservationService:
                 return 400, "La hora de inicio debe ser anterior a la hora de fin"
 
 
-            # 3.2. Validación de solapamiento de horarios (overlaps)
-            reserva_service = ReservaService(conexion)
-            reserva_service.validate_overlaps(service_owners_id, new_start_str, new_end_str)
-
             # 4. Generación de IDs y métricas
             year, month, day = dim_date_service.full_date
             res_id = create_id([people_id, day, _reservation['DIM_EventAddress']])
@@ -112,12 +110,18 @@ class ReservationService:
             )
 
             # 6. Inserción en la base de datos usando el REPOSITORIO
-            success = insert_reservation(new_reservation, conexion)
+            # Ahora, la validación de solapamiento y la inserción ocurren dentro del servicio.
+            reserva_service = ReservaService(conexion)
+            success, message = reserva_service.create_and_validate_reservation(new_reservation)
+            if not success:
+                raise ValueError(message) # Lanzamos el error para que el handler lo atrape
 
             if success:
-                conexion.save_changes()
-                print(f"✅ Reserva creada: ID {res_id} para mariachi {service_owners_id}")
+                # Este es el único lugar donde debemos confirmar la transacción.
+                #conexion.save_changes()
                 return  201, f"Reserva creada exitosamente (ID: {res_id})"
+            else:
+                return 500, "No se pudo insertar la reserva en la base de datos."
 
 
         except ValueError as ve:
@@ -126,6 +130,8 @@ class ReservationService:
         except Exception as e:
             print(f"❌ Error al crear la reserva: {e}")
             conexion.conn.rollback()
-            return  500, "Error al crear la reserva",
+            return  500, f"Error al crear la reserva: {e}"
         finally:
-            conexion.close_conexion()
+            # Solo cierra la conexión si fue creada dentro de este método.
+            if not conn:
+                conexion.close_conexion()

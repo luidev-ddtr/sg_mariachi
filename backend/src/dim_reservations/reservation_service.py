@@ -1,10 +1,8 @@
 from src.utils.conexion import Conexion
 from datetime import datetime, date
-from typing import Optional
-import logging
-from src.dim_reservations.repositorio.get_dates_reservations import get_dates_reservations
-
-logger = logging.getLogger(__name__)
+from src.dim_reservations.repositorio.get_dates_reservations import get_dates_reservations # Aseguramos que la importación sea correcta
+from src.dim_reservations.repositorio.insert_reservation import insert_reservation
+from src.dim_reservations.reservation_model import Reservation
 
 class ReservaService:
     """
@@ -35,16 +33,41 @@ class ReservaService:
         """
         new_start = datetime.fromisoformat(start_str)
         new_end = datetime.fromisoformat(end_str)
-        target_date = new_start.date()
 
-        # 1. Obtener las reservas existentes para esa fecha y mariachi
-        existing = get_dates_reservations(self.conn, service_owners_id, target_date)
+        # 1. Obtener TODAS las reservas existentes para ese mariachi
+        existing_reservations = get_dates_reservations(self.conn, service_owners_id)
 
         # 2. Validar si hay solapamiento (overlap)
-        for res_dict in existing:
+        for res_dict in existing_reservations:
             existing_start = datetime.fromisoformat(res_dict['DIM_StartDate'])
             existing_end = datetime.fromisoformat(res_dict['DIM_EndDate'])
 
             if (new_start < existing_end) and (new_end > existing_start):
                 res_id = res_dict['DIM_ReservationId']
                 raise ValueError(f"Choque de horario con reserva {res_id}: {existing_start.time()} - {existing_end.time()}")
+
+    def create_and_validate_reservation(self, new_reservation: Reservation) -> tuple[bool, str]:
+        """
+        Valida el solapamiento y, si no hay ninguno, inserta la reserva.
+        Este método asegura que la validación ocurra dentro de la misma transacción
+        justo antes de la inserción.
+
+        Args:
+            new_reservation (Reservation): El objeto de la nueva reserva a crear.
+
+        Returns:
+            tuple[bool, str]: (True, "Éxito") si se insertó, o (False, "Mensaje de error") si falló.
+        """
+        try:
+            # 1. Primero, validamos el solapamiento.
+            self.validate_overlaps(
+                service_owners_id=new_reservation.DIM_ServiceOwnersId,
+                start_str=new_reservation.DIM_StartDate,
+                end_str=new_reservation.DIM_EndDate
+            )
+            # 2. Si la validación pasa (no lanza excepción), procedemos a insertar.
+            success = insert_reservation(new_reservation, self.conn)
+            return success, "Reserva insertada" if success else "Fallo en la inserción del repositorio"
+        except ValueError as ve:
+            # Si validate_overlaps lanza un error, lo capturamos y lo devolvemos como un fallo.
+            return False, str(ve)

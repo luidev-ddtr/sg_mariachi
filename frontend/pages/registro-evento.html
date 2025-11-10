@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de eventos | Mariachis San Nicolás</title>
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+
+<!-- Link del archivo CSS -->  
 <link rel="stylesheet" href="../src/styles/styles_registro_eventos.css">
 
 
@@ -27,19 +31,19 @@
         <div class="card completados">
           <p>Eventos Completados</p>
           <h2 id="totalCompletados">250</h2>
-          <span class="icon-card">✔️</span>
+          <span class="material-symbols-outlined icon-card">done_outline</span>
         </div>
 
         <div class="card pendientes">
           <p>Eventos Pendientes</p>
           <h2 id="totalPendientes">90</h2>
-          <span class="icon-card">⚠️</span>
+          <span class="material-symbols-outlined icon-card">schedule</span>
         </div>
 
         <div class="card totales">
           <p>Eventos Totales</p>
           <h2 id="totalEventos">340</h2>
-          <span class="icon-card">📅</span>
+          <span class="material-symbols-outlined icon-card">bar_chart_4_bars</span>
         </div>
       </section>
 
@@ -53,9 +57,12 @@
           <option value="cancelado">Cancelado</option>
         </select>
 
-        <button id="btnFiltrar" class="btn red">🔍 Filtrar</button>
-        <button id="btnVerAgenda" class="btn blue">📆 Ver Agenda</button>
-        <button id="btnNuevaReserva" class="btn green">➕ Nueva reserva</button>
+        <button id="btnFiltrar" class="btn red">
+        <span class="material-symbols-outlined">search</span> Filtrar
+        </button>
+        <button id="btnNuevaReserva" class="btn green">
+        <span class="material-symbols-outlined">add</span> Nueva reserva
+        </button>
       </section>
 
       <!-- Tabla de eventos -->
@@ -78,79 +85,81 @@
             <tr>
               <td>1</td><td>Agustin Sanchez</td><td>7712469078</td><td>20/10/2025</td><td>12:00 pm</td><td>17:00 pm</td><td>$40,000.00</td>
               <td><span class="estado completado">Completado</span></td>
-              <td><button class="acciones">⋮</button></td>
+              <td><button class="acciones"><span class="material-symbols-outlined acciones">more_horiz</span></button></td><!-- se leagrego el icocono -->
             </tr>
             <tr>
               <td>2</td><td>Maria Hernandez</td><td>7712469078</td><td>03/03/2025</td><td>12:00 am</td><td>03:00 am</td><td>$40,000.00</td>
               <td><span class="estado completado">Completado</span></td>
-              <td><button class="acciones">⋮</button></td>
+              <td><button class="acciones"><span class="material-symbols-outlined acciones">more_horiz</span></button></td><!-- se leagrego el icocono -->
             </tr>
             <tr>
               <td>3</td><td>Jose Garcia</td><td>7712469078</td><td>19/10/2025</td><td>16:00 pm</td><td>20:00 pm</td><td>$40,000.00</td>
               <td><span class="estado completado">Completado</span></td>
-              <td><button class="acciones">⋮</button></td>
+              <td><button class="acciones"><span class="material-symbols-outlined acciones">more_horiz</span></button></td><!-- se leagrego el icocono -->
             </tr>
             <tr>
               <td>4</td><td>Ana Mendoza</td><td>7712469078</td><td>04/12/2025</td><td>11:00 am</td><td>15:00 pm</td><td>$40,000.00</td>
               <td><span class="estado cancelado">Cancelado</span></td>
-              <td><button class="acciones">⋮</button></td>
+              <td><button class="acciones"><span class="material-symbols-outlined acciones">more_horiz</span></button></td> <!-- se leagrego el icocono -->
             </tr>
             <tr>
               <td>5</td><td>Juan Martinez</td><td>7712469078</td><td>16/02/2025</td><td>12:00 pm</td><td>17:00 pm</td><td>$40,000.00</td>
               <td><span class="estado pendiente">Pendiente</span></td>
-              <td><button class="acciones">⋮</button></td>
+              <td><button class="acciones"><span class="material-symbols-outlined acciones">more_horiz</span></button></td> <!-- se leagrego el icocono -->
             </tr>
           </tbody>
-        </table>
-      </section>
-    </main>   </div> <div id="modalOverlay" class="modal-overlay">
-  <div class="modal-container">
-    <button id="modalClose" class="modal-close-btn">&times;</button>
-    <iframe id="modalFrame" src="about:blank" frameborder="0"></iframe>
-  </div>
-</div>
+        </table>
+      </section>
+    </main> 
+  </div> 
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-container">
+      <button id="modalClose" class="modal-close-btn">&times;</button>
+      <iframe id="modalFrame" src="about:blank" frameborder="0"></iframe>
+    </div>
+  </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // Elementos del DOM
-    const btnNuevaReserva = document.getElementById("btnNuevaReserva");
-    const modalOverlay = document.getElementById("modalOverlay");
-    const modalFrame = document.getElementById("modalFrame");
-    const modalClose = document.getElementById("modalClose");
+  document.addEventListener("DOMContentLoaded", () => {
+  // Elementos del DOM
+    const btnNuevaReserva = document.getElementById("btnNuevaReserva");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalFrame = document.getElementById("modalFrame");
+    const modalClose = document.getElementById("modalClose");
 
-    // URL del formulario que se cargará en el modal
-    const modalUrl = "../src/components/eventos/formulario_nvo_evento.html";
+  // URL del formulario que se cargará en el modal.
+    const modalUrl = "/src/components/eventos/formulario_nvo_evento.html";
 
-    // 1. Abrir el modal al hacer clic en "Nueva Reserva"
-    btnNuevaReserva.addEventListener("click", () => {
-      console.log("Abriendo modal...");
-      // Cargamos la URL en el iframe
-      modalFrame.src = modalUrl;
-      // Mostramos el modal añadiendo la clase 'visible'
-      modalOverlay.classList.add("visible");
-    });
+  // 1. Abrir el modal al hacer clic en "Nueva Reserva"
+    btnNuevaReserva.addEventListener("click", () => {
+      console.log("Abriendo modal...");
+     // Cargamos la URL en el iframe
+      modalFrame.src = modalUrl;
+      // Mostramos el modal añadiendo la clase 'visible'
+      modalOverlay.classList.add("visible");
+   });
 
-    // 2. Función para cerrar y limpiar el modal
-    function closeModal() {
-      modalOverlay.classList.remove("visible");
-      // Limpiamos el src para detener cualquier proceso en el iframe
-      modalFrame.src = "about:blank";
-    }
+    // 2. Función para cerrar y limpiar el modal
+    function closeModal() {
+      modalOverlay.classList.remove("visible");
+      // Limpiamos el src para detener cualquier proceso en el iframe
+      modalFrame.src = "about:blank";
+    }
 
-    // 3. Cerrar el modal con el botón 'X'
-    modalClose.addEventListener("click", () => {
-      closeModal();
-    });
+    // 3. Cerrar el modal con el botón 'X'.
+    modalClose.addEventListener("click", () => {
+      closeModal();
+    });
 
-    // 4. (Opcional) Cerrar el modal al hacer clic en el fondo oscuro
-    modalOverlay.addEventListener("click", (event) => {
-      // Si el clic fue directamente en el fondo (overlay) y no en el contenido
-      if (event.target === modalOverlay) {
-        closeModal();
-      }
-    });
+    // 4. (Opcional) Cerrar el modal al hacer clic en el fondo oscuro
+    modalOverlay.addEventListener("click", (event) => {
+      // Si el clic fue directamente en el fondo (overlay) y no en el contenido
+      if (event.target === modalOverlay) {
+       closeModal();
+      }
+    });
 
-  });
+  });
 </script>
 
 </body>

@@ -1,131 +1,157 @@
-/* --- ESTE ES EL CÓDIGO COMPLETO Y CORREGIDO PARA form_nvo_evento.css --- */
-
-/* 1. Forzamos el box-sizing en todo */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+/* Pagina principal */
+html, body {
+  margin: 0; /* Elimina márgenes por defecto del navegador */
+  padding: 0; /* Elimina rellenos por defecto */
+  height: 100%; /* Hace que el body ocupe toda la altura de la pantalla */
+  overflow: visible; /*Permite que el contenido (como el modal) se muestre completo */
+  display: flex; /* Centra el modal horizontal y verticalmente */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  backdrop-filter: blur(10px); /* Fondo CRISTAL (como blur) SE PUEDE CAMBIAR POR UNbackground: transparent;*/
 }
 
-/* 2. El body ahora es totalmente transparente */
-body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
+/* --- CONTENEDOR PRINCIPAL DEL MODAL (IMAGEN + FORMULARIO) --- */
+.modal-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh; /* <-- usa max-height, PARA QUE NO SEA FIJA */
+  border-radius: 10px;
+  overflow: visible; /* <-- antes estaba hidden */
+  background: transparent;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+
+
+/* --- SECCIÓN DE LA IMAGEN (LADO IZQUIERDO DEL MODAL) --- */
+.image-section {
+  flex: 0 0 35%; /* Ocupa la mitad disponible del modal */
+  background-color: #000; /* Fondo negro de respaldo si la imagen no carga */
+  overflow: hidden; /* Asegura que la imagen no se desborde */
+  border-radius: 10px 0 0 10px; /* ← IZQ superior + IZQ inferior */
+}
+
+.image-section img {
+  width: 100%; /* Imagen ocupa todo el ancho del contenedor */
+  height: 100%; /* Imagen ocupa todo el alto del contenedor */
+  object-fit: cover; /* La imagen se recorta para cubrir sin deformarse */
+  border-radius: 10px 0 0 10px; /* ← También en la imagen */
+}
+
+/* --- SECCIÓN DEL FORMULARIO (LADO DERECHO DEL MODAL) --- */
+.form-container {
+  flex: 1;
+  width: 70%;
+  max-width: 850px;
+  max-height: 90vh; /*  evita que crezca más del viewport */
+  border-radius: 0 10px 10px 0; /* ← DER superior + DER inferior */
+  overflow-y: auto; /* scroll si es necesario */
+  background: rgba(255, 253, 251, 0.6);
+  padding: 25px 30px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Ajustes del formulario interno */
+.form-container form {
+  width: 100%; /* Ocupa todo el ancho del contenedor */
+  height: auto; /* Se adapta automáticamente según su contenido */
+  display: flex;
+  flex-direction: column; /* Ordena los elementos en columna */
+  justify-content: flex-start; /* Comienza desde arriba */
+}
+
+/* Oculta visualmente la barra de scroll en navegadores WebKit (Chrome, Edge, Safari) */
+.form-container::-webkit-scrollbar {
+  width: 0;
   background: transparent;
 }
 
-/* 3. Tu contenedor de vidrio (display:flex) */
-.form-container {
-  display: flex;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+/* --- TÍTULO DEL FORMULARIO --- */
+h2 {
+  text-align: center; /* Centra el título */
+  color: #000000; /* Texto gris oscuro */
+  margin-bottom: 20px; /* Espacio inferior */
 }
 
-/* 4. Formulario (con padding reducido) */
-form {
-  flex: 1;
-  padding: 30px; /* <--- Reducido para dar más espacio */
-  color: #000;
-}
-
-/* 5. Tu imagen (se queda igual) */
-.form-container::after {
-  content: "";
-  background: url('/images/mariachis-bg.jpg') no-repeat center center / cover;
-  width: 45%;
-  min-height: 100%;
-}
-
-form h2 {
-  font-size: 1.8rem;
-  margin-bottom: 25px;
-  font-weight: 600;
-  color: #111;
-}
-
-/* 6. Fila (con gap reducido) */
+/* --- ESTRUCTURA DE FILAS Y CAMPOS --- */
 .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px; /* <-- Espacio entre los campos */
+  display: flex; /* Coloca grupos en la misma línea */
+  flex-wrap: wrap; /* Si no caben, bajan de línea */
+  justify-content: space-between; /* Espacio uniforme entre campos */
+  gap: 10px; /* Espaciado horizontal entre elementos */
+  margin-bottom: 10px; /* Espaciado vertical entre filas */
 }
 
-/* 7. Grupo (¡LA SOLUCIÓN!) */
 .form-group {
+  flex: 1; /* Cada grupo ocupa el mismo ancho posible */
   display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-  /*
-   * Esto le dice al campo:
-   * "Ocupa el 50% del ancho, menos la mitad del 'gap' (10px)"
-   */
-  flex-basis: calc(50% - 10px);
-  flex-grow: 1;
+  flex-direction: column; /* Pone etiqueta e input en columna */
+  margin-bottom: 10px; /* Espaciado vertical entre filas */
 }
 
-/* 8. Clase para campos que ocupan el 100% del ancho */
-.form-group.full-width {
-  flex-basis: 100%;
+/* Campos que ocupan el ancho completo */
+.full-width {
+  flex: 50%; /* Hace que ocupe toda la fila */
 }
 
+/* --- ETIQUETAS DE LOS CAMPOS --- */
 label {
-  font-weight: 500;
-  margin-bottom: 5px;
+  font-weight: 500; /* Peso medio de fuente */
+  margin-bottom: 5px; /* Separación entre etiqueta e input */
+  color: #000000; /* Texto gris oscuro */
 }
 
-input, textarea {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
-  background-color: rgba(255, 255, 255, 0.9);
-  width: 100%; /* Asegura que llene el .form-group */
+/* --- ESTILOS DE LOS INPUTS Y TEXTAREAS --- */
+input,
+textarea {
+  width: 100%; /* Ocupan todo el ancho disponible */
+  padding: 10px; /* Espaciado interno */
+  border-radius: 8px; /* Bordes redondeados */
+  border: none; /* Borde gris claro */
+  font-size: 0.95rem; /* Tamaño de texto */
+  box-sizing: border-box; /* Incluye el padding dentro del ancho total */
+  background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Suaviza las animaciones al enfocar */
 }
 
-input:focus, textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+/* --- EFECTO AL ENFOCAR LOS CAMPOS --- */
+input:focus,
+textarea:focus {
+  outline: none; /* Elimina borde azul predeterminado del navegador */
+  border-color: #020203; /* Borde azul al enfocar */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); /* Sombra azul alrededor */
 }
 
+/* --- BOTÓN PRINCIPAL --- */
 .submit-btn {
-  width: 100%;
-  background-color: #0fb26f;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
+  width: 100%; /* Ocupa todo el ancho del formulario */
+  background-color: #1eb211; /* Azul principal */
+  color: white; /* Texto blanco */
+  padding: 12px; /* Espaciado interno */
+  border: none; /* Sin borde */
+  border-radius: 8px; /* Bordes redondeados */
+  cursor: pointer; /* Cambia el cursor a mano al pasar encima */
+  font-size: 1rem; /* Tamaño del texto */
+  font-weight: 600; /* Texto seminegrita */
+  margin-top: 15px; /* Espacio superior */
+  transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
 }
 
-#form-message {
-  text-align: center;
-  margin-bottom: 10px;
-  font-weight: 500;
+/* Efecto hover del botón */
+.submit-btn:hover {
+  background-color: #087a23; /* Azul más oscuro al pasar el mouse */
 }
 
-#form-message.success { color: #0fb26f; }
-#form-message.error { color: #e74c3c; }
-
-/* Responsivo */
+/* --- RESPONSIVIDAD --- */
 @media (max-width: 768px) {
-  .form-container {
-    flex-direction: column;
-    width: 95%;
-  }
-  .form-container::after {
-    display: none;
-  }
-  form {
-    padding: 25px;
-  }
-  /* Hacemos que los campos se apilen en móvil */
-  .form-group {
-    flex-basis: 100%;
+  .form-row {
+    flex-direction: column; /* Los inputs se apilan verticalmente en pantallas pequeñas */
   }
 }
