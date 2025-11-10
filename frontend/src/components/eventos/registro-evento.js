@@ -5,6 +5,8 @@
 // Asegúrate que esta ruta sea correcta
 import { crear_reservacion } from '../../api/api_reservacion.js'; 
 
+const DIM_ServiceOwnersId = 'f07e69a4-4e80-527e';
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // 1. Seleccionamos los elementos del formulario
@@ -89,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       DIM_SecondLastName: dim_secondlastname, // <-- CAMPO ACTUALIZADO
       DIM_PhoneNumber: dim_phonenumber,
       DIM_SecondPhoneNumber: dim_secondphonenumber, // Tu HTML aún no tiene teléfono secundario
-      DIM_Address: dim_address // Mantenemos la dirección de calle por separado si la API lo requiere
+      DIM_Address: dim_address, // Mantenemos la dirección de calle por separado si la API lo requiere
+      DIM_ServiceOwnersId: DIM_ServiceOwnersId
     };
 
     console.log("Enviando a la API:", datosParaAPI);
