@@ -3,12 +3,12 @@ from src.utils.conexion import Conexion
 from src.utils.id_generator import create_id
 from src.dim_reservations.reservation_model import Reservation
 from src.dim_people.people_services import PeopleService
-from src.dim_reservations.repositorio.insert_reservation import insert_reservation
 from src.dim_reservations.reservation_service import ReservaService
 from datetime import datetime
 from src.dim_people.people_handler import PeopleHandler
-
 from src.dim_status.status import get_status_pending
+
+from src.dim_reservations.repositorio.read_reservations import read_reservations_with_date_filter
 
 people_services = PeopleService()
 handler_people = PeopleHandler()
@@ -204,5 +204,61 @@ class ReservationService:
             return  500, f"Error al crear la reserva: {e}"
         finally:
             # Solo cierra la conexión si fue creada dentro de este método.
+            if not conn:
+                conexion.close_conexion()
+    
+    def read_reservations_by_date(self, date, conn: Conexion = None) -> tuple[int, list]:
+        """
+        Obtiene todas las reservaciones de la semana correspondiente a una fecha dada.
+
+        Este método calcula a qué semana del mes pertenece un día específico y luego
+        utiliza esa información para consultar todas las reservaciones programadas
+        dentro de esa semana.
+
+        **Flujo de Proceso:**
+        1.  **Gestión de Conexión:** Utiliza una conexión existente o crea una nueva.
+        2.  **Cálculo de la Semana:** Determina el número de la semana dentro del mes
+            basado en el día proporcionado. La lógica es que los días 1-7 son la semana 1,
+            8-14 la semana 2, y así sucesivamente.
+        3.  **Consulta al Repositorio:** Llama a la función `read_reservations_with_date_filter`
+            pasando el año, mes y la semana calculada para obtener los datos.
+        4.  **Formateo de Respuesta:** Convierte la lista de objetos `VIEWReservation`
+            en una lista de diccionarios, que es un formato ideal para una respuesta JSON.
+        5.  **Manejo de Errores:** Captura cualquier excepción durante el proceso y
+            devuelve una tupla de error.
+        6.  **Cierre de Conexión:** Se asegura de cerrar la conexión si fue creada
+            localmente.
+
+        :param year: El año de la fecha a consultar.
+        :type year: int
+        :param month: El mes de la fecha a consultar.
+        :type month: int
+        :param day: El día de la fecha a consultar.
+        :type day: int
+        :param conn: (Opcional) Objeto de conexión a la base de datos.
+        :type conn: Conexion, optional
+        :return: Una tupla con el código de estado HTTP y una lista de reservaciones
+                 (o un mensaje de error).
+        :rtype: tuple[int, list]
+        """
+        conexion = conn or Conexion()
+        date = datetime.fromisoformat(date)
+        year, month, day = date.year, date.month, date.day
+        
+        try:
+            # Calcula la semana del mes. (Días 1-7 -> Semana 1, 8-14 -> Semana 2, etc.)
+            week_of_month = (day - 1) // 7 + 1
+
+            reservations_result = read_reservations_with_date_filter(year, month, week_of_month, conexion)
+            
+            # Convierte los objetos a diccionarios para la respuesta JSON
+            reservations_dict = [res.to_dict() for res in reservations_result]
+            print(reservations_dict)
+            
+            return 200, reservations_dict
+        except Exception as e:
+            print(f"❌ Error al leer las reservaciones por fecha: {e}")
+            return 500, f"Error al leer las reservaciones: {e}"
+        finally:
             if not conn:
                 conexion.close_conexion()

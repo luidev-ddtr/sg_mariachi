@@ -13,8 +13,8 @@ def sample_reservation_data():
     random_suffix = random.randint(1000, 9999)
     return  {
     "DIM_Address": "Independencias siempre viva",
-    "DIM_EndDate": "2025-11-11T19:00:00",
-    "DIM_EventAddress": "Sexto principal, Ixmiquilpan, Hgo.",
+    "DIM_EndDate": "2025-11-09T19:00:00",
+    "DIM_EventAddress": "Tercero principal, Ixmiquilpan, Hgo.",
     "DIM_LastName": "Hernandez",
     "DIM_NHours": 6,
     "DIM_Name": "Jaime",
@@ -23,7 +23,7 @@ def sample_reservation_data():
     "DIM_SecondLastName": "Perez",
     "DIM_SecondName": "Beltran",
     "DIM_SecondPhoneNumber": "1234567891",    
-    "DIM_StartDate": "2025-11-11T17:00:00",
+    "DIM_StartDate": "2025-11-09T17:00:00",
     "DIM_TotalAmount": 2500,
     "DIM_ServiceOwnersId": "f07e69a4-4e80-527e"
 }
