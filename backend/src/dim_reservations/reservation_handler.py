@@ -22,12 +22,83 @@ class ReservationService:
     
     def create_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[str, int]:
         """
-        Orquesta la creación de una nueva reserva.
-        1. Valida datos de entrada.
-        2. Llama al servicio de negocio para validar solapamientos.
-        3. Genera IDs y prepara el objeto de reserva.
-        4. Llama al repositorio para insertar en la base de datos.
-        5. Maneja la transacción y la respuesta.
+        Orquesta la creación de una nueva reserva, manejando la lógica de negocio,
+        la validación de datos, la gestión de clientes y la persistencia en la base de datos.
+
+        Este método actúa como el punto de entrada principal en la capa de handler para
+        registrar una nueva reservación. Coordina múltiples servicios y repositorios
+        para asegurar la integridad de los datos y la correcta ejecución de la transacción.
+
+        **Flujo de Proceso:**
+        1.  **Gestión de Conexión:**
+            - Si se proporciona un objeto `conn` (conexión), se utiliza para la operación.
+            Esto es crucial para las pruebas unitarias o para procesos que necesitan
+            agrupar varias operaciones en una única transacción.
+            - Si no se proporciona, se crea una nueva conexión a la base de datos.
+
+        2.  **Obtención de Fecha:**
+            - Se instancia `DIM_DATE` para obtener el `dateId` correspondiente a la fecha actual,
+            que se usará como la fecha de registro de la reserva.
+
+        3.  **Validación de Datos de Entrada:**
+            - Se verifica que los campos esenciales para una reserva (`DIM_ServiceOwnersId`,
+            `DIM_StartDate`, `DIM_EndDate`, `DIM_EventAddress`) estén presentes en el
+            diccionario de entrada `_reservation`.
+
+        4.  **Gestión del Cliente (Persona):**
+            - Se extraen los datos del cliente del diccionario `_reservation`.
+            - Se invoca a `people_services.is_person_exist` para comprobar si el cliente
+            ya existe en la base de datos.
+            - **Si el cliente no existe:** Se llama a `handler_people.create_people` para
+            crear un nuevo registro de persona y se obtiene su nuevo ID.
+            - **Si el cliente ya existe:** Se utiliza su ID (`people_id`) existente.
+
+        5.  **Validación de Lógica de Negocio:**
+            - Se parsean las fechas de inicio y fin.
+            - Se valida que la fecha de inicio sea estrictamente anterior a la fecha de fin.
+            - Se invoca a `ReservaService.create_and_validate_reservation`, que a su vez
+            realiza la validación de solapamiento de horarios. Este servicio busca
+            reservas existentes para el mismo `DIM_ServiceOwnersId` y lanza un error
+            si hay un choque de horarios.
+
+        6.  **Preparación del Modelo de Reserva:**
+            - Se genera un ID único para la reserva (`res_id`) usando una combinación
+            del ID del cliente, el día actual y la dirección del evento.
+            - Se calculan métricas como el número de horas (`n_hours`).
+            - Se instancia el objeto `Reservation` con todos los datos validados y generados,
+            incluyendo el estatus por defecto "pendiente" obtenido de `get_status_pending()`.
+
+        7.  **Persistencia en Base de Datos:**
+            - El objeto `Reservation` se pasa al método `create_and_validate_reservation`
+            del servicio, que finalmente llama a la función de repositorio `insert_reservation`
+            para ejecutar el `INSERT` en la base de datos.
+            - Si la inserción y la validación de solapamiento son exitosas, la transacción
+            se confirma (commit).
+
+        8.  **Manejo de Errores y Transacciones:**
+            - Si ocurre un `ValueError` (ej. por choque de horarios), se retorna un código 400.
+            - Si ocurre cualquier otra excepción, la transacción se revierte (`rollback`)
+            para evitar datos inconsistentes y se retorna un código 500.
+
+        9.  **Cierre de Conexión:**
+            - En el bloque `finally`, se asegura que la conexión se cierre solo si fue
+            creada dentro de este método, evitando cerrar conexiones gestionadas externamente.
+
+        **Permisos/Acceso:**
+        - Este servicio está diseñado para ser llamado por un endpoint de API (ej. un POST a `/reservations`).
+        - El usuario de la base de datos asociado debe tener permisos de:
+            - **SELECT** en `dim_people`, `dim_date`, `dim_reservation`.
+            - **INSERT** en `dim_people` y `dim_reservation`.
+
+        :param _reservation: Diccionario con los datos de la reserva y del cliente.
+        :type _reservation: dict
+        :param conn: (Opcional) Objeto de conexión a la base de datos para control transaccional.
+        :type conn: Conexion, optional
+        :raises ValueError: Si hay un error de validación, como un solapamiento de horarios.
+        :raises Exception: Para errores generales de base de datos o de lógica interna.
+        :return: Una tupla con el código de estado HTTP y un mensaje descriptivo.
+                Ej: (201, "Reserva creada exitosamente...") o (400, "Choque de horario...").
+        :rtype: tuple[int, str]
         """
         # Usa la conexión existente si se proporciona, de lo contrario crea una nueva.
         # Esto es clave para que las pruebas puedan compartir una transacción.
