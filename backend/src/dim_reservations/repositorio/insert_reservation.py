@@ -84,7 +84,7 @@ INSERT INTO `dim_reservation` (
         object_coon.cursor.execute(query, values)
         
         print("✅ Cambios guardados correctamente")
-        object_coon.save_changes()
+        #object_coon.save_changes()
         
         return True
     except Exception as err:
