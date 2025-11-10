@@ -1,4 +1,4 @@
-from src.dim_reservations.reservation_model import VIEWReservation
+from src.dim_reservations.view_reservation_model import VIEWReservation
 from src.utils.conexion import Conexion
 
 
