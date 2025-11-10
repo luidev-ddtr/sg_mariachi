@@ -26,13 +26,12 @@ def test_read_reservations_by_date_success(db_connection):
     # --- ARRANGE ---
     # Preparamos los datos de entrada para la prueba.
     handler = ReservationService()
-    year = 2025
-    month = 11
-    day = 10
+
+    date = "2025-11-10"
 
     # --- ACT ---
     # Ejecutamos el método que queremos probar, pasando la conexión del fixture.
-    status, reservations = handler.read_reservations_by_date(year, month, day, conn=db_connection)
+    status, reservations = handler.read_reservations_by_date(date, conn=db_connection)
 
     # --- ASSERT ---
     # Verificamos que los resultados sean los esperados.

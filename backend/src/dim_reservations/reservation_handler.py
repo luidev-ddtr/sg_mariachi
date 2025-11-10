@@ -207,7 +207,7 @@ class ReservationService:
             if not conn:
                 conexion.close_conexion()
     
-    def read_reservations_by_date(self, year: int, month: int, day: int, conn: Conexion = None) -> tuple[int, list]:
+    def read_reservations_by_date(self, date, conn: Conexion = None) -> tuple[int, list]:
         """
         Obtiene todas las reservaciones de la semana correspondiente a una fecha dada.
 
@@ -242,6 +242,8 @@ class ReservationService:
         :rtype: tuple[int, list]
         """
         conexion = conn or Conexion()
+        date = datetime.fromisoformat(date)
+        year, month, day = date.year, date.month, date.day
         
         try:
             # Calcula la semana del mes. (Días 1-7 -> Semana 1, 8-14 -> Semana 2, etc.)
