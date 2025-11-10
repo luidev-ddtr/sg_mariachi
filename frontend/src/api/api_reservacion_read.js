@@ -1,7 +1,10 @@
 import axiosInstance from "./axiosInstance";
 
 
-export const GetReservaciones = [
+//TODO Requiere una fecha como requisito para funcionar, ya que 
+// siempre se le pasa la fecha actual por defecto, ya si se quiere filtrar 
+// por una fecha en particular se mandan otros datos.
+export const GetReservaciones = async (date) => [
   {
     DIM_fullname: "Angel_94115 Perez Garcia Cruz",
     DIM_PhoneNumber: "123456789",
