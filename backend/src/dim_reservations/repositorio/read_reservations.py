@@ -2,7 +2,7 @@ from src.dim_reservations.reservation_model import VIEWReservation
 from src.utils.conexion import Conexion
 
 
-def read_reservations_with_date_filter(year: int, month: int, week: int, object_conection:Conexion):
+def read_reservations_with_date_filter(year: int, month: int, week: int, object_conection:Conexion)-> list | list[VIEWReservation]:
     """
     Esta funcion retorna de una semana en especifico, recibe los parametros 
     

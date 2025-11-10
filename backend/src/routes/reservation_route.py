@@ -21,16 +21,74 @@ def create_reservation() -> tuple[Any]:
     """
     try: 
         data_reservation = request.get_json()
-
         for name in data_reservation:
-            print(f"{name}, {data_reservation[name]}", end="\n")
-        reservation_options.create_reservation(data_reservation)
+            print(f"'{name}': {data_reservation[name]}", end="\n")
+        status, message = reservation_options.create_reservation(data_reservation)
+        
+        if status != 201:
+            print(message)
+            return send_error(message, status)
+        
         return send_success("Reserva creada exitosamente", None, 201)
     except Exception as e:
         return send_error(str(e), 500)
 
+
+
+@reservation_route.route('/read', methods=['GET'])
+def read_reservation():
+    """
+    Crea una nueva reserva en la tabla dim_people
+    """
+    try:
+        status, message, data_reservations  = reservation_options.__annotations__ #TODO Corregir ya que aun ni se hga creado la funcion
+
+        if status != 200:
+            print(message)
+            return send_error(message, status)
+        
+        return send_success("Reserva creada exitosamente", data_reservations, 200)
+    except Exception as e:
+        return send_error(str(e), 500)
+    
+
+@reservation_route.route('/update', methods=['PUT'])
+def update_reservation():
+    """
+    Crea una nueva reserva en la tabla dim_people
+    """
+    try:
+        new_data = request.get_json()
+        status, message = reservation_options.update_reservation(new_data) #TODO Cambiar al nombre verdadero que se pornga
+        
+        if status != 201:
+            print(message)
+            return send_error(message, status)
+        
+        return send_success("Reserva creada exitosamente", None, 200)
+    except Exception as e:
+        return send_error(str(e), 500)
+
+
+@reservation_route.route('/delete', methods=['DELETE'])
+def delete_reservation() -> tuple[Any]:
+    """
+    Crea una nueva reserva en la tabla dim_people
+    """
+    try:
+        id_reservation = request.get_json()
+        status, message = reservation_options.delete_reservation(id_reservation) #TODO Cambiar al nombre verdadero que se pornga
+        
+        if status != 201:
+            print(message)
+            return send_error(message, status)
+        
+        return send_success("Reserva creada exitosamente", None, 200)
+    except Exception as e:
+        return send_error(str(e), 500)
+
 @reservation_route.route('/prueba1', methods=['GET'])
-def prueba1():
+def prueba1() -> tuple[Any]:
     """
     Crea una nueva reserva en la tabla dim_people
     """
