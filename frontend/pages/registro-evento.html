@@ -127,8 +127,8 @@
     const modalFrame = document.getElementById("modalFrame");
     const modalClose = document.getElementById("modalClose");
 
-  // URL del formulario que se cargará en el modal
-    const modalUrl = "../src/components/eventos/formulario_nvo_evento.html";
+  // URL del formulario que se cargará en el modal.
+    const modalUrl = "/src/components/eventos/formulario_nvo_evento.html";
 
   // 1. Abrir el modal al hacer clic en "Nueva Reserva"
     btnNuevaReserva.addEventListener("click", () => {
@@ -146,7 +146,7 @@
       modalFrame.src = "about:blank";
     }
 
-    // 3. Cerrar el modal con el botón 'X'
+    // 3. Cerrar el modal con el botón 'X'.
     modalClose.addEventListener("click", () => {
       closeModal();
     });
