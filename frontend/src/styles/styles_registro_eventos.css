@@ -200,7 +200,7 @@ button.acciones:hover {
   padding: 0;
   box-shadow: none;
   border-radius: 20px;
-  width: 1000px;
+  width: 1000px;    /*Ancho del modal*/
   max-width: 95%;
   height: 90vh;               /* Fija altura máxima del modal */
   display: flex;
