@@ -70,3 +70,13 @@ SET
 WHERE
     `DIM_ReservationId` = %s
 
+
+
+--Coinsulta para archivar un starus, como es pura informacion estatica se utiliza un valor por defecto 
+
+UPDATE
+    `dim_reservation`
+SET
+    `DIM_StatusId` = 'cw42055f-3ecb-9099'
+WHERE
+    DIM_ReservationId = %s;

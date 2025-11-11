@@ -262,3 +262,29 @@ class ReservationService:
         finally:
             if not conn:
                 conexion.close_conexion()
+                
+# Para editar una reservacion nos llega la informacion de la reservacion en una diccionario, nos llegan estos campos
+
+# diccionario= {
+#     'DIM_StartDate': ,
+#     'DIM_EndDate': ,
+#     'DIM_NHours' ,
+#     'DIM_TotalAmount': ,
+#     'DIM_Notes': ,
+#     'DIM_ReservationId': ,
+#     'DIM_SecondPhoneNumber': 
+# }
+
+
+# se debe validar en primer lugar, si la nueva fecha de reservacion esta disponible, 
+# tambien se tiene que actualizar el telefo del cliente, por lo que se tiene que hacer una peticion a dim_people y actualizar el telefono
+# se debe de validar que los datos que se envien no esten vacios, para que la informacion sea segura.
+
+# Para archivar una reservacion se obtendra el id en un diccionario en este formato
+
+# diccionio = {
+#     'DIM_ReservationId': "hassifdmuchas-letras"
+# }
+
+# se debe de comprobar que el estatus de la reservacion sea completo o cancelado
+# ya que por razones de seguridad 

@@ -80,7 +80,7 @@ def update_reservation():
         return send_error(str(e), 500)
 
 
-@reservation_route.route('/delete', methods=['DELETE'])
+@reservation_route.route('/archive', methods=['DELETE'])
 def delete_reservation() -> tuple[Any]:
     """
     Crea una nueva reserva en la tabla dim_people
@@ -88,6 +88,24 @@ def delete_reservation() -> tuple[Any]:
     try:
         id_reservation = request.get_json()
         status, message = reservation_options.delete_reservation(id_reservation) #TODO Cambiar al nombre verdadero que se pornga
+        
+        if status != 201:
+            print(message)
+            return send_error(message, status)
+        
+        return send_success("Reserva creada exitosamente", None, 200)
+    except Exception as e:
+        print(e)
+        return send_error(str(e), 500)
+    
+@reservation_route.route('/cancel', methods=['POST'])
+def delete_reservation() -> tuple[Any]:
+    """
+    Crea una nueva reserva en la tabla dim_people
+    """
+    try:
+        id_reservation = request.get_json()
+        status, message = reservation_options.cancel(id_reservation) #TODO Cambiar al nombre verdadero que se pornga
         
         if status != 201:
             print(message)
