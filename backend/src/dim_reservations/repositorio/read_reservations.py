@@ -74,3 +74,85 @@ def read_reservations_with_date_filter(year: int, month: int, week: int, object_
     except Exception as e:
         print(f"Error al ejecutar la consulta: {e}")
         return []
+    
+    
+
+def get_status_name_by_reservation_id(reservation_id: int, object_conection:Conexion)-> str:
+    """
+    Obtiene el nombre del estado (status) actual de una reserva específica utilizando su ID.
+
+    Esta función realiza una consulta de unión (JOIN) entre la tabla de Reservaciones 
+    (`DIM_Reservation`) y la tabla de Estados (`DIM_Status`) para recuperar el nombre
+    legible del estado.
+
+    Args:
+        reservation_id (int): El identificador único (`DIM_ReservationId`) de la reserva.
+        object_conection (Conexion): El objeto de conexión a la base de datos que contiene el cursor activo.
+
+    Returns:
+        str: Retorna el nombre del estado (`DIM_StatusName`) de la reserva si se encuentra.
+             Retorna una cadena vacía (`""`) si la reserva no existe, si no tiene estado
+             asociado, o si ocurre una excepción durante la ejecución de la consulta.
+    Constrains:
+        * Se espera que el ID de la reserva sea un `int`, aunque se utiliza un placeholder `%s`
+          para prevenir inyección SQL.
+        * Si el resultado de la consulta (`object_conection.cursor.fetchone()`) es `None` (no se
+          encuentra la reserva), se retorna una cadena vacía.
+    """
+    query = """
+    SELECT
+        st.DIM_StatusName
+    FROM
+        DIM_Reservation AS rsv
+    JOIN DIM_Status AS st
+    ON
+        st.DIM_StatusId = rsv.DIM_StatusId
+    WHERE DIM_ReservationId = %s;
+    """
+    
+    try:
+        object_conection.cursor.execute(query, (reservation_id,))
+        result = object_conection.cursor.fetchone()
+        if not result:
+            return ""
+        return result["DIM_StatusName"]
+    except Exception as e:
+        print(f"Error al ejecutar la consulta: {e}")
+        return ""
+    
+    
+def get_people_id_by_reservation_id(reservation_id: int, object_conection:Conexion)-> str:
+    """
+    Obtiene el identificador único de la persona (`DIM_PeopleId`) asociada a una reserva específica.
+    Args:
+        reservation_id (int): El identificador único (`DIM_ReservationId`) de la reserva.
+        object_conection (Conexion): El objeto de conexión a la base de datos que contiene el cursor activo.
+
+    Returns:
+        str: Retorna el ID de la persona (`DIM_PeopleId`) como una cadena si la reserva se encuentra.
+             Retorna una cadena vacía (`""`) si la reserva no existe o si ocurre una excepción
+             durante la ejecución de la consulta.
+    Constrains:
+        * Se espera que `reservation_id` sea un valor numérico (`int`), aunque el manejo
+          de la consulta usa el placeholder `%s` para seguridad.
+        * El ID de persona se almacena como un `str` (cadena) para mantener la consistencia
+          con el tipo de dato devuelto.
+        * Si no se encuentra la reserva (el resultado es `None`), se retorna una cadena vacía.
+    """
+    query = """
+    SELECT
+        rsv.DIM_PeopleId
+    FROM
+        DIM_Reservation AS rsv
+    WHERE DIM_ReservationId = %s;
+    """
+    
+    try:
+        object_conection.cursor.execute(query, (reservation_id,))
+        result = object_conection.cursor.fetchone()
+        if not result:
+            return ""
+        return result["DIM_PeopleId"]
+    except Exception as e:
+        print(f"Error al ejecutar la consulta: {e}")
+        return ""
