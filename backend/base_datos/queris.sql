@@ -56,3 +56,27 @@ JOIN
     DIM_Status AS estado ON rsv.DIM_StatusId = estado.DIM_StatusId;
 
 
+--Query para editar datos 
+--Solo que hubo un conflicto, el conflicto es que: si se cambia la fecha, entonces se perdera el registro de cuando se modifico esta reservacion.
+UPDATE
+    `dim_reservation`
+SET
+	`dim_dateId` = %s,
+    `DIM_StartDate` = %s,
+    `DIM_EndDate` = %s,
+    `DIM_NHours` = %s,
+    `DIM_TotalAmount` = %s,
+    `DIM_Notes` = 
+WHERE
+    `DIM_ReservationId` = %s
+
+
+
+--Coinsulta para archivar un starus, como es pura informacion estatica se utiliza un valor por defecto 
+
+UPDATE
+    `dim_reservation`
+SET
+    `DIM_StatusId` = 'cw42055f-3ecb-9099'
+WHERE
+    DIM_ReservationId = %s;

@@ -83,10 +83,11 @@ INSERT INTO `dim_reservation` (
         print(f"Esto es la query: {query}")
         object_coon.cursor.execute(query, values)
         
-        print("✅ Cambios guardados correctamente")
+        print("✅ Cambios guardados correctamente. Reserva creada")
         object_coon.save_changes()
         
         return True
     except Exception as err:
-        print(f"Error al insertar la persona: {err}")
+        print(f"Error al registrar la reserva: {err}")
+        object_coon.conn.rollback()
         return False
