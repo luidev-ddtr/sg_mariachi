@@ -4,8 +4,10 @@
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
 
 // --- Funciones auxiliares para formatear ---
+// (¡Descomentadas!)
 const formatDate = (date) => {
   if (!date) return '';
+  // 'date' aquí SÍ es un objeto Date
   return date.toLocaleDateString('es-MX', {
     day: '2-digit',
     month: '2-digit',
@@ -15,6 +17,7 @@ const formatDate = (date) => {
 
 const formatTime = (date) => {
   if (!date) return '';
+  // 'date' aquí SÍ es un objeto Date
   return date.toLocaleTimeString('es-MX', {
     hour: '2-digit',
     minute: '2-digit',
@@ -22,12 +25,12 @@ const formatTime = (date) => {
   });
 };
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN'
-  }).format(amount);
-};
+ const formatCurrency = (amount) => {
+   return new Intl.NumberFormat('es-MX', {
+     style: 'currency',
+     currency: 'MXN'
+   }).format(amount);
+ };
 
 // --- Función principal ---
 const renderReservationsTable = async () => {
@@ -54,14 +57,21 @@ const renderReservationsTable = async () => {
       const estado = (item.DIM_StatusName || 'desconocido').toLowerCase();
       const estadoCapitalizado = estado.charAt(0).toUpperCase() + estado.slice(1);
 
+      // --- ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
+      // Convertimos los strings de la API en objetos Date
+      const fechaInicio = new Date(item.DIM_StartDate);
+      const fechaFin = new Date(item.DIM_EndDate);
+
       return `
         <tr>
           <td>${index + 1 /* Indice */}</td> 
           <td>${item.DIM_fullname /* Nombre completo */}</td>
           <td>${item.DIM_PhoneNumber /* Número de teléfono */}</td>
-          <td>${formatDate(item.DIM_StartDate) /* Fecha de inicio */}</td>
-          <td>${formatTime(item.DIM_StartDate) /* Hora de inicio */}</td>
-          <td>${formatTime(item.DIM_EndDate) /* Hora de fin */}</td>
+          
+          <td>${formatDate(fechaInicio) /* Fecha de inicio */}</td>
+          <td>${formatTime(fechaInicio) /* Hora de inicio */}</td>
+          <td>${formatTime(fechaFin) /* Hora de fin */}</td>
+          
           <td>${formatCurrency(item.DIM_TotalAmount) /* Cantidad total */}</td>
           
           <td>
@@ -105,27 +115,24 @@ const setupDropdownListeners = () => {
 
   tbody.addEventListener('click', (event) => {
     
-    // --- ¡CAMBIO AQUÍ! (Check 1: Clic en "Actualizar o editar") ---
+    // --- (Check 1: Clic en "Actualizar o editar") ---
     const editButton = event.target.closest('.js-edit-trigger');
     if (editButton) {
-      event.preventDefault(); // Evita que el link '#' navegue
+      event.preventDefault(); 
 
-      // 1. Obtener el ID que guardamos en 'data-id'
       const eventId = editButton.dataset.id;
       const url = `../src/components/eventos/formulario_edit_evento.html?id=${eventId}`;
 
-      // 2. Buscar los elementos del modal que YA EXISTEN en registro-evento.html
       const modalOverlay = document.getElementById('modalOverlay');
       const modalFrame = document.getElementById('modalFrame');
 
-      // 3. Activar el modal
       if (modalOverlay && modalFrame) {
-        modalFrame.src = url; // Carga el formulario en el iframe
-        modalOverlay.classList.add('visible'); // Muestra el modal
+        modalFrame.src = url; 
+        modalOverlay.classList.add('visible'); 
       } else {
         console.error('No se encontraron los elementos del modal (modalOverlay o modalFrame)');
       }
-      return; // Fin
+      return; 
     }
 
     // --- (Check 2: Clic en el botón de toggle '...') ---
@@ -134,7 +141,6 @@ const setupDropdownListeners = () => {
       event.preventDefault(); 
       const menu = toggleButton.nextElementSibling; 
 
-      // Cerrar todos los OTROS menús
       const allOpenMenus = tbody.querySelectorAll('.dropdown-menu');
       allOpenMenus.forEach(openMenu => {
         if (openMenu !== menu && openMenu.style.display === 'block') {
@@ -142,15 +148,12 @@ const setupDropdownListeners = () => {
         }
       });
 
-      // Abrir/cerrar el menú actual
       menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-      return; // Fin
+      return; 
     }
     
     // --- (Check 3: Clic en cualquier otro item del menú, como "Archivar") ---
     if (event.target.closest('.dropdown-item')) {
-      // Es un link diferente, deja que navegue (si tiene href)
-      // y cierra todos los menús
       const allOpenMenus = tbody.querySelectorAll('.dropdown-menu');
       allOpenMenus.forEach(openMenu => {
         openMenu.style.display = 'none';
