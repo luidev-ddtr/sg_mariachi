@@ -252,10 +252,10 @@ class ReservationService:
             reservations_result = read_reservations_with_date_filter(year, month, week_of_month, conexion)
             
             # Convierte los objetos a diccionarios para la respuesta JSON
-            reservations_dict = [res.to_dict() for res in reservations_result]
-            print(reservations_dict)
+            #reservations_dict = [res.to_dict() for res in reservations_result]
+            print(reservations_result)
             
-            return 200, reservations_dict
+            return 200, reservations_result
         except Exception as e:
             print(f"❌ Error al leer las reservaciones por fecha: {e}")
             return 500, f"Error al leer las reservaciones: {e}"

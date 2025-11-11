@@ -4,11 +4,7 @@ export const GetReservaciones = async (date) => {
     try {
         // Validar que se proporcionó una fecha
         if (!date) {
-            return { 
-                success: false, 
-                message: "La fecha es requerida para obtener las reservaciones.", 
-                data: [] 
-            };
+            return [];
         }
 
         console.log("Fecha enviada a api/reservation/read:", date);
@@ -20,11 +16,7 @@ export const GetReservaciones = async (date) => {
         
         console.log("Respuesta del servidor al obtener reservaciones:", response.data);
          
-        return {
-            success: response.data.status || true,
-            message: response.data.message,
-            data: response.data.body || []
-        };
+        return response.data.body;
         
     } catch (error) {
         // Manejo mejorado de errores
