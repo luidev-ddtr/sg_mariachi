@@ -31,6 +31,7 @@ def create_reservation() -> tuple[Any]:
         
         return send_success("Reserva creada exitosamente", None, 201)
     except Exception as e:
+        print(e)
         return send_error(str(e), 500)
 
 
@@ -38,17 +39,25 @@ def create_reservation() -> tuple[Any]:
 @reservation_route.route('/read', methods=['GET'])
 def read_reservation():
     """
-    Crea una nueva reserva en la tabla dim_people
+    Obtiene reservas por fecha desde los parámetros de consulta
     """
     try:
-        status, message, data_reservations  = reservation_options.__annotations__ #TODO Corregir ya que aun ni se hga creado la funcion
-
-        if status != 200:
-            print(message)
-            return send_error(message, status)
+        # Obtener la fecha del parámetro de consulta 'date'
+        date = request.args.get('date')
         
-        return send_success("Reserva creada exitosamente", data_reservations, 200)
+        # Validar que la fecha fue proporcionada
+        if not date:
+            return send_error("El parámetro 'date' es requerido", 400)
+        
+        status, data_reservations = reservation_options.read_reservations_by_date(date)
+        
+        if status != 200:
+            return send_error("Error al obtener las reservas", status)
+        
+        return send_success("Reservas obtenidas exitosamente", data_reservations, 200)
+    
     except Exception as e:
+        print(e)
         return send_error(str(e), 500)
     
 
@@ -67,6 +76,7 @@ def update_reservation():
         
         return send_success("Reserva creada exitosamente", None, 200)
     except Exception as e:
+        print(e)
         return send_error(str(e), 500)
 
 
@@ -85,6 +95,7 @@ def delete_reservation() -> tuple[Any]:
         
         return send_success("Reserva creada exitosamente", None, 200)
     except Exception as e:
+        print(e)
         return send_error(str(e), 500)
 
 @reservation_route.route('/prueba1', methods=['GET'])
@@ -95,4 +106,5 @@ def prueba1() -> tuple[Any]:
     try:
         return send_success("Prueba creada exitosamente", None, 200)
     except Exception as e:
+        print(e)
         return send_error(str(e), 500)

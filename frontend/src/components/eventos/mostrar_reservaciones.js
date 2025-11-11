@@ -43,7 +43,7 @@ const renderReservationsTable = async () => {
 
   try {
     const reservaciones = await GetReservaciones(new Date());
-
+    console.log(reservaciones);
     if (reservaciones.length === 0) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No hay reservaciones para mostrar.</td></tr>';
       return;
