@@ -38,16 +38,24 @@ def create_reservation() -> tuple[Any]:
 @reservation_route.route('/read', methods=['GET'])
 def read_reservation():
     """
-    Crea una nueva reserva en la tabla dim_people
+    Obtiene reservas por fecha desde los parámetros de consulta
     """
     try:
-        status, message, data_reservations  = reservation_options.__annotations__ #TODO Corregir ya que aun ni se hga creado la funcion
-
+        # Obtener la fecha del parámetro de consulta 'date'
+        date = request.args.get('date')
+        
+        # Validar que la fecha fue proporcionada
+        if not date:
+            return send_error("El parámetro 'date' es requerido", 400)
+        
+        status, message, data_reservations = reservation_options.read_reservations_by_date(date)
+        
         if status != 200:
             print(message)
             return send_error(message, status)
         
-        return send_success("Reserva creada exitosamente", data_reservations, 200)
+        return send_success("Reservas obtenidas exitosamente", data_reservations, 200)
+    
     except Exception as e:
         return send_error(str(e), 500)
     

@@ -1,60 +1,47 @@
 import axiosInstance from "./axiosInstance";
 
+export const GetReservaciones = async (date) => {
+    try {
+        // Validar que se proporcionó una fecha
+        if (!date) {
+            return { 
+                success: false, 
+                message: "La fecha es requerida para obtener las reservaciones.", 
+                data: [] 
+            };
+        }
 
-//TODO Requiere una fecha como requisito para funcionar, ya que 
-// siempre se le pasa la fecha actual por defecto, ya si se quiere filtrar 
-// por una fecha en particular se mandan otros datos.
-export const GetReservaciones = async (date) => [
-  {
-    DIM_fullname: "Angel_94115 Perez Garcia Cruz",
-    DIM_PhoneNumber: "123456789",
-    FullDate: new Date("2025-10-27"),
-    DIM_StartDate: new Date("2026-01-05T10:00:00"),
-    DIM_EndDate: new Date("2026-01-05T15:00:00"),
-    DIM_TotalAmount: 1000,
-    DIM_StatusName: "pendiente",
-    DIM_DateId: "20251027"
-  },
-  {
-    DIM_fullname: "Maria_83942 Lopez Sanchez Torres",
-    DIM_PhoneNumber: "987654321",
-    FullDate: new Date("2025-10-28"),
-    DIM_StartDate: new Date("2026-01-06T09:00:00"),
-    DIM_EndDate: new Date("2026-01-06T14:00:00"),
-    DIM_TotalAmount: 1250,
-    DIM_StatusName: "completado",
-    DIM_DateId: "20251028"
-  },
-  {
-    DIM_fullname: "Luis_58320 Hernandez Morales Vega",
-    DIM_PhoneNumber: "552341678",
-    FullDate: new Date("2025-10-29"),
-    DIM_StartDate: new Date("2026-01-07T08:30:00"),
-    DIM_EndDate: new Date("2026-01-07T13:30:00"),
-    DIM_TotalAmount: 875,
-    DIM_StatusName: "pendiente",
-    DIM_DateId: "20251029"
-  },
-  {
-    DIM_fullname: "Sofia_73102 Martinez Rivera Gomez",
-    DIM_PhoneNumber: "554321890",
-    FullDate: new Date("2025-10-30"),
-    DIM_StartDate: new Date("2026-01-08T11:00:00"),
-    DIM_EndDate: new Date("2026-01-08T16:00:00"),
-    DIM_TotalAmount: 1450,
-    DIM_StatusName: "cancelado",
-    DIM_DateId: "20251030"
-  },
-  {
-    DIM_fullname: "Carlos_27491 Dominguez Perez Luna",
-    DIM_PhoneNumber: "558765432",
-    FullDate: new Date("2025-10-31"),
-    DIM_StartDate: new Date("2026-01-09T12:00:00"),
-    DIM_EndDate: new Date("2026-01-09T17:00:00"),
-    DIM_TotalAmount: 960,
-    DIM_StatusName: "completado",
-    DIM_DateId: "20251031"
-  }
-];
+        console.log("Fecha enviada a api/reservation/read:", date);
 
-export default data_base;
+        // Hacer la petición GET con el parámetro de fecha
+        const response = await axiosInstance.get('reservation/read', {
+            params: { date }
+        });
+        
+        console.log("Respuesta del servidor al obtener reservaciones:", response.data);
+         
+        return {
+            success: response.data.status || true,
+            message: response.data.message,
+            data: response.data.body || []
+        };
+        
+    } catch (error) {
+        // Manejo mejorado de errores
+        let errorMessage = 'Error desconocido al obtener las reservaciones';
+        
+        if (error.response) {
+            // El servidor respondió con un status fuera del rango 2xx
+            console.error("Error de respuesta:", error.response.data);
+            errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          `Error ${error.response.status}: ${error.response.statusText}`;
+        }  else {
+            // Algo pasó en la configuración de la petición
+            console.error("Error de configuración:", error.message);
+            errorMessage = error.message || 'Error al configurar la petición';
+        }
+        
+        throw new Error(errorMessage);
+    }
+};
