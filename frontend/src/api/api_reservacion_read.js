@@ -56,5 +56,17 @@ export const GetReservaciones = async (date) => [
     DIM_DateId: "20251031"
   }
 ];
-
-export default data_base;
+// ... (el resto de tus reservaciones)
+/**
+ * Devuelve todas las reservaciones.
+ */
+/**
+ * ¡FUNCIÓN CLAVE! Obtiene una reservación por su ID.
+ */
+export const GetReservacionPorId = async (id) => {
+  const todasLasReservaciones = await GetReservaciones(new Date());
+  // Buscamos la reservación que coincida con el ID
+  const evento = todasLasReservaciones.find(item => item.DIM_DateId == id);
+  return evento || null;
+};
+//export default data_base;
