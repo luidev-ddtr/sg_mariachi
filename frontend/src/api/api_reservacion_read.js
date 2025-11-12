@@ -46,7 +46,7 @@ export const GetReservaciones = async (date) => {
 export const GetReservacionPorId = async (id) => {
   const todasLasReservaciones = await GetReservaciones(new Date());
   // Buscamos la reservación que coincida con el ID
-  const evento = todasLasReservaciones.find(item => item.DIM_DateId == id);
+  const evento = todasLasReservaciones.find(item => item.DIM_ReservationId == id);
   return evento || null;
 };
 //export default data_base;
