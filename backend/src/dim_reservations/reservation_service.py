@@ -1,8 +1,12 @@
 from src.utils.conexion import Conexion
 from datetime import datetime, date
 from src.dim_reservations.repositorio.get_dates_reservations import get_dates_reservations # Aseguramos que la importación sea correcta
+from src.dim_reservations.repositorio.read_reservations import get_reservation_by_id
 from src.dim_reservations.repositorio.insert_reservation import insert_reservation
 from src.dim_reservations.reservation_model import Reservation
+
+from src.dim_reservations.repositorio.update_reservation import update_reservation
+
 
 class ReservaService:
     """
@@ -148,3 +152,37 @@ class ReservaService:
         except ValueError as ve:
             # Si validate_overlaps lanza un error, lo capturamos y lo devolvemos como un fallo.
             return False, str(ve)
+    
+    def update_and_validate_reservation(self, new_reservation: Reservation) -> tuple[bool, str]:
+        """
+        Valida la lógica de negocio (fechas, solapamiento) y actualiza una reserva.
+        """
+        try:
+            # 1. Validar que las fechas sean lógicas
+            new_start = datetime.fromisoformat(new_reservation.DIM_StartDate)
+            new_end = datetime.fromisoformat(new_reservation.DIM_EndDate)
+            if new_start >= new_end:
+                return False, "La hora de inicio debe ser anterior a la hora de fin"
+
+            # 2. Validamos el solapamiento, excluyendo la propia reserva que se está actualizando.
+            self.validate_overlaps(
+                service_owners_id=new_reservation.DIM_ServiceOwnersId,
+                start_str=new_reservation.DIM_StartDate,
+                end_str=new_reservation.DIM_EndDate,
+                exclude_reservation_id=new_reservation.DIM_ReservationId # ¡Importante!
+            )
+            # 3. Si la validación pasa, actualizamos
+            success = update_reservation(new_reservation, self.conn)
+            return success, "Reserva actualizada" if success else "Fallo en la actualización del repositorio"
+        except ValueError as ve:
+            return False, str(ve)
+
+    def get_reservation_by_id(self, reservation_id: str) -> dict | None:
+        """
+        Obtiene los datos de una reserva por su ID.
+        """
+        try:
+            return get_reservation_by_id(reservation_id, self.conn)
+        except Exception as e:
+            print(f"Error en servicio al obtener reserva por ID: {e}")
+            return None
