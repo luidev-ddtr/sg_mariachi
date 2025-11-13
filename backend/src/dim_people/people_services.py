@@ -1,5 +1,6 @@
 from src.utils.conexion import Conexion
 from src.dim_people.repository.validations import *
+from src.dim_people.repository.update_people import update_people
 
 
 class PeopleService:
@@ -58,3 +59,6 @@ class PeopleService:
             return  404, "No se encontro la persona", ""
         else:
             return 200, "Persona encontrada", result #resul representa el ID en caso de que la persona exista
+        
+    def update_second_phone(self, people_id: str, new_second_phone: str, conexion: Conexion) -> bool:
+        return update_people(new_second_phone, people_id, conexion)

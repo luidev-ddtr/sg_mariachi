@@ -1,7 +1,7 @@
 from src.utils.conexion import Conexion
 from datetime import datetime, date
 from src.dim_reservations.repositorio.get_dates_reservations import get_dates_reservations # Aseguramos que la importación sea correcta
-from src.dim_reservations.repositorio.read_reservations import get_reservation_by_id
+from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
 from src.dim_reservations.repositorio.insert_reservation import insert_reservation
 from src.dim_reservations.reservation_model import Reservation
 
@@ -44,6 +44,7 @@ class ReservaService:
         service_owners_id: str,  # administrador
         start_str: str = "",  # ISO: "2025-11-05T10:00:00"
         end_str: str = "",
+        exclude_reservation_id: str = None # Nuevo parámetro para excluir una reserva
     ) -> None:
         """
         Valida si un nuevo intervalo de tiempo de reserva se solapa con alguna reserva existente
@@ -97,9 +98,13 @@ class ReservaService:
         for res_dict in existing_reservations:
             existing_start = datetime.fromisoformat(res_dict['DIM_StartDate'])
             existing_end = datetime.fromisoformat(res_dict['DIM_EndDate'])
+            res_id = res_dict['DIM_ReservationId']
+
+            # Si la reserva existente es la misma que estamos actualizando, la ignoramos.
+            if res_id == exclude_reservation_id:
+                continue
 
             if (new_start < existing_end) and (new_end > existing_start):
-                res_id = res_dict['DIM_ReservationId']
                 raise ValueError(f"Choque de horario con reserva {res_id}: {existing_start.time()} - {existing_end.time()}")
 
     def create_and_validate_reservation(self, new_reservation: Reservation) -> tuple[bool, str]:
@@ -172,14 +177,24 @@ class ReservaService:
                 exclude_reservation_id=new_reservation.DIM_ReservationId # ¡Importante!
             )
             # 3. Si la validación pasa, actualizamos
-            success = update_reservation(new_reservation, self.conn)
+            # Se pasan los argumentos de forma individual, como espera la función del repositorio.
+            success = update_reservation(
+                date_id=new_reservation.DIM_DateId,
+                StartDate=new_reservation.DIM_StartDate,
+                EndDate=new_reservation.DIM_EndDate,
+                NHours=new_reservation.DIM_NHours,
+                TotalAmount=new_reservation.DIM_TotalAmount,
+                Notes=new_reservation.DIM_Notes,
+                ReservationId=new_reservation.DIM_ReservationId,
+                conn=self.conn
+            )
             return success, "Reserva actualizada" if success else "Fallo en la actualización del repositorio"
         except ValueError as ve:
             return False, str(ve)
 
     def get_reservation_by_id(self, reservation_id: str) -> dict | None:
         """
-        Obtiene los datos de una reserva por su ID.
+            Obtiene los datos de una reserva por su ID.
         """
         try:
             return get_reservation_by_id(reservation_id, self.conn)
