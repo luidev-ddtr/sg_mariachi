@@ -87,7 +87,7 @@ const renderReservationsTable = async (dateParam, statusParam) => {
               <span class="material-symbols-outlined">more_horiz</span>
             </button>
             <div class="dropdown-menu" style="display: none;">
-              <a class="dropdown-item" href="#">Ver detalles</a>
+              <a class="dropdown-item js-contract-trigger" href="#" data-id="${item.DIM_ReservationId}">Ver contrato</a>
               <a class="dropdown-item js-archive-trigger" href="#" data-id="${item.DIM_ReservationId}">Archivar</a>
               <a class="dropdown-item" href="#">Pagar</a>
               <a class="dropdown-item js-edit-trigger" href="#" data-id="${item.DIM_ReservationId}">Actualizar</a>
@@ -104,7 +104,6 @@ const renderReservationsTable = async (dateParam, statusParam) => {
 };
 
 // --- Lógica para manejar los clics del Dropdown ---
-// (Esta es tu función original completa, que sí funciona)
 const setupDropdownListeners = () => {
   const tbody = document.querySelector('#tabla-eventos tbody');
   if (!tbody) return;
@@ -114,25 +113,50 @@ const setupDropdownListeners = () => {
     // --- (Check 1: Clic en "Actualizar o editar") ---
     const editButton = event.target.closest('.js-edit-trigger');
     if (editButton) {
-      event.preventDefault(); 
-      
-      const eventId = editButton.dataset.id;
-      const url = `../src/components/eventos/formulario_edit_evento.html?id=${eventId}`;
+        event.preventDefault(); 
+        const eventId = editButton.dataset.id;
+        
+        // Esta es la ruta que SÍ funciona:
+        const url = `../src/components/eventos/formulario_edit_evento.html?id=${eventId}`;
 
-      const modalOverlay = document.getElementById('modalOverlay');
-      const modalFrame = document.getElementById('modalFrame');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalFrame = document.getElementById('modalFrame');
 
-      if (modalOverlay && modalFrame) {
-        modalFrame.src = url; 
-        modalOverlay.classList.add('visible'); 
-      } else {
-        console.error('No se encontraron los elementos del modal (modalOverlay o modalFrame)');
-      }
-      return; 
+        if (modalOverlay && modalFrame) {
+            modalFrame.src = url; 
+            modalOverlay.classList.add('visible'); 
+        } else {
+            console.error('No se encontraron los elementos del modal (modalOverlay o modalFrame)');
+        }
+        return; 
+    }
+
+    // --- (¡NUEVO CHECK!: Clic en "Ver contrato") ---
+    const contractButton = event.target.closest('.js-contract-trigger');
+    if (contractButton) {
+        event.preventDefault(); 
+        
+        const eventId = contractButton.dataset.id;
+        
+        // ¡¡RUTA CORREGIDA!!
+        // Usamos el MISMO formato que el de "Actualizar"
+        const url = `../src/components/eventos/formulario_contrato.html?id=${eventId}`;
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalFrame = document.getElementById('modalFrame');
+
+        if (modalOverlay && modalFrame) {
+            modalFrame.src = url; 
+            modalOverlay.classList.add('visible'); 
+        } else {
+            console.error('No se encontraron los elementos del modal (modalOverlay o modalFrame)');
+        }
+        return; 
     }
 
     // --- (Check 2: Clic en "Archivar") ---
     const archiveButton = event.target.closest('.js-archive-trigger');
+    // ... (el resto de tu código está bien)
     if (archiveButton) {
         event.preventDefault();
         const reservationId = archiveButton.dataset.id;
@@ -147,7 +171,7 @@ const setupDropdownListeners = () => {
         return;
     }
 
-
+    // ... (El resto de tus checks están bien) ...
     // --- (Check 3: Clic en el botón de toggle '...') ---
     const toggleButton = event.target.closest('.js-dropdown-toggle');
     if (toggleButton) {
@@ -184,7 +208,6 @@ const setupDropdownListeners = () => {
     }
   });
 };
-
 
 // --- Lógica del modal de confirmación (¡MODIFICADA!) ---
 const setupConfirmationModalListeners = () => {
