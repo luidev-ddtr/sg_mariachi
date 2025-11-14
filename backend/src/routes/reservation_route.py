@@ -61,20 +61,45 @@ def read_reservation():
         return send_error(str(e), 500)
     
 
-@reservation_route.route('/update', methods=['PUT'])
+@reservation_route.route('/update', methods=['POST'])
 def update_reservation():
     """
-    Crea una nueva reserva en la tabla dim_people
+    Actualiza una reserva existente
     """
     try:
-        new_data = request.get_json()
-        status, message = reservation_options.update_reservation(new_data) #TODO Cambiar al nombre verdadero que se pornga
+        # Usar directamente el reservation_id de la URL
+        data_reservation = request.get_json()
+        status, message, new_data = reservation_options.update_reservation(data_reservation)
         
-        if status != 201:
-            print(message)
+        if status != 200:
             return send_error(message, status)
         
-        return send_success("Reserva creada exitosamente", None, 200)
+        return send_success("Reserva actualizada exitosamente", new_data, 200)
+    except Exception as e:
+        return send_error(str(e), 500)
+    
+@reservation_route.route('/get_contract', methods=['POST'])
+def get_contract():
+    """
+    Obtiene la informacion de una reservacion, para mostrarla como contrato
+    """
+    try:
+        print("Se creo el endpoint  y conecto")
+        return send_success("Reserva obtenida exitosamente", None, 200)
+        # Obtener la fecha del parámetro de consulta 'date'
+        reservation_id = request.get_json()
+        
+        # Validar que la fecha fue proporcionada
+        if not reservation_id:
+            return send_error("El parámetro 'reservation_id' es requerido", 400)
+        
+        status, data_reservations = reservation_options.get_contract_info(reservation_id) #TODO metodo aun no creado
+        
+        if status != 200:
+            return send_error("Error al obtener las reservas", status)
+        
+        return send_success("Reservas obtenidas exitosamente", data_reservations, 200)
+    
     except Exception as e:
         print(e)
         return send_error(str(e), 500)

@@ -50,3 +50,44 @@ export const GetReservacionPorId = async (id) => {
   return evento || null;
 };
 //export default data_base;
+
+
+export const GetContractInfo = async (id) => {
+    try {
+        // Validar que se proporcionó un ID
+        if (!id) {
+            return null;
+        }
+
+        console.log("ID enviado a api/reservation/get_contract:", id);
+
+        // Hacer la petición POST enviando el ID como payload
+        const response = await axiosInstance.post(
+            'reservation/get_contract',
+            { id }   // <- el backend lo recibe como JSON
+        );
+
+        console.log("Respuesta del servidor al obtener contrato:", response.data);
+
+        // Retornar el cuerpo tal como lo hace GetReservaciones
+        return response.data.body;
+
+    } catch (error) {
+        // Manejo mejorado de errores
+        let errorMessage = 'Error desconocido al obtener la información del contrato';
+
+        if (error.response) {
+            // El servidor respondió con un status fuera del rango 2xx
+            console.error("Error de respuesta:", error.response.data);
+            errorMessage = error.response.data?.message ||
+                           error.response.data?.error ||
+                           `Error ${error.response.status}: ${error.response.statusText}`;
+        } else {
+            // Algo pasó en la configuración de la petición
+            console.error("Error de configuración:", error.message);
+            errorMessage = error.message || 'Error al configurar la petición';
+        }
+
+        throw new Error(errorMessage);
+    }
+};
