@@ -14,7 +14,7 @@ export const updateReservation = async (reservacion_data) => {
         console.log(`Enviando solicitud de actualización para el ID: ${reservacion_data}`);
 
         // Hacer la petición PUT/PATCH para actualizar el estado de la reservación
-        const response = await axiosInstance.post(`reservation/update/`, reservacion_data);
+        const response = await axiosInstance.post(`reservation/update`, reservacion_data);
         
         console.log("Respuesta del servidor al actualizar reservación:", response.data);
         

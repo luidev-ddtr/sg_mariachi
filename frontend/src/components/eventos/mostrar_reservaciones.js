@@ -2,7 +2,7 @@
 
 // 1. Importar las funciones de la API
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
-import { ArchiveReservacion } from '../../api/api_reservacion_update.js';
+//import { updateReservation } from '../../api/api_reservacion_update.js';
 
 // --- Funciones de formato ---
 const formatDate = (isoString) => {
@@ -217,34 +217,6 @@ const setupConfirmationModalListeners = () => {
 
         console.log(`Iniciando archivado para ID: ${reservationId}`);
 
-        try {
-            btnConfirm.textContent = 'Archivando...';
-            btnConfirm.disabled = true;
-
-            const response = await ArchiveReservacion(reservationId);
-            console.log(`Respuesta de la API de archivado:`, response);
-
-            closeModal();
-            
-            // --- ¡CAMBIO AQUÍ! ---
-            // Recargamos la tabla usando los valores que están en los filtros
-            // (Usamos los IDs de tu HTML: "inputFecha", "selectEstado")
-            const dateInput = document.getElementById('inputFecha');
-            const statusInput = document.getElementById('selectEstado');
-            
-            // Usamos la fecha del filtro, o la de hoy si está vacío
-            const dateValue = dateInput.value || new Date().toISOString().split('T')[0];
-            const statusValue = statusInput.value || 'todos';
-
-            // Volvemos a renderizar, y la función filtrará por nosotros
-            renderReservationsTable(dateValue, statusValue); 
-
-        } catch (error) {
-            console.error('Error al archivar la reservación:', error);
-            alert('Hubo un error al archivar la reservación.');
-            btnConfirm.textContent = 'Sí, Archivar';
-            btnConfirm.disabled = false;
-        }
     });
 };
 
