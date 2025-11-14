@@ -3,16 +3,21 @@ from src.utils.conexion import Conexion
 from src.utils.id_generator import create_id
 from src.dim_reservations.reservation_model import Reservation
 from src.dim_people.people_services import PeopleService
+from src.dim_people.people_handler import PeopleHandler
 from src.dim_reservations.reservation_service import ReservaService
 from datetime import datetime
 from src.dim_people.people_handler import PeopleHandler
 from src.dim_status.status import get_status_pending
 
 from src.dim_reservations.repositorio.read_reservations import read_reservations_with_date_filter
+from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
+
+
+
 
 people_services = PeopleService()
 handler_people = PeopleHandler()
- 
+
 class ReservationService:
     """
     Clase que representa el Handler de Reservaciones.
@@ -279,6 +284,75 @@ class ReservationService:
 # se debe validar en primer lugar, si la nueva fecha de reservacion esta disponible, 
 # tambien se tiene que actualizar el telefo del cliente, por lo que se tiene que hacer una peticion a dim_people y actualizar el telefono
 # se debe de validar que los datos que se envien no esten vacios, para que la informacion sea segura.
+
+    def update_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[str, int]:
+        """
+        Orquesta la actualización de una reserva existente.
+
+        Flujo:
+        1. Valida que los campos requeridos del frontend estén presentes.
+        2. Obtiene los datos completos de la reserva existente desde la BD.
+        3. Actualiza el número de teléfono secundario del cliente.
+        4. Construye un objeto `Reservation` con los datos actualizados.
+        5. Llama al servicio de reservas para validar la lógica de negocio (solapamiento) y persistir los cambios.
+        """
+        conexion = conn or Conexion()
+        reserva_service = ReservaService(conexion)
+        try:
+            # 1. Validar campos de entrada del frontend
+            required_fields = ['DIM_ReservationId', 'DIM_StartDate', 'DIM_EndDate', 'DIM_NHours', 'DIM_TotalAmount', 'DIM_Notes', 'DIM_SecondPhoneNumber']
+            if not all(field in _reservation for field in required_fields):
+                return 400, "Faltan campos requeridos para la actualización."
+
+            reservation_id = _reservation['DIM_ReservationId']
+
+            # 2. Obtener datos completos de la reserva existente
+            existing_reservation_data = reserva_service.get_reservation_by_id(reservation_id)
+            if not existing_reservation_data:
+                return 404, f"No se encontró una reserva con el ID {reservation_id}"
+
+            # 3. Actualizar el teléfono secundario de la persona
+            people_id = existing_reservation_data['DIM_PeopleId']
+            new_second_phone = _reservation['DIM_SecondPhoneNumber']
+            
+            if not people_services.update_second_phone(people_id, new_second_phone, conexion):
+                # Podríamos decidir si fallar o solo advertir. Por ahora, fallamos.
+                return 500, "Error al actualizar el número de teléfono secundario."
+
+            # 4. Construir el objeto Reservation con datos actualizados y existentes
+            dim_date_service = DIM_DATE(conexion) # Para obtener la fecha de modificación
+
+            new_reservation = Reservation(
+                DIM_ReservationId=reservation_id, # ID Original
+                DIM_PeopleId=people_id, # Obtenido de la reserva existente
+                DIM_StatusId=existing_reservation_data['DIM_StatusId'], # Obtenido de la reserva existente
+                DIM_DateId=dim_date_service.dateId, # Fecha de la modificación
+                DIM_ServiceOwnersId=existing_reservation_data['DIM_ServiceOwnersId'], # Obtenido de la reserva existente
+                DIM_EventAddress=existing_reservation_data['DIM_EventAddress'], # Obtenido de la reserva existente
+                DIM_StartDate=_reservation['DIM_StartDate'], # Dato nuevo del frontend
+                DIM_EndDate=_reservation['DIM_EndDate'], # Dato nuevo del frontend
+                DIM_NHours=_reservation['DIM_NHours'], # Dato nuevo del frontend
+                DIM_TotalAmount=_reservation['DIM_TotalAmount'], # Dato nuevo del frontend
+                DIM_Notes=_reservation['DIM_Notes'] # Dato nuevo del frontend
+            )
+
+            # 5. Validar y actualizar en la capa de servicio
+            success, message = reserva_service.update_and_validate_reservation(new_reservation)
+            if not success:
+                return 400, message # Error de negocio (ej. solapamiento)
+            
+            conexion.save_changes()
+            return 200, "Reserva actualizada exitosamente"
+
+        except ValueError as ve:
+            return 400, str(ve)
+        except Exception as e:
+            print(f"❌ Error al actualizar la reserva: {e}")
+            conexion.conn.rollback()
+            return  500, f"Error al actualizar la reserva: {e}"
+        finally:
+            if not conn:
+                conexion.close_conexion()
 
 # Para archivar una reservacion se obtendra el id en un diccionario en este formato
 

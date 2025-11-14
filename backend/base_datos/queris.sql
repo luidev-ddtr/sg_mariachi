@@ -80,3 +80,25 @@ SET
     `DIM_StatusId` = 'cw42055f-3ecb-9099'
 WHERE
     DIM_ReservationId = %s;
+
+
+
+--Consulta para obtener el id del status de una reservacion
+SELECT
+    st.DIM_StatusName
+FROM
+    DIM_Reservation AS rsv
+JOIN DIM_Status AS st
+ON
+    st.DIM_StatusId = rsv.DIM_StatusId
+WHERE DIM_ReservationId = %s;
+
+
+--Funcion para a
+
+    UPDATE
+        dim_people
+    SET
+        DIM_SecondPhoneNumber = %s
+    WHERE
+        DIM_PeopleId = %s;
