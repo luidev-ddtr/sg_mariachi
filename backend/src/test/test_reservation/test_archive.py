@@ -50,3 +50,13 @@ def test_archive_real_reservation(db_connection):
         db_connection.cursor.execute("UPDATE dim_reservation SET DIM_StatusId = %s WHERE DIM_ReservationId = %s", (original_status_id, id_modificate))
         db_connection.save_changes()
         print("✅ Estatus original restaurado.")
+
+
+def test_archive_reservation():
+    manejador = ReservationService()
+    conexion = Conexion()
+
+    id = "32ea5c29-0eef-56bb"
+    data = {'DIM_ReservationId': id}
+
+    resultado = manejador.archivate_reservation(data, conexion)

@@ -2,7 +2,6 @@
 
 // 1. Importar las funciones de la API
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
-//import { updateReservation } from '../../api/api_reservacion_update.js';
 
 // --- Funciones de formato ---
 const formatDate = (isoString) => {
@@ -186,41 +185,6 @@ const setupDropdownListeners = () => {
 };
 
 
-// --- Lógica del modal de confirmación (¡MODIFICADA!) ---
-const setupConfirmationModalListeners = () => {
-    const modal = document.getElementById('confirmArchiveModal');
-    if (!modal) return;
-
-    const btnCancel = modal.querySelector('#btn-cancel-archive');
-    const btnConfirm = modal.querySelector('#btn-confirm-archive');
-    const btnClose = modal.querySelector('.modal-close');
-
-    // (Tu función closeModal original)
-    const closeModal = () => {
-        modal.style.display = 'none';
-        btnConfirm.removeAttribute('data-id');
-        btnConfirm.textContent = 'Sí, Archivar';
-        btnConfirm.disabled = false;
-    };
-
-    btnCancel.addEventListener('click', closeModal);
-    btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            closeModal();
-        }
-    });
-
-    btnConfirm.addEventListener('click', async () => {
-        const reservationId = btnConfirm.dataset.id;
-        if (!reservationId) return;
-
-        console.log(`Iniciando archivado para ID: ${reservationId}`);
-
-    });
-};
-
-
 // --- (¡NUEVA FUNCIÓN! para manejar el botón de filtrar) ---
 const setupFilterListener = () => {
     // Usamos los IDs de tu HTML: "inputFecha", "selectEstado", "btnFiltrar"
@@ -275,8 +239,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 3. Activar el resto de listeners (estos ya los tenías)
     setupDropdownListeners(); 
-    setupConfirmationModalListeners();
     
     // 4. Activar el nuevo listener del filtro
     setupFilterListener(); 
+
+    // 5. ¡NUEVO! Escuchar el evento de archivado para recargar la tabla
+    window.addEventListener('reservationArchived', () => {
+        console.log('Evento "reservationArchived" detectado. Recargando tabla...');
+        // Obtenemos los valores actuales de los filtros para recargar con la vista actual
+        const currentDate = document.getElementById('inputFecha').value;
+        const currentStatus = document.getElementById('selectEstado').value;
+        
+        // Volvemos a renderizar la tabla
+        renderReservationsTable(currentDate, currentStatus);
+    });
 });
