@@ -91,3 +91,22 @@ export const GetContractInfo = async (id) => {
         throw new Error(errorMessage);
     }
 };
+// Esta e sla funcion que retornara toda la infromacion, de la api
+// se devuelve en este formato.
+// [
+//         {
+//         id: "j9h8g7f6e5d4c3b2a1", // otro hash de ejemplo
+//         contratante_nombre: "Ana López",
+//         evento_lugar: "Auditorio Principal hidalgo mexico",
+//         evento_dia: "20",
+//         evento_mes: "10",
+//         evento_anio: "2025",
+//         evento_horas: 4,
+//         evento_hora_inicio: "2025-10-20T16:00",
+//         evento_hora_fin: "2025-10-20T20:00",
+//         pago_total: 4000,
+//         contratante_domicilio: "Avenida Siempre Viva 456, Ciudad",
+//         contratante_telefono: "234567890",
+//         contratante_segundo_telefono: "876543210"
+//     }
+// ]
