@@ -19,7 +19,7 @@ def test_archive_real_reservation(db_connection):
     Utiliza un ID de una reserva real existente en la base de datos de pruebas.
     """
     service = ReservationService()
-    id_modificate = '2082dafd-cea8-5b9c'
+    id_modificate = '32ea5c29-0eef-56bb'
     archive_payload = {'DIM_ReservationId': id_modificate}
     archived_status_id = 'cw42055f-3ecb-9099' # ID para 'Archivado'
 
