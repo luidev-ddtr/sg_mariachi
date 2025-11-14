@@ -33,7 +33,7 @@ def read_reservations_with_date_filter(year: int, month: int, week: int, object_
         if not result:
             return []
         
-        print(result)
+        #print(result)
         #serializar las fehcas a formato js entendible
         data_format = []
         for data in result:
