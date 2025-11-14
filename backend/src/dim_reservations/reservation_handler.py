@@ -258,7 +258,7 @@ class ReservationService:
             
             # Convierte los objetos a diccionarios para la respuesta JSON
             #reservations_dict = [res.to_dict() for res in reservations_result]
-            print(reservations_result)
+            #print(reservations_result)
             
             return 200, reservations_result
         except Exception as e:
@@ -302,14 +302,14 @@ class ReservationService:
             # 1. Validar campos de entrada del frontend
             required_fields = ['DIM_ReservationId', 'DIM_StartDate', 'DIM_EndDate', 'DIM_NHours', 'DIM_TotalAmount', 'DIM_Notes', 'DIM_SecondPhoneNumber']
             if not all(field in _reservation for field in required_fields):
-                return 400, "Faltan campos requeridos para la actualización."
+                return 400, "Faltan campos requeridos para la actualización.", []
 
             reservation_id = _reservation['DIM_ReservationId']
 
             # 2. Obtener datos completos de la reserva existente
             existing_reservation_data = reserva_service.get_reservation_by_id(reservation_id)
             if not existing_reservation_data:
-                return 404, f"No se encontró una reserva con el ID {reservation_id}"
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", []
 
             # 3. Actualizar el teléfono secundario de la persona
             people_id = existing_reservation_data['DIM_PeopleId']
@@ -317,7 +317,7 @@ class ReservationService:
             
             if not people_services.update_second_phone(people_id, new_second_phone, conexion):
                 # Podríamos decidir si fallar o solo advertir. Por ahora, fallamos.
-                return 500, "Error al actualizar el número de teléfono secundario."
+                return 500, "Error al actualizar el número de teléfono secundario.", []
 
             # 4. Construir el objeto Reservation con datos actualizados y existentes
             dim_date_service = DIM_DATE(conexion) # Para obtener la fecha de modificación
@@ -339,17 +339,19 @@ class ReservationService:
             # 5. Validar y actualizar en la capa de servicio
             success, message = reserva_service.update_and_validate_reservation(new_reservation)
             if not success:
-                return 400, message # Error de negocio (ej. solapamiento)
+                return 400, message , []# Error de negocio (ej. solapamiento)
             
             conexion.save_changes()
-            return 200, "Reserva actualizada exitosamente"
+            
+            reservacion_update = reserva_service.get_reservation_by_id(reservation_id)
+            return 200, "Reserva actualizada exitosamente", [reservacion_update]
 
         except ValueError as ve:
-            return 400, str(ve)
+            return 400, str(ve), {}
         except Exception as e:
             print(f"❌ Error al actualizar la reserva: {e}")
             conexion.conn.rollback()
-            return  500, f"Error al actualizar la reserva: {e}"
+            return  500, f"Error al actualizar la reserva: {e}", []
         finally:
             if not conn:
                 conexion.close_conexion()

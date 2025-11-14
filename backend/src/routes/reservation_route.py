@@ -61,22 +61,21 @@ def read_reservation():
         return send_error(str(e), 500)
     
 
-@reservation_route.route('/update', methods=['PUT'])
+@reservation_route.route('/update', methods=['POST'])
 def update_reservation():
     """
-    Crea una nueva reserva en la tabla dim_people
+    Actualiza una reserva existente
     """
     try:
-        new_data = request.get_json()
-        status, message = reservation_options.update_reservation(new_data) #TODO Cambiar al nombre verdadero que se pornga
+        # Usar directamente el reservation_id de la URL
+        data_reservation = request.get_json()
+        status, message, new_data = reservation_options.update_reservation(data_reservation)
         
-        if status != 201:
-            print(message)
+        if status != 200:
             return send_error(message, status)
         
-        return send_success("Reserva creada exitosamente", None, 200)
+        return send_success("Reserva actualizada exitosamente", new_data, 200)
     except Exception as e:
-        print(e)
         return send_error(str(e), 500)
 
 

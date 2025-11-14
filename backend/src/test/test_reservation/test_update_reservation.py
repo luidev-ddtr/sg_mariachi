@@ -10,7 +10,7 @@ def test_update_reservation_success():
     """
     # --- ARRANGE ---
     service = ReservationService()
-    reservation_id_to_update = '034c9e2a-319d-57e2'
+    reservation_id_to_update = '32ea5c29-0eef-56bb'
 
     # Datos que enviaría el frontend para la actualización
     update_payload = {
@@ -25,7 +25,7 @@ def test_update_reservation_success():
 
     # --- ACT ---
     # El servicio gestionará su propia conexión
-    status, message = service.update_reservation(update_payload)
+    status, message, data = service.update_reservation(update_payload)
 
     # --- ASSERT (Parte 1): Verificar la respuesta del handler ---
     assert status == 200, f"Se esperaba estado 200 pero se obtuvo {status}: {message}"

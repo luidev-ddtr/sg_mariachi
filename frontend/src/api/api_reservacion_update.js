@@ -1,27 +1,45 @@
-// /api/api_reservacion_update.js
+import axiosInstance from "./axiosInstance";
 
 /**
- * SIMULACIÓN DE API: Cambia el estado de una reservación a "Archivado".
+ * API: Cambia el estado de una reservación a "Archivado".
  * @param {string} reservationId - El ID de la reservación a archivar.
  */
-export const ArchiveReservacion = async (reservationId) => {
-  
-  // 1. Imprimimos en consola para saber que se llamó
-  console.log(`Simulando archivado para el ID: ${reservationId}`);
+export const updateReservation = async (reservacion_data) => {
+    try {
+        // Validar que se proporcionó un ID de reservación
+        if (!reservacion_data) {
+            throw new Error("No se proporcionó datos para actualizar la reservación");
+        }
 
-  // 2. Simulamos un retraso de red (1 segundo)
-  await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`Enviando solicitud de actualización para el ID: ${reservacion_data}`);
 
-  // 3. Simulamos una respuesta de éxito
-  console.log("Simulación completada. La API 'ficticia' tuvo éxito.");
-  
-  return { 
-    success: true, 
-    message: "Reservación archivada (simulado)" 
-  };
-
-  // --- Para probar errores ---
-  // Si alguna vez quieres probar tu 'catch', borra el 'return' 
-  // de arriba y descomenta la siguiente línea:
-  // throw new Error("Error de simulación: El servidor no responde");
+        // Hacer la petición PUT/PATCH para actualizar el estado de la reservación
+        const response = await axiosInstance.post(`reservation/update/`, reservacion_data);
+        
+        console.log("Respuesta del servidor al actualizar reservación:", response.data);
+        
+        return response.data.body; 
+        
+    } catch (error) {
+        // Manejo mejorado de errores
+        let errorMessage = 'Error desconocido al actualizar la reservación';
+        
+        if (error.response) {
+            // El servidor respondió con un status fuera del rango 2xx
+            console.error("Error de respuesta:", error.response.data);
+            errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          `Error ${error.response.status}: ${error.response.statusText}`;
+        } else if (error.request) {
+            // La petición fue hecha pero no se recibió respuesta
+            console.error("Error de red:", error.request);
+            errorMessage = 'Error de conexión: No se pudo contactar al servidor';
+        } else {
+            // Algo pasó en la configuración de la petición
+            console.error("Error de configuración:", error.message);
+            errorMessage = error.message || 'Error al configurar la petición';
+        }
+        
+        throw new Error(errorMessage);
+    }
 };
