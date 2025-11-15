@@ -77,33 +77,61 @@ def update_reservation():
         return send_success("Reserva actualizada exitosamente", new_data, 200)
     except Exception as e:
         return send_error(str(e), 500)
+    
+@reservation_route.route('/get_contract', methods=['POST'])
+def get_contract():
+    """
+    Obtiene la informacion de una reservacion, para mostrarla como contrato
+    """
+    try:
+        print("Se creo el endpoint  y conecto")
+        return send_success("Reserva obtenida exitosamente", None, 200)
+        # Obtener la fecha del parámetro de consulta 'date'
+        reservation_id = request.get_json()
+        
+        # Validar que la fecha fue proporcionada
+        if not reservation_id:
+            return send_error("El parámetro 'reservation_id' es requerido", 400)
+        
+        status, data_reservations = reservation_options.get_contract_info(reservation_id) #TODO metodo aun no creado
+        
+        if status != 200:
+            return send_error("Error al obtener las reservas", status)
+        
+        return send_success("Reservas obtenidas exitosamente", data_reservations, 200)
+    
+    except Exception as e:
+        print(e)
+        return send_error(str(e), 500)
 
 
-@reservation_route.route('/archive', methods=['DELETE'])
+@reservation_route.route('/archive', methods=['POST'])
 def archive_reservation() -> tuple[Any]:
     """
     Archiva lógicamente una reserva existente utilizando el ID proporcionado en el cuerpo de la solicitud (JSON).
 
     Esta operación realiza un 'soft delete' de la reserva.
     """
-    try:
+    try: 
         # Se espera que el JSON contenga el ID de la reserva a archivar
         id_reservation = request.get_json()
+        print(id_reservation)
         
         # Llama a la función de lógica de negocio para archivar la reserva
         # Se asume que delete_reservation realiza el archivado lógico
         # TODO: Cambiar el nombre de la función en reservation_options a algo más claro como 'archive_reservation_by_id'
-        status, message = reservation_options.delete_reservation(id_reservation)
+
+        status, message, data  = reservation_options.archivate_reservation(id_reservation)
 
         # Si el estado de la operación no es de éxito (asumimos 200 OK para el éxito del archivo lógico)
-        if status not in [200, 204]:
+        if status != 200:
             print(message)
             # Devuelve el error con el status code devuelto por la lógica de negocio
             return send_error(message, status)
         
         # Operación exitosa
         # Un archivo o eliminación exitosa suele retornar 200 OK
-        return send_success("Reserva archivada exitosamente", None, 200)
+        return send_success("Reserva archivada exitosamente", data, 200)
     
     except Exception as e:
         # Manejo de errores internos del servidor (ej. error de conexión, JSON inválido, etc.)

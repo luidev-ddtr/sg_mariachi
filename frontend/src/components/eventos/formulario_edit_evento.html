@@ -4,15 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Editar Evento</title>
-    <link rel="stylesheet" href="../../styles/form_nvo_evento.css">
+   <!-- GOOGLE FONTS: ROBOTO (todos los pesos) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Enlace al archivo CSS -->
+    <link rel="stylesheet" href="../../styles/style_form_edit_evento.css">
 </head>
 <body>
+
+<div class="modal-wrapper">
+<!-- Panel de imagen -->
+<div class="image-section">
+<img src="/images/mariachis-bg.jpg" alt="Mariachis" />
+</div>
 
     <div class="form-container">
         <form id="event-form">
             <h2>Editar Evento</h2>
 
-                        <div class="form-row">
+                        
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
                     <input type="text" id="nombre" name="nombre" required readonly>
@@ -21,16 +30,16 @@
                     <label for="segundo_nombre">Segundo Nombre</label>
                     <input type="text" id="segundo_nombre" name="segundo_nombre" readonly>
                 </div>
-            </div>
+           
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="apellido_paterno">Apellido Paterno</label>
-                    <input type="text" id="apellido_paterno" name="apellido_paterno" required readonly>
+                    <input type="text" id="apellido_paterno" name="apellido_paterno">
                 </div>
                 <div class="form-group">
                     <label for="apellido_materno">Apellido Materno</label>
-                    <input type="text" id="apellido_materno" name="apellido_materno" readonly>
+                    <input type="text" id="apellido_materno" name="apellido_materno" > 
                 </div>
             </div>
 
@@ -46,13 +55,13 @@
             </div>
             
 
-                        <div class="form-row">
+                        
                 <div class="form-group">
                     <label for="fecha">Fecha</label>
                     <input type="date" id="fecha" name="fecha" required>
                 </div>
                 
-            </div>
+           
 
             <div class="form-row">
                 <div class="form-group">

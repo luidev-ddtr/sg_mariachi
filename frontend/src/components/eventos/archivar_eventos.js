@@ -17,7 +17,7 @@ const setupConfirmationModalListeners = () => {
     const btnCancel = modal.querySelector('#btn-cancel-archive');
     const btnConfirm = modal.querySelector('#btn-confirm-archive');
     const btnClose = modal.querySelector('.modal-close');
-
+ 
     // Función para cerrar el modal y resetear el botón
     const closeModal = () => {
         modal.style.display = 'none';
@@ -44,12 +44,11 @@ const setupConfirmationModalListeners = () => {
         try {
             btnConfirm.textContent = 'Archivando...';
             btnConfirm.disabled = true;
-
+            console.log("Informacion enviada en arvivar evento,js",reservationId);
             // --- CAMBIO 2: Usamos el nombre correcto de tu función ---
             const response = await ArchivarReservacion(reservationId);
             
-            console.log(`Respuesta de la API de archivado:`, response);
-
+            console.log(`Respuesta de la API de archiavdo:`, response.data.message);
             closeModal();
             
             // Disparamos un evento global para avisarle a
