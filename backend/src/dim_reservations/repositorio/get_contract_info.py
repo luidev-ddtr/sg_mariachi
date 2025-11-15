@@ -2,7 +2,31 @@ from src.utils.conexion import Conexion
 
 def get_contract_info(dim_reservation_id: str, conexion: Conexion) -> dict:
     """
-    Obtiene la informacion de una reservacion, para mostrarla como contrato
+    Obtiene la información completa de una reservación para su uso en la
+    generación del contrato. La función consulta información del cliente,
+    la fecha del evento, horarios, ubicación y datos de contacto asociados
+    a la reservación.
+
+    Parameters
+    ----------
+    dim_reservation_id : str
+        El ID de la reservación cuyo contrato se desea obtener.
+    conexion : Conexion
+        Objeto de conexión a la base de datos que contiene el cursor
+        utilizado para ejecutar la consulta SQL.
+
+    Returns
+    -------
+    dict or None
+        Un diccionario con la información del contrato si la consulta
+        fue exitosa. Si ocurre un error o no se encuentra la reservación,
+        se devuelve ``None``.
+
+    Raises
+    ------
+    Exception
+        Cualquier error durante la ejecución de la consulta SQL será
+        capturado y mostrado en consola, devolviendo ``None``.
     """
     query = """
     SELECT 
@@ -34,4 +58,4 @@ def get_contract_info(dim_reservation_id: str, conexion: Conexion) -> dict:
         return result
     except Exception as e:
         print(f"Error al obtener la informacion de la reservacion: {e}")
-        return None
+        return None #CORREGIR EL NONE PARA ENVIAR RESULTAMOS MAS COHERENTES, DESPUES

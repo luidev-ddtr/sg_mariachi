@@ -1,7 +1,6 @@
 // mostrar_reservaciones.js (VERSIÓN FINAL 100% FUNCIONAL)
 
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
-//import { updateReservation } from '../../api/api_reservacion_update.js';
 
 const formatDate = (isoString) => {
   if (!isoString) return 'N/A';
