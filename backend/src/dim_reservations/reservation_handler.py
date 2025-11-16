@@ -10,9 +10,9 @@ from src.dim_people.people_handler import PeopleHandler
 from src.dim_status.status import get_status_pending
 
 from src.dim_reservations.repositorio.read_reservations import read_reservations_with_date_filter
-from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
+#from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
 from src.dim_reservations.repositorio.archive_reservation import archive_reservation_by_id
-
+from src.dim_reservations.repositorio.get_contract_info import get_contract_info
 
 
 
@@ -366,49 +366,124 @@ class ReservationService:
 # se debe de comprobar que el estatus de la reservacion sea completo o cancelado
 # ya que por razones de seguridad 
 
-    def archivate_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[str, int]:
+    def archivate_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str, list | None]:
         conexion = conn or Conexion()
         reserva_service = ReservaService(conexion)
         try:
             # 1. Validar que el ID de la reservación venga en el diccionario
             reservation_id = _reservation.get('DIM_ReservationId')
             if not reservation_id:
-                return 400, "Falta el ID de la reservación (DIM_ReservationId)."
+                return 400, "Falta el ID de la reservación (DIM_ReservationId).", None
 
             # 2. Obtener la reservación para verificar su estatus
             existing_reservation = reserva_service.get_reservation_by_id(reservation_id)
             if not existing_reservation:
-                return 404, f"No se encontró una reserva con el ID {reservation_id}"
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", None
 
             # 3. Verificar si el estatus es 'completado' o 'cancelado'
             current_status_id = existing_reservation['DIM_StatusId']
             allowed_statuses = [
                 'd9664265-818c-52dc',  # ID de completada
-                'c842035f-aecb-5099'   # ID de cancelada
+                'c842035f-aecb-5099',  # ID de cancelada
+                '624a7243-52a7-5e88'   # ID de archivada (para evitar errores si se intenta archivar de nuevo)
             ]
 
             if current_status_id not in allowed_statuses:
-                return 400, "La reservación no puede ser archivada porque no está en estatus 'Completada' o 'Cancelada'."
+                return 400, "La reservación no puede ser archivada porque no está en estatus 'Completada' o 'Cancelada'.", None
 
             # 4. Llamar a la función del repositorio para archivar
             success = archive_reservation_by_id(reservation_id, conexion)
 
             if success:
-                # La función archive_reservation_by_id ya hace commit, así que no es necesario aquí.
-                return 200, "Reservación archivada exitosamente."
+                # Después de archivar, obtenemos los datos actualizados
+                updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
+                if not updated_reservation:
+                    # Esto sería raro, pero es un buen control de seguridad
+                    return 404, "La reservación fue archivada, pero no se pudo recuperar la información actualizada.", None
+                
+                return 200, "Reservación archivada exitosamente.", [updated_reservation]
             else:
                 # Si la función de archivado falla, devolvemos un error de servidor.
-                return 500, "Ocurrió un error al intentar archivar la reservación."
+                return 500, "Ocurrió un error al intentar archivar la reservación.", None
 
         except Exception as e:
             print(f"❌ Error en el handler al archivar la reserva: {e}")
             # No hacemos rollback aquí porque la función de archivado maneja su propia transacción.
-            return 500, f"Error interno del servidor: {e}"
+            return 500, f"Error interno del servidor: {e}", None
         finally:
             # Solo cierra la conexión si fue creada dentro de este método.
             if not conn:
                 conexion.close_conexion()
 
+#Para obtener la información de una reserva se obtendra el id en un diccionario en este formato
+# diccionario = {
+#               contratante_nombre
+#               evento_lugar
+#               evento_dia
+#               evento_mes
+#               evento_anio
+#               evento_horas
+#               evento_hora_inicio
+#               evento_hora_fin
+#               pago_total
+#               pago_anticipo
+#               pago_restante
+#               contratante_domicilio
+#               contratante_telefono
+#               contratante_segundo_telefono
+#              }
 
+    def get_contracto_info(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str, dict | None]:
+        """
+        Obtiene la información detallada de una reservación por su ID.
 
-        
+        Flujo:
+        1. Valida que el ID de la reservación esté presente en la solicitud.
+        2. Llama al servicio para obtener los datos de la reservación desde la base de datos.
+        3. Devuelve los datos encontrados o un error si no existe.
+        4. Formatea los datos al formato requerido por el contrato.
+        """
+        conexion = conn or Conexion()
+        try:
+            reservation_id = _reservation.get('DIM_ReservationId')
+            if not reservation_id:
+                return 400, "Falta el ID de la reservación (DIM_ReservationId).", None
+
+            # Llama directamente a la función del repositorio que tiene el query específico
+            contract_data = get_contract_info(reservation_id, conexion)
+
+            if not contract_data:
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", None
+
+            # Procesar y formatear los datos
+            evento_fecha = contract_data['evento_fecha']
+            pago_total = float(contract_data['pago_total'])
+            
+            # Asumimos un 50% de anticipo por ahora. Esto se puede ajustar.
+            pago_anticipo = pago_total / 2
+            pago_restante = pago_total - pago_anticipo
+
+            formatted_contract = {
+                "contratante_nombre": contract_data['contratante_nombre'],
+                "evento_lugar": contract_data['evento_locacion'],
+                "evento_dia": evento_fecha.day,
+                "evento_mes": evento_fecha.month,
+                "evento_anio": evento_fecha.year,
+                "evento_horas": contract_data['evento_horas'],
+                "evento_hora_inicio": contract_data['evento_hora_inicio'].strftime('%H:%M'),
+                "evento_hora_fin": contract_data['evento_hora_fin'].strftime('%H:%M'),
+                "pago_total": pago_total,
+                "pago_anticipo": pago_anticipo,
+                "pago_restante": pago_restante,
+                "contratante_domicilio": contract_data['contratante_domicilio'],
+                "contratante_telefono": contract_data['contratante_telefono'],
+                "contratante_segundo_telefono": contract_data['contratante_segundo_telefono']
+            }
+
+            return 200, "Información del contrato obtenida exitosamente.", formatted_contract
+        except Exception as e:
+            print(f"❌ Error en handler al obtener información del contrato: {e}")
+            return 500, f"Error interno del servidor: {e}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()
