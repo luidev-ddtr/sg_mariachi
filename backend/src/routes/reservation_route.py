@@ -84,8 +84,8 @@ def get_contract():
     Obtiene la informacion de una reservacion, para mostrarla como contrato
     """
     try:
-        print("Se creo el endpoint  y conecto")
-        return send_success("Reserva obtenida exitosamente", None, 200)
+        #print("Se creo el endpoint  y conecto")
+        #return send_success("Reserva obtenida exitosamente", None, 200)
         # Obtener la fecha del parámetro de consulta 'date'
         reservation_id = request.get_json()
         
@@ -93,12 +93,12 @@ def get_contract():
         if not reservation_id:
             return send_error("El parámetro 'reservation_id' es requerido", 400)
         
-        status, data_reservations = reservation_options.get_contract_info(reservation_id) #TODO metodo aun no creado
+        status, message, data_reservations = reservation_options.get_contracto_info(reservation_id) # metodo aun no creado
         
         if status != 200:
-            return send_error("Error al obtener las reservas", status)
+            return send_error(message, status)
         
-        return send_success("Reservas obtenidas exitosamente", data_reservations, 200)
+        return send_success(message, data_reservations, status)
     
     except Exception as e:
         print(e)

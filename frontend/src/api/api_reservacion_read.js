@@ -61,10 +61,12 @@ export const GetContractInfo = async (id) => {
 
         console.log("ID enviado a api/reservation/get_contract:", id);
 
+        const data = { 'DIM_ReservationId': id }
+
         // Hacer la petición POST enviando el ID como payload
         const response = await axiosInstance.post(
             'reservation/get_contract',
-            { id }   // <- el backend lo recibe como JSON
+            data   // <- el backend lo recibe como JSON
         );
 
         console.log("Respuesta del servidor al obtener contrato:", response.data);
