@@ -19,7 +19,7 @@ def test_archive_real_reservation(db_connection):
     Utiliza un ID de una reserva real existente en la base de datos de pruebas.
     """
     service = ReservationService()
-    id_modificate = '32ea5c29-0eef-56bb'
+    id_modificate = '2082dafd-cea8-5b9c'  # ID de una reserva real en la BD de pruebas
     archive_payload = {'DIM_ReservationId': id_modificate}
     archived_status_id = 'cw42055f-3ecb-9099' # ID para 'Archivado'
 
@@ -34,14 +34,20 @@ def test_archive_real_reservation(db_connection):
     print(f"ℹ️ Estatus original de la reserva '{id_modificate}': {original_status_id}")
 
     try:
-        status, message = service.archivate_reservation(archive_payload, conn=db_connection)
+        # ACT: Llamamos a la función a probar
+        status, message, data = service.archivate_reservation(archive_payload, conn=db_connection)
 
+        # ASSERT: Verificamos la respuesta del handler
         assert status == 200, f"Se esperaba estado 200 pero se obtuvo {status}: {message}"
+        assert isinstance(data, list) and len(data) == 1, "La respuesta no contiene la lista con la reservación actualizada."
+        updated_reservation = data[0]
+        assert updated_reservation['DIM_ReservationId'] == id_modificate
+        assert updated_reservation['DIM_StatusId'] == archived_status_id, "El estatus en los datos devueltos no es el de 'Archivado'."
         
-        # Verificar directamente en la BD que el estatus cambió
+        # ASSERT: Verificar directamente en la BD que el estatus cambió
         db_connection.cursor.execute("SELECT DIM_StatusId FROM dim_reservation WHERE DIM_ReservationId = %s", (id_modificate,))
         result = db_connection.cursor.fetchone()
-        assert result['DIM_StatusId'] == archived_status_id, "El estatus en la BD no fue actualizado a 'Archivado'."
+        assert result['DIM_StatusId'] == archived_status_id, "El estatus en la BD no fue actualizado correctamente a 'Archivado'."
         print("✅ Test de archivado exitoso: La reserva fue archivada y verificada en la BD.")
 
     finally:
@@ -52,11 +58,11 @@ def test_archive_real_reservation(db_connection):
         print("✅ Estatus original restaurado.")
 
 
-def test_archive_reservation():
-    manejador = ReservationService()
-    conexion = Conexion()
+# def test_archive_reservation():
+#     manejador = ReservationService()
+#     conexion = Conexion()
 
-    id = "32ea5c29-0eef-56bb"
-    data = {'DIM_ReservationId': id}
+#     id = "32ea5c29-0eef-56bb"
+#     data = {'DIM_ReservationId': id}
 
-    resultado = manejador.archivate_reservation(data, conexion)
+#     resultado = manejador.archivate_reservation(data, conexion)
