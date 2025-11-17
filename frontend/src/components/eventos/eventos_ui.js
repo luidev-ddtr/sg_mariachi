@@ -71,7 +71,29 @@ const setupDropdownListeners = () => {
 
 // === Resto de funciones (sin cambios) ===
 const setupConfirmationModalListeners = () => { /* ... tu código original ... */ };
-const setupFilterListener = () => { /* ... tu código original ... */ };
+const setupFilterListener = () => { 
+    // 1. Obtenemos los elementos del DOM (IDs de tu HTML)
+  const filterButton = document.getElementById('btnFiltrar');
+  const dateInput = document.getElementById('inputFecha');
+  const statusSelect = document.getElementById('selectEstado');
+
+  // 2. Nos aseguramos que todo exista antes de agregar el listener
+  if (filterButton && dateInput && statusSelect) {
+    
+    filterButton.addEventListener('click', (event) => {
+      event.preventDefault(); // Previene que la página se recargue
+
+      // 3. Obtenemos los valores ACTUALES de los filtros
+      const fecha = dateInput.value;
+      const estado = statusSelect.value;
+
+      // 4. Usamos la función importada para repintar la tabla
+      renderReservationsTable(fecha, estado);
+    });
+  } else {
+    console.error("No se encontraron los elementos del filtro. Revisa los IDs.");
+  }
+};
 
 // === INICIO DE LA APLICACIÓN ===
 document.addEventListener('DOMContentLoaded', () => {
