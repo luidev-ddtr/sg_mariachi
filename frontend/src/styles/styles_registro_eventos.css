@@ -139,8 +139,8 @@ table {
 }
 
 th, td {
-  padding: 25px 10px;
-  text-align: left;
+  padding: 15px 5px;
+  text-align: center;
   border-bottom: 1px solid #eee;
 }
 
@@ -235,6 +235,91 @@ button.acciones:hover {
   width: 30px;
   height: 30px;
 }
+
+/*estilos del modal archivar*/
+.modal-dialog{
+  width: 600px; 
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.50);
+  padding: 10px;
+  overflow: hidden;
+  position: fixed; /*Posición del modal*/
+  top: 30%;
+  left: 30%;
+  z-index: 9999;
+
+}
+.modal-header {
+  color: #000000;                               /* Texto blanco */
+  padding: 15px 20px;                        /* Espaciado interno */
+  display: flex;                              /* Alineación flex */
+  justify-content: space-between;            /* Título a la izq., botón a la der. */
+  align-items: center;                       /* Alinea verticalmente */
+}
+.modal-header h4 {
+  margin: 0;                                 /* Quita espacio extra del título */
+  font-size: 22px;                           /* Tamaño del título */
+  font-weight: 600;                          /* Negrita moderada */
+}
+.modal-close {
+  font-size: 35px;                           /* Tamaño del icono "X" */
+  cursor: pointer;                           /* Cambia el cursor a mano */
+  padding: 0 8px;                            /* Espacio alrededor */
+  transition: 0.2s;                           /* Animación al pasar el mouse */
+}
+
+.modal-close:hover {
+  color: #646464;                            /* Se pone negro suave al pasar encima */
+}
+/*body del modal archivar*/
+.modal-body {
+  padding: 10px;                             /* Espacio interno */
+  font-size: 20px;                           /* Tamaño del texto */
+  color: #22262e;                            /* Texto gris oscuro */
+  text-align: center;                        /* Centra el texto */
+}
+.modal-footer {
+  padding: 16px 20px;                        /* Espaciado interno */
+  /*background: #f3f4f6;   */                    /* Fondo gris claro */
+  display: flex;                              /* Activa flexbox */
+  justify-content: center;                 /* Alinea botones a la derecha */
+  gap: 30px;                                 /* Espacio entre botones */
+}
+/*css de los botones del modal archivar*/
+.modal-footer .btn {
+  padding: 8px 14px;                         /* Tamaño del botón */
+  border-radius: 6px;                        /* Bordes redondeados */
+  font-size: 22px;                           /* Tamaño de texto */
+  font-weight: 500;                          /* Semi bold */
+  cursor: pointer;                           /* Cursor en forma de mano */
+  border: none;                              /* Sin borde */
+  transition: 0.25s ease;                    /* Animación suave */
+}
+/*estilo del boton cancelar*/
+.btn-secondary {
+  background: #d9dadd;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+/*estilo del boton archivar*/
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+
+
+
+
 /*  Responsividad  */
 @media (max-width: 900px) {
   .sidebar {
