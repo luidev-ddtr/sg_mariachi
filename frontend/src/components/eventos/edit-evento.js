@@ -1,250 +1,184 @@
-/**
- * @file edit-evento.js
- * @description ¡Versión CONECTADA A LA API REAL!
- * Carga datos desde GetReservacionPorId y descompone el 'fullname'.
- * Utiliza updateReservation para guardar cambios.
- * (Versión sin campos de localidad)
- */
+import { updateReservation } from '../../api/api_reservacion_update.js';
+import { GetContractInfo } from '../../api/api_reservacion_read.js'; 
 
-// --- PASO 1: IMPORTACIONES (ACTUALIZADO) ---
-import { 
-    GetReservacionPorId
-} from '../../api/api_reservacion_read.js'; // (Ajusta esta ruta)
-
-// ¡NUEVO! Importamos la función de actualización
-import { 
-    updateReservation 
-} from '../../api/api_reservacion_update.js'; // (Ajusta esta ruta si es necesario)
-
-
-// --- ¡NUEVA FUNCIÓN! ---
-function descomponerNombre(fullname) {
-    // ... (Esta función auxiliar se mantiene igual que la tuya)
-    const nombreLimpio = (fullname || '').replace(/_\d+/, '').trim();
-    const partes = nombreLimpio.split(' ');
-    let nombre = "", segundoNombre = "", apellidoP = "", apellidoM = "";
-
-    if (partes.length === 4) {
-        nombre = partes[0];
-        segundoNombre = partes[1];
-        apellidoP = partes[2];
-        apellidoM = partes[3];
-    } else if (partes.length === 3) {
-        nombre = partes[0];
-        segundoNombre = ""; 
-        apellidoP = partes[1];
-        apellidoM = partes[2];
-    } else if (partes.length === 2) {
-        nombre = partes[0];
-        segundoNombre = "";
-        apellidoP = partes[1];
-        apellidoM = "";
-    } else {
-        nombre = partes[0] || '';
-    }
-    return { nombre, segundoNombre, apellidoP, apellidoM };
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // --- PASO 2: SELECCIÓN DE ELEMENTOS DEL DOM ---
-    // (Esta sección se mantiene igual que la tuya)
-    const eventForm = document.getElementById('event-form');
-    const messageEl = document.getElementById('form-message');
-    const DIM_ServiceOwnersId = 'f07e69a4-4e80-527e';
-    const DIM_PeopleId = 'ce037ec9-32c2-58f1';
+document.addEventListener('DOMContentLoaded', async () => {
+    const form = document.getElementById('event-form');
+    const horaInicioInput = document.getElementById('hora_inicio');
+    const horaFinalInput = document.getElementById('hora_final');
     
-    const nombreEl = document.getElementById('nombre');
-    const segundoNombreEl = document.getElementById('segundo_nombre');
-    const apellidoPaternoEl = document.getElementById('apellido_paterno');
-    const apellidoMaternoEl = document.getElementById('apellido_materno');
-    const telefonoEl = document.getElementById('telefono');
-    const telefonoSecundarioEl = document.getElementById('telefono_secundario');
-    const fechaEl = document.getElementById('fecha');
-    const horaInicioEl = document.getElementById('hora_inicio');
-    const horaFinalEl = document.getElementById('hora_final');
-    const descripcionEl = document.getElementById('descripcion');
-    const totalHorasEl = document.getElementById('total_horas');
-    const montoEl = document.getElementById('dim_totalamount');
-    
-    // Esta variable guardará el ID de la URL
-    let eventoId = null;
+    // 1. OBTENER ID DE LA URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
 
-    if (!eventForm) {
-        console.error("Formulario no encontrado");
+    if (!eventId) {
+        console.error("ID no encontrado en la URL");
+        alert("Error crítico: No hay ID de evento para editar.");
         return;
     }
 
-    // --- PASO 3: LÓGICA DE CARGA DE DATOS ---
-    // (Esta sección se mantiene igual que la tuya)
-    
-    async function cargarDatosDelEvento() {
-        const urlParams = new URLSearchParams(window.location.search);
-        eventoId = urlParams.get('id'); // Asignamos el ID a la variable global
+    // 2. CARGAR DATOS
+    await cargarDatosEnFormulario(eventId);
 
-        if (!eventoId) {
-            showFormMessage('Error: No se proporcionó un ID de evento.', 'error');
+    // 3. ARREGLO DEL MODAL (STOP PROPAGATION)
+    const stopAndCalculate = (e) => {
+        e.stopPropagation(); 
+        calcularTotalHoras();
+    };
+
+    // Listeners corregidos
+    horaInicioInput.addEventListener('change', stopAndCalculate);
+    horaInicioInput.addEventListener('click', (e) => e.stopPropagation()); 
+
+    horaFinalInput.addEventListener('change', stopAndCalculate);
+    horaFinalInput.addEventListener('click', (e) => e.stopPropagation());
+
+    // 4. ENVIAR CAMBIOS (UPDATE)
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        e.stopPropagation(); 
+
+        // --- PREPARACIÓN DE DATOS ---
+        const nombreInput = document.getElementById('nombre').value.trim();
+        const partesNombre = nombreInput.split(/\s+/);
+        const primerNombre = partesNombre[0] || "";
+        const segundoNombre = partesNombre.slice(1).join(" ") || ""; 
+
+        const paterno = document.getElementById('apellido_paterno').value;
+        const materno = document.getElementById('apellido_materno').value;
+
+        const fecha = document.getElementById('fecha').value; 
+        const horaInicio = document.getElementById('hora_inicio').value; 
+        const horaFin = document.getElementById('hora_final').value;
+        const totalHoras = document.getElementById('total_horas').value.split(':')[0];
+
+        // --- OBJETO SQL ---
+        const datosParaEnviar = {
+            DIM_ReservationId: eventId,
+            
+            DIM_Name: primerNombre,
+            DIM_SecondName: segundoNombre,
+            DIM_LastName: paterno,
+            DIM_SecondLastName: materno,
+            DIM_PhoneNumber: document.getElementById('telefono').value,
+            DIM_SecondPhoneNumber: document.getElementById('telefono_secundario').value,
+
+            DIM_StartDate: `${fecha} ${horaInicio}:00`,
+            DIM_EndDate: `${fecha} ${horaFin}:00`,
+            
+            DIM_EventAddress: document.getElementById('descripcion').value,
+            DIM_Notes: document.getElementById('descripcion').value,
+            
+            DIM_TotalAmount: document.getElementById('dim_totalamount').value,
+            DIM_NHours: parseInt(totalHoras) || 0
+        };
+
+        try {
+            console.log("Enviando actualización...", datosParaEnviar);
+            await updateReservation(datosParaEnviar);
+            
+            alert("¡Evento actualizado correctamente!");
+            
+            // --- CIERRE DEL MODAL ---
+            // Regresa a la pantalla anterior automáticamente
+            window.history.back(); 
+            
+        } catch (error) {
+            console.error(error);
+            alert("Error: " + (error.message || "No se pudo actualizar"));
+        }
+    });
+});
+
+// --- FUNCIONES AUXILIARES ---
+
+async function cargarDatosEnFormulario(id) {
+    try {
+        const respuesta = await GetContractInfo(id);
+        const datos = Array.isArray(respuesta) ? respuesta[0] : respuesta;
+
+        if (!datos) {
+            alert("No se encontraron datos para este evento.");
             return;
         }
 
-        try {
-            showFormMessage('Cargando datos del evento...', 'info');
-            const evento = await GetReservacionPorId(eventoId); 
-
-            if (evento) {
-                poblarFormulario(evento);
-                showFormMessage('Datos cargados.', 'success');
-            } else {
-                showFormMessage(`Error: No se encontró el evento con ID: ${eventoId}.`, 'error');
-            }
-        } catch (error) {
-            console.error('Error al cargar datos:', error);
-            showFormMessage(`Error al cargar datos: ${error.message}`, 'error');
-        }
-    }
-
-    /**
-     * Rellena todos los campos del formulario.
-     * (Esta función se mantiene igual que la tuya)
-     */
-    function poblarFormulario(evento) {
-        
-        // --- Tarea 1: Descomponer el nombre ---
-        const { nombre, segundoNombre, apellidoP, apellidoM } = descomponerNombre(evento.DIM_fullname);
-
-        nombreEl.value = nombre;
-        segundoNombreEl.value = segundoNombre;
-        apellidoPaternoEl.value = apellidoP;
-        apellidoMaternoEl.value = apellidoM;
-
-        // --- Poblar campos que sí vienen ---
-        telefonoEl.value = evento.DIM_PhoneNumber || '';
-        montoEl.value = evento.DIM_TotalAmount || '';
-        descripcionEl.value = evento.DIM_Notes || '';
-        telefonoSecundarioEl.value = ''; // Este campo no viene en la API
-        
-        // --- Tarea 2: Manejar Localidad (Mostrar Mensaje) ---
-        const contenedorTelefono = telefonoSecundarioEl.closest('.form-group');
-        if (contenedorTelefono && !document.getElementById('localidad-warning')) {
-            const warningMsg = document.createElement('p');
-            warningMsg.id = 'localidad-warning';
-            warningMsg.textContent = 'La localidad del evento no se puede modificar.';
-            warningMsg.style.color = '#777';
-            warningMsg.style.fontSize = '0.9em';
-            warningMsg.style.marginTop = '5px';
-            contenedorTelefono.parentNode.insertBefore(warningMsg, contenedorTelefono.nextSibling);
-        }
-
-        // --- Formateo de Fechas y Horas ---
-        try {
-            const fechaInicio = new Date(evento.DIM_StartDate);
-            fechaEl.value = fechaInicio.toISOString().split('T')[0]; 
-            horaInicioEl.value = fechaInicio.toTimeString().split(' ')[0].substring(0, 5); 
-            
-            const fechaFin = new Date(evento.DIM_EndDate);
-            horaFinalEl.value = fechaFin.toTimeString().split(' ')[0].substring(0, 5);
-        } catch (e) {
-            console.error("Error al formatear fechas", e);
-            showFormMessage("Error al interpretar fechas del evento.", "error");
-        }
-        
-        calcularTotalHoras();
-    }
-
-    // --- PASO 4: LÓGICA DE ACTUALIZACIÓN (¡CONECTADA!) ---
-    /**
-     * ¡FUNCIÓN ACTUALIZADA!
-     * Llama a la API 'updateReservation' en lugar de simular.
-     */
-    async function handleSubmit(event) {
-        event.preventDefault(); 
-        
-        // ¡IMPORTANTE! 
-        // Añadimos el 'eventoId' (que obtuvimos de la URL) al objeto
-        // que enviaremos a la API. Tu backend lo necesitará.
-        // Asegúrate de que el backend espera el ID como "id".
-        const datosActualizados = {
-            DIM_ReservationId: eventoId, // <-- ¡NOMBRE CORREGIDO!
-            DIM_StartDate: `${fechaEl.value} ${horaInicioEl.value}:00`,
-            DIM_EndDate: `${fechaEl.value} ${horaFinalEl.value}:00`,
-            DIM_NHours: calcularNHours(),
-            DIM_TotalAmount: parseFloat(montoEl.value) || 0,
-            DIM_Notes: descripcionEl.value.trim(),
-            DIM_SecondPhoneNumber: telefonoSecundarioEl.value.trim()
-            // DIM_ServiceOwnersId -> ELIMINADO
-            // DIM_PeopleId -> ELIMINADO
-        };
-
-        const submitButton = eventForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        showFormMessage('Actualizando evento...', 'info');
-
-        try {
-            // ¡Llamada real a la API!
-            console.log ("datos actualizados",datosActualizados);
-            const resultado = await updateReservation(datosActualizados);
-            
-            console.log("Respuesta del servidor (updateReservation):", resultado);
-            showFormMessage('¡Evento actualizado exitosamente!', 'success');
-            
-            // Opcional: puedes redirigir al usuario después de un éxito
-            // setTimeout(() => {
-            //     window.location.href = 'pagina_anterior.html'; // Redirigir
-            // }, 1500);
-
-        } catch (error) {
-            // El error.message vendrá formateado desde tu archivo de API
-            console.error('Error al actualizar el evento:', error);
-            showFormMessage(`Error al actualizar: ${error.message}`, 'error');
-        
-        } finally {
-            // Esto se ejecuta siempre, ya sea éxito o error,
-            // para reactivar el botón.
-            submitButton.disabled = false;
-        }
-    }
-
-    // --- PASO 5: FUNCIONES AUXILIARES (Sin cambios) ---
-    // (Esta sección se mantiene igual que la tuya)
-    
-    function showFormMessage(message, type) {
-        messageEl.textContent = message;
-        messageEl.className = type;
-    }
-
-    function calcularTotalHoras() {
-        const inicio = horaInicioEl.value;
-        const final = horaFinalEl.value;
-        if (inicio && final) {
-            const [inicioH, inicioM] = inicio.split(':').map(Number);
-            const totalMinInicio = (inicioH * 60) + inicioM;
-            
-            const [finalH, finalM] = final.split(':').map(Number);
-            const totalMinFinal = (finalH * 60) + finalM;
-
-            let diffMinutos = totalMinFinal - totalMinInicio;
-            if (diffMinutos < 0) { diffMinutos += 24 * 60; }
-
-            const horas = Math.floor(diffMinutos / 60);
-            const minutos = diffMinutos % 60;
-            totalHorasEl.value = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+        // NOMBRES
+        if (datos.DIM_Name) {
+             document.getElementById('nombre').value = (datos.DIM_Name + " " + (datos.DIM_SecondName || "")).trim();
+             document.getElementById('apellido_paterno').value = datos.DIM_LastName || "";
+             document.getElementById('apellido_materno').value = datos.DIM_SecondLastName || "";
         } else {
-            totalHorasEl.value = "00:00";
+            const nombreCompleto = datos.contratante_nombre || datos.nombre || '';
+            if (nombreCompleto) {
+                const partes = nombreCompleto.trim().split(/\s+/); 
+                if (partes.length > 0) document.getElementById('nombre').value = partes[0];
+                if (partes.length > 1) document.getElementById('apellido_paterno').value = partes[1];
+                if (partes.length > 2) document.getElementById('apellido_materno').value = partes.slice(2).join(' '); 
+            }
         }
+
+        document.getElementById('telefono').value = datos.DIM_PhoneNumber || datos.contratante_telefono || "";
+        document.getElementById('telefono_secundario').value = datos.DIM_SecondPhoneNumber || datos.contratante_segundo_telefono || "";
+
+        // FECHA
+        let fechaParaInput = "";
+        if (datos.DIM_StartDate) {
+            const separador = datos.DIM_StartDate.includes('T') ? 'T' : ' ';
+            fechaParaInput = datos.DIM_StartDate.split(separador)[0];
+        } 
+        else if (datos.DIM_DateId) {
+            const fechaStr = String(datos.DIM_DateId);
+            if (fechaStr.length === 8) {
+                const y = fechaStr.substring(0, 4);
+                const m = fechaStr.substring(4, 6);
+                const d = fechaStr.substring(6, 8);
+                fechaParaInput = `${y}-${m}-${d}`;
+            }
+        }
+        else if (datos.evento_anio && datos.evento_mes && datos.evento_dia) {
+            fechaParaInput = `${datos.evento_anio}-${String(datos.evento_mes).padStart(2,'0')}-${String(datos.evento_dia).padStart(2,'0')}`;
+        }
+        document.getElementById('fecha').value = fechaParaInput;
+
+        // HORAS
+        let horaInicioStr = datos.DIM_StartDate || datos.evento_hora_inicio || "";
+        let horaFinStr = datos.DIM_EndDate || datos.evento_hora_fin || "";
+
+        document.getElementById('hora_inicio').value = extraerHora(horaInicioStr);
+        document.getElementById('hora_final').value = extraerHora(horaFinStr);
+
+        // OTROS
+        document.getElementById('descripcion').value = datos.DIM_EventAddress || datos.evento_lugar || "";
+        document.getElementById('dim_totalamount').value = datos.DIM_TotalAmount || datos.pago_total || 0;
+
+        calcularTotalHoras();
+
+    } catch (error) {
+        console.error("Error cargando:", error);
     }
+}
 
-    function calcularNHours() {
-        const [horas, minutos] = totalHorasEl.value.split(':').map(Number);
-        return horas + (minutos / 60);
+function extraerHora(valor) {
+    if (!valor) return '';
+    if (valor.includes(' ')) return valor.split(' ')[1].substring(0, 5);
+    if (valor.includes('T')) return valor.split('T')[1].substring(0, 5);
+    if (valor.includes(':')) return valor.substring(0, 5);
+    return valor;
+}
+
+function calcularTotalHoras() {
+    const inicio = document.getElementById('hora_inicio').value;
+    const fin = document.getElementById('hora_final').value;
+
+    if (inicio && fin) {
+        const dateInicio = new Date(`2000-01-01T${inicio}:00`);
+        const dateFin = new Date(`2000-01-01T${fin}:00`);
+        let diff = dateFin - dateInicio;
+        if (diff < 0) diff += 24 * 60 * 60 * 1000;
+
+        const horas = Math.floor(diff / 1000 / 60 / 60);
+        const minutos = Math.floor((diff / 1000 / 60) % 60);
+
+        document.getElementById('total_horas').value = 
+            `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
     }
-
-    // --- PASO 6: INICIALIZACIÓN ---
-    // (Esta sección se mantiene igual que la tuya)
-    horaInicioEl.addEventListener('change', calcularTotalHoras);
-    horaFinalEl.addEventListener('change', calcularTotalHoras);
-    eventForm.addEventListener('submit', handleSubmit);
-    
-    cargarDatosDelEvento();
-
-});
+}
