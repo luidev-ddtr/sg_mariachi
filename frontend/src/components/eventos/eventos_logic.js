@@ -51,19 +51,16 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
         <td>${formatCurrency(item.DIM_TotalAmount)}</td>
         <td><span class="status ${item.DIM_StatusName?.toLowerCase() || 'pendiente'}">${item.DIM_StatusName || 'Pendiente'}</span></td>
         <td>
-          <div class="dropdown">
-            <button class="btn-actions js-dropdown-toggle" type="button">
-              <span class="material-symbols-outlined">more_horiz</span>
-            </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="#">Ver detalles</a>
-              <a class="dropdown-item js-archive-trigger" href="#" data-id="${item.DIM_ReservationId}">Archivar</a>
-              <a class="dropdown-item" href="#">Pagar</a>
-              <a class="dropdown-item js-edit-trigger" href="#" data-id="${item.DIM_ReservationId}">Actualizar</a>
-            </div>
-          </div>
+          <!-- Convertido a un select -->
+          <select class="btn-actions js-action-select" data-id="${item.DIM_ReservationId}">
+            <option value="" selected disabled><center></center></option>
+            <option value="details">Ver detalles</option>
+            <option value="archive">Archivar</option>
+            <option value="pay">Pagar</option>
+            <option value="edit">Actualizar</option>
+          </select>
         </td>
-      </tr>
+      </tr> 
     `).join('');
   } catch (error) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
