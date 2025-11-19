@@ -97,15 +97,29 @@ const setupFilterListener = () => {
 
 // === INICIO DE LA APLICACIÓN ===
 document.addEventListener('DOMContentLoaded', () => {
-  const dateInput = document.getElementById('inputFecha');
-  const today = new Date().toISOString().split('T')[0];
-  if (dateInput) dateInput.value = today;
+  const dateInput = document.getElementById('inputFecha');
+  const statusSelect = document.getElementById('selectEstado'); // Referencia al select
+  
+  const today = new Date().toISOString().split('T')[0];
+  if (dateInput) dateInput.value = today;
 
-  // Llama a la función que IMPORTAMOS
-  renderReservationsTable(today, document.getElementById('selectEstado')?.value || 'todos');
-  
-  // Configura todos los listeners
+  // 1. Carga inicial (tu código original)
+  renderReservationsTable(today, statusSelect?.value || 'todos');
+  
+  // 2. Configura listeners (tu código original)
   setupDropdownListeners();
-  setupConfirmationModalListeners();
-  setupFilterListener();
+  setupConfirmationModalListeners();
+  setupFilterListener();
+
+  // --- NUEVO: Listener para recarga automática ---
+  document.addEventListener('evento-actualizado', () => {
+      console.log("🔄 Recibida señal de actualización: Repintando tabla...");
+      
+      // Obtenemos los valores ACTUALES de los filtros para no perder la búsqueda
+      const fechaActual = dateInput ? dateInput.value : today;
+      const estadoActual = statusSelect ? statusSelect.value : 'todos';
+
+      // Llamamos a tu función importada para refrescar la tabla
+      renderReservationsTable(fechaActual, estadoActual);
+  });
 });
