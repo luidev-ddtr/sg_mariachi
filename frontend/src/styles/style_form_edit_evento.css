@@ -82,25 +82,28 @@ h2 {
 }
 
 /* --- ESTRUCTURA DE FILAS Y CAMPOS --- */
+/* --- los cambios que se hicieron fue en la estructura de las filas y campos desde .form.row hasta .full-width --- */
 .form-row {
-  display: flex; /* Coloca grupos en la misma línea */
-  flex-wrap: wrap; /* Si no caben, bajan de línea */
-  justify-content: space-between; /* Espacio uniforme entre campos */
-  gap: 1px; /* Espaciado horizontal entre elementos */
-  margin-bottom: 2px; /* Espaciado vertical entre filas */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;               /* Igual que Nuevo Evento */
+  margin-bottom: 10px;
 }
 
 .form-group {
-  flex: 100%; /* Cada grupo ocupa el mismo ancho posible */
+  flex: 1;                 /* Igual que Nuevo Evento */
+  min-width: 45%;          /* Para que se comporten como columnas */
   display: flex;
-  flex-direction: column; /* Pone etiqueta e input en columna */
-  margin-bottom: 5px; /* Espaciado vertical entre filas */
+  flex-direction: column;
+  margin-bottom: 10px;     /* Igual que Nuevo Evento */
 }
 
-/* Campos que ocupan el ancho completo */
+/* Campos de ancho completo */
 .full-width {
-  flex: 100%; /* Hace que ocupe toda la fila */
+  flex: 100%;              /* Ocupa la fila completa */
 }
+
 
 /* --- ETIQUETAS DE LOS CAMPOS --- */
 label {
