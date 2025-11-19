@@ -71,20 +71,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             DIM_TotalAmount: document.getElementById('dim_totalamount').value,
             DIM_NHours: parseInt(totalHoras) || 0
         };
-
+        // En edit-evento.js, dentro del form.addEventListener('submit'...)
         try {
             console.log("Enviando actualización...", datosParaEnviar);
             await updateReservation(datosParaEnviar);
             
             alert("¡Evento actualizado correctamente!");
             
-            // --- CIERRE DEL MODAL ---
-            // Regresa a la pantalla anterior automáticamente
-            window.history.back(); 
+            // --- CAMBIO AQUÍ ---
+            // Verificamos si el padre tiene la función puente
+            if (window.parent && window.parent.finalizarEdicionExitoso) {
+                window.parent.finalizarEdicionExitoso();
+            } else {
+                // Fallback por si se abrió en pestaña nueva
+                window.history.back();
+            }
             
         } catch (error) {
-            console.error(error);
-            alert("Error: " + (error.message || "No se pudo actualizar"));
+            // ... error handling
         }
     });
 });
