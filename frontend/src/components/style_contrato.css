@@ -1,0 +1,101 @@
+/* ESTILOS GENERALES DEL DOCUMENTO*/
+
+body {
+    font-family: "Times New Roman", serif;
+    background: #f3f3f3;
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.contrato-container {
+    width: 800px;
+    background: white;
+    padding: 40px 60px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+/*ENCABEZADO DEL CONTRATO*/
+h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 0px;
+}
+
+h2 {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 5px;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* Frase #si señor */
+p:nth-of-type(1) {
+    text-align: center;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Teléfonos */
+p:nth-of-type(2) {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Título Contrato */
+h2:nth-of-type(2) {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 22px;
+    text-decoration: underline;
+}
+
+/* LISTA DE CLÁUSULAS*/
+ol {
+    margin-top: 20px;
+}
+
+ol li {
+    margin-bottom: 18px;
+    text-align: justify;
+}
+
+/*FIRMAS*/
+.firmas {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.firmas p {
+    margin: 5px 0;
+    text-align: center !important;
+}
+
+.linea-firma {
+    width: 60%;
+    margin: 40px auto 5px auto;
+    border-top: 1px solid #000;
+    height: 1px;
+}
+
+/* NOTA DEL CONTRATO*/
+.nota {
+    margin-top: 40px;
+    font-size: 14px;
+    font-style: italic;
+    text-align: justify;
+}
+
+/* LOGO DEL MARICACHI SAN NICOLÁS*/
+.logo {
+    width: 200px;
+    display: block;
+    margin: 0 auto 10px auto;
+}

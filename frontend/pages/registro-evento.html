@@ -60,7 +60,8 @@
         <span class="material-symbols-outlined">search</span> Filtrar
         </button>
         <button id="btnNuevaReserva" class="btn green">
-        <span class="material-symbols-outlined">add</span> Nueva reserva
+          <!-- Se cambio "reserva" Accion por "evento" -->
+        <span class="material-symbols-outlined">add</span> Nuevo evento
         </button>
       </section>
 
@@ -139,13 +140,15 @@
 <script src="../src/components/eventos/eventos_ui.js" type="module"></script>
 <script src="../src/components/eventos/archivar_eventos.js" type="module"></script>
 <div id="confirmArchiveModal" class="modal-overlay" style="display: none;">
+  <!-- Modal de archivar -->
   <div class="modal-dialog">
     <div class="modal-header">
       <h4>Confirmar Acción</h4>
       <span class="modal-close" data-dismiss="modal">&times;</span>
     </div>
     <div class="modal-body">
-      <p>¿Estás seguro de que deseas archivar esta reservación?</p>
+      <!-- Se cambio "reservacion" Accion por "evento" -->
+      <p>¿Estás seguro de que deseas archivar este evento?</p>
     </div>
     <div class="modal-footer">
       <button id="btn-cancel-archive" class="btn btn-secondary">Cancelar</button>
