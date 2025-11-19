@@ -1,4 +1,4 @@
-/*ESTE ARCHIVO CONTIENE LOS ESTILOS CSS PARA LA PÁGINA DE REGISTRO Y GESTIÓN DE EVENTOS*/
+/* ESTE ARCHIVO CONTIENE LOS ESTILOS CSS PARA LA PÁGINA DE REGISTRO Y GESTIÓN DE EVENTOS */
 * {
   margin: 0;
   padding: 0;
@@ -17,7 +17,6 @@ body {
   min-height: 100vh;
 }
 
-
 /* --- Contenido principal --- */
 .main-content {
   flex: 1;
@@ -31,7 +30,7 @@ body {
   margin-bottom: 30px;
 }
 
-/* --- Tarjetas --- */
+/* --- Tarjetas (Cards) --- */
 .cards-section {
   display: flex;
   flex-wrap: wrap;
@@ -46,6 +45,7 @@ body {
   padding: 15px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   position: relative;
+  background-color: white; /* Fondo base por seguridad */
 }
 
 .card p {
@@ -56,6 +56,7 @@ body {
 .card h2 {
   font-size: 24px;
   font-weight: bold;
+  margin-top: 5px;
 }
 
 .icon-card {
@@ -80,15 +81,13 @@ body {
   border-left: 5px solid #1c7ed6;
 }
 
-
-
 /* --- Filtros --- */
 .filters {
-  display: flex;           /*los inputs y botones se coloquen en la misma línea*/
-  flex-wrap: wrap;         /*responsividad*/
-  gap: 30px;               /*espacio entre los botones de los filtros*/
-  align-items: center;     /*para que los inputs y botones queden centrados en altura si tienen diferentes tamaños */
-  margin-bottom: 20px;     /*espacio inferior entre la sección de filtros y el elemento siguiente*/
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .filters input,
@@ -96,6 +95,7 @@ body {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 14px;
 }
 
 .btn {
@@ -105,11 +105,11 @@ body {
   color: white;
   cursor: pointer;
   font-weight: 500;
+  display: inline-flex; /* Para alinear iconos correctamente */
+  align-items: center;
 }
 
 .btn.red { background-color: #e03131; }
-
-
 
 .btn.green { 
   background-color: #37b24d;
@@ -117,108 +117,142 @@ body {
 }
 
 .btn .material-symbols-outlined {
-  font-size: 20px;          /* Tamaño del ícono */
-  vertical-align: middle;   /* Lo centra verticalmente con el texto */
-  margin-right: 6px;        /* Espacio entre ícono y texto */
-  line-height: 1;           /* Evita desajustes de altura */
+  font-size: 20px;
+  margin-right: 6px;
 }
 
-
-/* --- Tabla --- */
+/* --- Tabla (Estilos actualizados para coincidir con event_logic.js) --- */
 .tabla-reservaciones-container {
   overflow-x: auto;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+/* --- Ajuste específico para columnas --- */
+
+/* 1. Reducir ancho de la primera columna (No. Eventos) */
+table th:first-child,
+table td:first-child {
+  width: 50px;       /* Forzamos un ancho pequeño */
+  max-width: 50px;   /* Evita que crezca más de la cuenta */
+  white-space: nowrap; /* Evita que el texto se rompa feo si es corto */
+}
+
+/* Opcional: Ajuste para que el texto del encabezado no se vea apretado */
+table th:first-child {
+  font-size: 11px;   /* Hacemos la letra del título un pelín más pequeña */
+  padding: 15px 5px; /* Reducimos el relleno lateral */
 }
 
 th, td {
-  padding: 15px 5px;
+  padding: 15px 10px; /* Un poco más de espacio horizontal */
   text-align: center;
   border-bottom: 1px solid #eee;
+  font-size: 14px;
 }
 
 th {
   background-color: #f7e9b5;
   color: #444;
   font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
 }
 
-.estado {
-  padding: 5px 10px;
-  border-radius: 10px;
-  font-size: 13px;
+/* Estado (Matches class="status" en JS) */
+.status {
+  padding: 5px 12px;
+  border-radius: 20px; /* Más redondeado estilo "pill" */
+  font-size: 12px;
   font-weight: 600;
   color: white;
+  display: inline-block;
+  min-width: 80px;
 }
 
-.estado.completado { background-color: #37b24d; }
-.estado.cancelado { background-color: #e03131; }
-.estado.pendiente { background-color: #f59f00; }
+/* Colores de estado (Asegúrate que coincidan con lo que viene de la BD) */
+.status.confirmado, 
+.status.completado { background-color: #37b24d; } /* Verde */
 
-/*styles de los iconos de la tabla ...*/
-.acciones {
-  background-color: transparent;  /* sin fondo */
-  border: none;                   /*sin borde*/
-  border-radius: 6px;             /*esquinas redondeadas*/
-  padding: 5px 8px;               /*espacio interno*/
-  cursor: pointer;                /*puntero al pasar*/
+.status.cancelado { background-color: #e03131; } /* Rojo */
+
+.status.pendiente { background-color: #f59f00; } /* Naranja */
+
+.status.archivado { background-color: #868e96; } /* Gris */
+
+
+/* Acciones (Dropdown Select - Matches class="btn-actions" en JS) */
+.btn-actions {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #555;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
 }
-button.acciones:hover {
-  background-color: #f0f0f0;      /* efecto al pasar el mouse */
+
+.btn-actions:hover {
+  border-color: #bbb;
+  background-color: #f9f9f9;
 }
 
-/* --- EN: styles_registro_eventos.css --- */
-/* (Reemplaza el código del modal que ya tenías) */
+.btn-actions:focus {
+  border-color: #1c7ed6;
+  box-shadow: 0 0 0 2px rgba(28, 126, 214, 0.2);
+}
 
+
+/* --- Modal General (Fondo desenfocado) --- */
 .modal-overlay {
   display: none;
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Un poco más oscuro */
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   justify-content: center;
   align-items: center;
-  /* ¡AQUÍ ESTÁ EL TRUCO! Difumina la página de atrás */
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px); /* Efecto blur */
 }
+
 .modal-overlay.visible {
   display: flex;
 }
 
-/* El contenedor (MARCO TRANSPARENTE) */
-.modal-container {   /*SE REALIZARON CAMBIOS PARA EL MODAL*/
+/* --- Modal de Edición (El grande con imagen) --- */
+.modal-container {
   position: relative;
   background-color: transparent;
   padding: 0;
-  box-shadow: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   border-radius: 20px;
-  width: 1000px;    /*Ancho del modal*/
+  width: 1000px;
   max-width: 95%;
-  height: 90vh;               /* Fija altura máxima del modal */
+  height: 90vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;           /* Evita scroll */
+  overflow: hidden;
 }
 
-
-#modalFrame { /*SE REALIZARON CAMBIOS DE ESTILO PARA EL MODAL*/
-  background: url('/images/mariachis-bg.jpg') no-repeat center center / cover; /*directo*/
-  
+#modalFrame {
+  background: url('/images/mariachis-bg.jpg') no-repeat center center / cover;
   width: 100%;
-  height: 100%;               /* Llenar todo el modal */
+  height: 100%;
   border: none;
   border-radius: 20px;
 }
 
-/* Botón de cerrar */
+/* Botón cerrar modal edición */
 .modal-close-btn {
   position: absolute;
   top: 15px;
@@ -226,119 +260,152 @@ button.acciones:hover {
   font-size: 20px;
   font-weight: bold;
   color: #fff;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   border: none;
   cursor: pointer;
-  line-height: 1;
   z-index: 1010;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 36px; /* Un poco más grande para dedo */
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
 }
 
-/*estilos del modal archivar*/
-.modal-dialog{
-  width: 600px; 
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+
+/* --- Modal de Archivar (Confirmación) --- */
+#confirmArchiveModal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 2000; /* Por encima de todo */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-dialog {
+  background-color: #fff;
+  margin: 15% auto; /* Centrado vertical aproximado */
+  padding: 0;
+  border: 1px solid #888;
+  width: 400px; /* Más compacto para alertas */
   max-width: 90%;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.50);
-  padding: 10px;
-  overflow: hidden;
-  position: fixed; /*Posición del modal*/
-  top: 30%;
-  left: 30%;
-  z-index: 9999;
-
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  position: relative; /* Reset de posicion fixed interna */
+  top: auto; left: auto; /* Reset */
+  animation: modalFadeIn 0.3s;
 }
+
+@keyframes modalFadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
 .modal-header {
-  color: #000000;                               /* Texto blanco */
-  padding: 15px 20px;                        /* Espaciado interno */
-  display: flex;                              /* Alineación flex */
-  justify-content: space-between;            /* Título a la izq., botón a la der. */
-  align-items: center;                       /* Alinea verticalmente */
-}
-.modal-header h4 {
-  margin: 0;                                 /* Quita espacio extra del título */
-  font-size: 22px;                           /* Tamaño del título */
-  font-weight: 600;                          /* Negrita moderada */
-}
-.modal-close {
-  font-size: 35px;                           /* Tamaño del icono "X" */
-  cursor: pointer;                           /* Cambia el cursor a mano */
-  padding: 0 8px;                            /* Espacio alrededor */
-  transition: 0.2s;                           /* Animación al pasar el mouse */
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.modal-close:hover {
-  color: #646464;                            /* Se pone negro suave al pasar encima */
+.modal-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
 }
-/*body del modal archivar*/
+
+.close-modal { /* X del modal archivar */
+  color: #aaa;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.close-modal:hover {
+  color: #000;
+}
+
 .modal-body {
-  padding: 10px;                             /* Espacio interno */
-  font-size: 20px;                           /* Tamaño del texto */
-  color: #22262e;                            /* Texto gris oscuro */
-  text-align: center;                        /* Centra el texto */
+  padding: 20px;
+  font-size: 16px;
+  color: #444;
+  text-align: center;
 }
+
 .modal-footer {
-  padding: 16px 20px;                        /* Espaciado interno */
-  /*background: #f3f4f6;   */                    /* Fondo gris claro */
-  display: flex;                              /* Activa flexbox */
-  justify-content: center;                 /* Alinea botones a la derecha */
-  gap: 30px;                                 /* Espacio entre botones */
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end; /* Botones a la derecha */
+  gap: 10px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
-/*css de los botones del modal archivar*/
+
 .modal-footer .btn {
-  padding: 8px 14px;                         /* Tamaño del botón */
-  border-radius: 6px;                        /* Bordes redondeados */
-  font-size: 22px;                           /* Tamaño de texto */
-  font-weight: 500;                          /* Semi bold */
-  cursor: pointer;                           /* Cursor en forma de mano */
-  border: none;                              /* Sin borde */
-  transition: 0.25s ease;                    /* Animación suave */
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
-/*estilo del boton cancelar*/
+
 .btn-secondary {
-  background: #d9dadd;
-  color: #374151;
+  background-color: #e9ecef;
+  color: #495057;
 }
 
 .btn-secondary:hover {
-  background: #d1d5db;
+  background-color: #dee2e6;
 }
-/*estilo del boton archivar*/
+
 .btn-danger {
-  background: #ef4444;
-  color: #fff;
+  background-color: #fa5252;
+  color: white;
 }
 
 .btn-danger:hover {
-  background: #dc2626;
+  background-color: #e03131;
 }
 
-
-
-
-
-/*  Responsividad  */
+/* Responsividad Básica */
 @media (max-width: 900px) {
-  .sidebar {
-    width: 180px;
-  }
-  .header h1 {
-    font-size: 22px;
-  }
+  .header h1 { font-size: 22px; }
 }
 
 @media (max-width: 600px) {
-  .cards-section {
-    flex-direction: column;
-  }
-  .filters {
+  .cards-section, .filters {
     flex-direction: column;
     align-items: stretch;
   }
-  .sidebar {
-    display: none; /* Puedes cambiar a menú hamburguesa */
+  
+  /* Hacer la tabla scrolleable en móviles */
+  .tabla-reservaciones-container {
+    margin-top: 10px;
+  }
+  
+  th, td {
+    padding: 10px 5px;
+    font-size: 12px;
+  }
+  
+  .btn-actions {
+    font-size: 12px;
+    padding: 4px 2px;
+    width: 100%; /* Select ocupe todo el ancho en celda pequeña */
   }
 }
