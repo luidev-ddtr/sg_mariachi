@@ -178,8 +178,7 @@ th {
 }
 
 /* Colores de estado (Asegúrate que coincidan con lo que viene de la BD) */
-.status.confirmado, 
-.status.completado { background-color: #37b24d; } /* Verde */
+.status.completo { background-color: #37b24d; } /* Verde */
 
 .status.cancelado { background-color: #e03131; } /* Rojo */
 
