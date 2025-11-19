@@ -52,13 +52,13 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
         <td><span class="status ${item.DIM_StatusName?.toLowerCase() || 'pendiente'}">${item.DIM_StatusName || 'Pendiente'}</span></td>
         <td>
           <!-- Convertido a un select -->
-          <select class="btn-actions js-action-select" data-id="${item.DIM_ReservationId}">
-            <option value="" selected disabled><center></center></option>
+          <center><select class="btn-actions js-action-select" data-id="${item.DIM_ReservationId}">
+            <option value="" selected disabled></option>
             <option value="details">Ver detalles</option>
             <option value="archive">Archivar</option>
             <option value="pay">Pagar</option>
             <option value="edit">Actualizar</option>
-          </select>
+          </select></center>
         </td>
       </tr> 
     `).join('');
