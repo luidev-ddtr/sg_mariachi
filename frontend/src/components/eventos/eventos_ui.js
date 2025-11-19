@@ -2,6 +2,7 @@
 // (TODA LA LÓGICA DE INTERFAZ Y LISTENERS)
 
 // IMPORTAMOS LA FUNCIÓN DEL OTRO ARCHIVO
+import { ArchivarReservacion } from '../../api/api_reservacion_archivar.js';
 import { renderReservationsTable } from './eventos_logic.js';
 import { TableDropdownManager } from './dropdown_manajer.js';
 
@@ -19,7 +20,7 @@ const openEditModal = (eventId) => {
   }
 };
 
-// === FUNCIÓN PARA ABRIR MODAL DE ARCHIVAR ===
+// === FUNCIÓN PARA ABRIR MODAL DE ARCHIVAR === 
 const openArchiveModal = (reservationId) => {
   const modal = document.getElementById('confirmArchiveModal');
   
@@ -63,13 +64,18 @@ const setupConfirmationModalListeners = () => {
   // Botón de confirmar
   const confirmBtn = modal.querySelector('#btn-confirm-archive');
   if (confirmBtn) {
-    confirmBtn.addEventListener('click', () => {
+    confirmBtn.addEventListener('click', async () => {
       const reservationId = confirmBtn.dataset.id;
       if (reservationId) {
-        console.log('Archivando reservación:', reservationId);
-        // Aquí va tu lógica de archivado
-        // Por ejemplo: archivarReservacion(reservationId);
-        closeArchiveModal();
+        try {
+          console.log('Archivando reservación desde eventos_ui:', reservationId);
+          await ArchivarReservacion(reservationId);
+          closeArchiveModal();
+          document.dispatchEvent(new CustomEvent('evento-actualizado', { detail: 'archivado' }));
+        } catch (error) {
+          console.error('Error al intentar archivar:', error);
+          alert(`No se pudo archivar la reservación: ${error.message}`);
+        }
       }
     });
   }

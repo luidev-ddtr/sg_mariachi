@@ -13,7 +13,7 @@ const setupConfirmationModalListeners = () => {
         console.error("No se encontró el modal #confirmArchiveModal");
         return;
     }
-
+ 
     const btnCancel = modal.querySelector('#btn-cancel-archive');
     const btnConfirm = modal.querySelector('#btn-confirm-archive');
     const btnClose = modal.querySelector('.modal-close');
@@ -24,7 +24,7 @@ const setupConfirmationModalListeners = () => {
         btnConfirm.removeAttribute('data-id');
         btnConfirm.textContent = 'Sí, Archivar';
         btnConfirm.disabled = false;
-    };
+    }; 
 
     btnCancel.addEventListener('click', closeModal);
     btnClose.addEventListener('click', closeModal);
@@ -48,12 +48,12 @@ const setupConfirmationModalListeners = () => {
             // --- CAMBIO 2: Usamos el nombre correcto de tu función ---
             const response = await ArchivarReservacion(reservationId);
             
-            console.log(`Respuesta de la API de archiavdo:`, response.data.message);
+            console.log(`Respuesta de la API de archivado:`, response);
             closeModal();
             
-            // Disparamos un evento global para avisarle a
-            // 'mostrar_reservaciones.js' que debe recargar la tabla.
-            window.dispatchEvent(new CustomEvent('reservationArchived'));
+            // --- CORRECCIÓN ---
+            // Disparamos el evento 'evento-actualizado' que la tabla principal (eventos_ui.js) está esperando.
+            document.dispatchEvent(new CustomEvent('evento-actualizado'));
 
         } catch (error) {
             console.error('Error al archivar la reservación:', error);
