@@ -126,6 +126,26 @@
     modalClose.addEventListener("click", () => {
       closeModal();
     });
+    // 1. Exponemos la función closeModal al objeto window para poder usarla desde funciones globales
+    window.cerrarModalInterface = closeModal;
+
+    // 2. Definimos la función que llamará el HIJO (edit-evento.js)
+    window.finalizarEdicionExitoso = function() {
+        console.log("Evento actualizado desde el modal. Cerrando y recargando...");
+        
+        // A. Cerramos el modal
+        closeModal();
+
+        // B. Disparamos un evento personalizado para que 'eventos_ui.js' sepa que debe recargar la tabla
+        const eventoUpdate = new CustomEvent('evento-actualizado');
+        document.dispatchEvent(eventoUpdate);
+        
+        // OPCIONAL: Si tienes acceso directo a la función de carga aquí, úsala:
+        // if (typeof window.cargarTablaEventos === 'function') {
+        //     window.cargarTablaEventos();
+        // }
+    }
+
 
     // 4. (Opcional) Cerrar el modal al hacer clic en el fondo
     modalOverlay.addEventListener("click", (event) => {
@@ -136,6 +156,7 @@
     });
 
   });
+  
 </script>
 <script src="../src/components/eventos/eventos_ui.js" type="module"></script>
 <script src="../src/components/eventos/archivar_eventos.js" type="module"></script>
