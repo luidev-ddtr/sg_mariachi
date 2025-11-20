@@ -39,11 +39,14 @@ def read_reservations_with_date_filter(year: int, month: int, week: int, object_
         for data in result:
             # Convertir los objetos datetime a strings ISO para JavaScript
             # FullDate: solo fecha (YYYY-MM-DD)
-            if isinstance(data['FullDate'], (datetime.date, datetime.datetime)):
-                fullDate_str = data['FullDate'].strftime('%Y-%m-%d')
-            else:
-                fullDate_str = str(data['FullDate'])
-            
+            # if isinstance(data['FullDate'], (datetime.date, datetime.datetime)):
+            #     fullDate_str = data['FullDate'].strftime('%Y-%m-%d')
+            # else:
+            #     fullDate_str = str(data['FullDate'])
+
+            # FullDate: Usar la fecha del evento (DIM_StartDate) en formato YYYY-MM-DD
+            fullDate_str = data['DIM_StartDate'].strftime('%Y-%m-%d') if isinstance(data['DIM_StartDate'], datetime.datetime) else str(data['DIM_StartDate']).split('T')[0]
+
             # DIM_StartDate y DIM_EndDate: fecha y hora completa (YYYY-MM-DDTHH:MM:SS)
             if isinstance(data['DIM_StartDate'], datetime.datetime):
                 start_date_str = data['DIM_StartDate'].strftime('%Y-%m-%dT%H:%M:%S')
