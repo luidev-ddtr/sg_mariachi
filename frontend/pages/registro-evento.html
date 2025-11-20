@@ -4,28 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de eventos | Mariachis San Nicolás</title>
-  <!-- Google Material Icons -->
+  
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
 
-<!-- Link del archivo CSS -->  
-<link rel="stylesheet" href="../src/styles/styles_registro_eventos.css">
-
-<link rel="stylesheet" href="../src/styles/style_dropdown.css">
+  <link rel="stylesheet" href="../src/styles/styles_registro_eventos.css">
+  <link rel="stylesheet" href="../src/styles/style_dropdown.css">
 </head>
 
 <body>
-  <!-- Contenedor general -->
   <div class="container">
 
-   
-
-    <!-- Contenido principal -->
     <main class="main-content">
       <header class="header">
         <h1 id="tituloPrincipal">Gestión de eventos</h1>
       </header>
 
-      <!-- Sección de tarjetas con resumen -->
       <section class="cards-section">
         <div class="card completados">
           <p>Eventos Completados</p>
@@ -46,7 +39,6 @@
         </div>
       </section>
 
-      <!-- Filtros -->
       <section class="filters">
         <input type="date" id="inputFecha" />
         <select id="selectEstado">
@@ -60,12 +52,10 @@
         <span class="material-symbols-outlined">search</span> Filtrar
         </button>
         <button id="btnNuevaReserva" class="btn green">
-          <!-- Se cambio "reserva" Accion por "evento" -->
         <span class="material-symbols-outlined">add</span> Nuevo evento
         </button>
       </section>
 
-      <!-- Tabla de eventos -->
       <section class="table-section">
         <table id="tabla-eventos">
           <thead>
@@ -82,12 +72,12 @@
             </tr>
           </thead>
           <tbody>
-
-          </tbody>
+             </tbody>
         </table>
       </section>
     </main> 
   </div> 
+
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal-container">
       <button id="modalClose" class="modal-close-btn">&times;</button>
@@ -95,87 +85,90 @@
     </div>
   </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-  // Elementos del DOM
-    const btnNuevaReserva = document.getElementById("btnNuevaReserva");
-    const modalOverlay = document.getElementById("modalOverlay");
-    const modalFrame = document.getElementById("modalFrame");
-    const modalClose = document.getElementById("modalClose");
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Elementos del DOM
+      const btnNuevaReserva = document.getElementById("btnNuevaReserva");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalFrame = document.getElementById("modalFrame");
+      const modalClose = document.getElementById("modalClose");
 
-  // URL del formulario que se cargará en el modal.
-    const modalUrl = "/src/components/eventos/formulario_nvo_evento.html";
+      // URL del formulario que se cargará en el modal.
+      const modalUrl = "/src/components/eventos/formulario_nvo_evento.html";
 
-  // 1. Abrir el modal al hacer clic en "Nueva Reserva"
-    btnNuevaReserva.addEventListener("click", () => {
-      console.log("Abriendo modal...");
-     // Cargamos la URL en el iframe
-      modalFrame.src = modalUrl;
-      // Mostramos el modal añadiendo la clase 'visible'
-      modalOverlay.classList.add("visible");
-   });
+      // 1. Abrir el modal al hacer clic en "Nuevo Evento"
+      btnNuevaReserva.addEventListener("click", () => {
+        console.log("Abriendo modal...");
+        modalFrame.src = modalUrl;
+        modalOverlay.classList.add("visible");
+      });
 
-    // 2. Función para cerrar y limpiar el modal
-    function closeModal() {
-      modalOverlay.classList.remove("visible");
-      // Limpiamos el src para detener cualquier proceso en el iframe
-      modalFrame.src = "about:blank";
-    }
-
-    // 3. Cerrar el modal con el botón 'X'.
-    modalClose.addEventListener("click", () => {
-      closeModal();
-    });
-    // 1. Exponemos la función closeModal al objeto window para poder usarla desde funciones globales
-    window.cerrarModalInterface = closeModal;
-
-    // 2. Definimos la función que llamará el HIJO (edit-evento.js)
-    window.finalizarEdicionExitoso = function() {
-        console.log("Evento actualizado desde el modal. Cerrando y recargando...");
-        
-        // A. Cerramos el modal
-        closeModal();
-
-        // B. Disparamos un evento personalizado para que 'eventos_ui.js' sepa que debe recargar la tabla
-        const eventoUpdate = new CustomEvent('evento-actualizado');
-        document.dispatchEvent(eventoUpdate);
-        
-        // OPCIONAL: Si tienes acceso directo a la función de carga aquí, úsala:
-        // if (typeof window.cargarTablaEventos === 'function') {
-        //     window.cargarTablaEventos();
-        // }
-    }
-
-
-    // 4. (Opcional) Cerrar el modal al hacer clic en el fondo
-    modalOverlay.addEventListener("click", (event) => {
-      // Si el clic fue directamente en el fondo (overlay) y no en el contenido
-      if (event.target === modalOverlay) {
-       closeModal();
+      // 2. Función para cerrar y limpiar el modal
+      function closeModal() {
+        modalOverlay.classList.remove("visible");
+        modalFrame.src = "about:blank";
       }
-    });
 
-  });
-  
-</script>
-<script src="../src/components/eventos/eventos_ui.js" type="module"></script>
-<script src="../src/components/eventos/archivar_eventos.js" type="module"></script>
-<div id="confirmArchiveModal" class="modal-overlay" style="display: none;">
-  <!-- Modal de archivar -->
-  <div class="modal-dialog">
-    <div class="modal-header">
-      <h4>Confirmar Acción</h4>
-      <span class="modal-close" data-dismiss="modal">&times;</span>
-    </div>
-    <div class="modal-body">
-      <!-- Se cambio "reservacion" Accion por "evento" -->
-      <p>¿Estás seguro de que deseas archivar este evento?</p>
-    </div>
-    <div class="modal-footer">
-      <button id="btn-cancel-archive" class="btn btn-secondary">Cancelar</button>
-      <button id="btn-confirm-archive" class="btn btn-danger">Sí, Archivar</button>
+      // 3. Cerrar el modal con el botón 'X'
+      modalClose.addEventListener("click", () => {
+        closeModal();
+      });
+
+      // 4. Cerrar el modal al hacer clic en el fondo
+      modalOverlay.addEventListener("click", (event) => {
+        if (event.target === modalOverlay) {
+          closeModal();
+        }
+      });
+
+      // 5. Exponemos la función closeModal globalmente
+      window.cerrarModalInterface = closeModal;
+
+      // 6. Función para finalizar edición (usada por edit-evento.js)
+      window.finalizarEdicionExitoso = function() {
+          console.log("Evento actualizado desde el modal de edición.");
+          closeModal();
+          const eventoUpdate = new CustomEvent('evento-actualizado');
+          document.dispatchEvent(eventoUpdate);
+      }
+
+      // ---------------------------------------------------------
+      // 🔥 LISTENER PARA NUEVOS EVENTOS (Desde registro-evento.js)
+      // ---------------------------------------------------------
+      window.addEventListener('message', (event) => {
+          // Verificamos que el mensaje sea 'eventoRegistrado'
+          if (event.data === 'eventoRegistrado') {
+              console.log("✅ Nuevo evento detectado. Cerrando modal y recargando tabla...");
+
+              // A. Cerramos el modal
+              closeModal();
+
+              // B. Avisamos a eventos_ui.js que debe recargar la tabla
+              const eventoUpdate = new CustomEvent('evento-actualizado');
+              document.dispatchEvent(eventoUpdate);
+          }
+      });
+    });
+  </script>
+
+  <script src="../src/components/eventos/eventos_ui.js" type="module"></script>
+  <script src="../src/components/eventos/archivar_eventos.js" type="module"></script>
+
+  <div id="confirmArchiveModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4>Confirmar Acción</h4>
+        <span class="modal-close" data-dismiss="modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas archivar este evento?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-archive" class="btn btn-secondary">Cancelar</button>
+        <button id="btn-confirm-archive" class="btn btn-danger">Sí, Archivar</button>
+      </div>
     </div>
   </div>
-</div>
+
 </body>
 </html>
