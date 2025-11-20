@@ -493,7 +493,8 @@ class ReservationService:
                 "pago_restante": pago_restante, # Esto aun esta en prueba
                 "contratante_domicilio": contract_data['contratante_domicilio'],
                 "contratante_telefono": contract_data['contratante_telefono'],
-                "contratante_segundo_telefono": contract_data['contratante_segundo_telefono']
+                "contratante_segundo_telefono": contract_data['contratante_segundo_telefono'],
+                "servicio_notas": contract_data["servicio_notas"]
             }
 
             return 200, "Información del contrato obtenida exitosamente.", formatted_contract
