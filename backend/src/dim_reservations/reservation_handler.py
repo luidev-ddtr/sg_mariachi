@@ -167,7 +167,7 @@ class ReservationService:
             
             
             if not date_id or "No se pudo" in date_id:
-                 return 500, "esta fecha no existe"
+                return 500, "esta fecha no existe"
 
             n_hours = (new_end - new_start).total_seconds() / 3600.0
 
@@ -322,12 +322,27 @@ class ReservationService:
 
             # 4. Construir el objeto Reservation con datos actualizados y existentes
             dim_date_service = DIM_DATE(conexion) # Para obtener la fecha de modificación
+            
+            # Extraer la fecha del evento para usarla como DIM_DateId
+            event_date = datetime.fromisoformat(_reservation['DIM_StartDate'])
+            event_date_id = dim_date_service.get_id_by_object_date(event_date.year, event_date.month, event_date.day)
+
+            # Nuevamente, validar que la fecha del evento exista en DIM_Date
+            if event_date_id is None:
+                # Si la fecha del evento no existe en DIM_Date, no podemos continuar.
+                return 400, "La fecha del evento no se encuentra en el sistema de fechas.", []
 
             new_reservation = Reservation(
                 DIM_ReservationId=reservation_id, # ID Original
                 DIM_PeopleId=people_id, # Obtenido de la reserva existente
                 DIM_StatusId=existing_reservation_data['DIM_StatusId'], # Obtenido de la reserva existente
-                DIM_DateId=dim_date_service.dateId, # Fecha de la modificación
+                
+                # Linea original del DIM_DateId
+                #DIM_DateId= dim_date_service.dateId, # Fecha de la modificación
+
+                # Nueva linea para el DIM_DateId basado en la fecha del evento
+                DIM_DateId=event_date_id, # Usamos el ID de la fecha del evento
+
                 DIM_ServiceOwnersId=existing_reservation_data['DIM_ServiceOwnersId'], # Obtenido de la reserva existente
                 DIM_EventAddress=existing_reservation_data['DIM_EventAddress'], # Obtenido de la reserva existente
                 DIM_StartDate=_reservation['DIM_StartDate'], # Dato nuevo del frontend
@@ -389,7 +404,7 @@ class ReservationService:
             ]
 
             if current_status_id not in allowed_statuses:
-                return 400, "La reservación no puede ser archivada porque no está en estatus 'Completada' o 'Cancelada'.", []
+                return 400, "La reservación no puede ser archivada porque su estatus no es 'Completada' o 'Cancelada'.", []
 
             # 4. Llamar a la función del repositorio para archivar
             success = archive_reservation_by_id(reservation_id, conexion)
