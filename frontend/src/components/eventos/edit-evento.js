@@ -65,8 +65,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             DIM_StartDate: `${fecha} ${horaInicio}:00`,
             DIM_EndDate: `${fecha} ${horaFin}:00`,
             
-            DIM_EventAddress: document.getElementById('descripcion').value,
-            DIM_Notes: document.getElementById('descripcion').value,
+             // --- CORRECCIÓN: Leer de los inputs correctos ---
+            DIM_EventAddress: document.getElementById('direccion').value, // Lee del input Dirección
+            DIM_Notes: document.getElementById('descripcion').value,      // Lee del textarea Descripción
             
             DIM_TotalAmount: document.getElementById('dim_totalamount').value,
             DIM_NHours: parseInt(totalHoras) || 0
@@ -151,7 +152,12 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById('hora_final').value = extraerHora(horaFinStr);
 
         // OTROS
-        document.getElementById('descripcion').value = datos.DIM_EventAddress || datos.evento_lugar || "";
+        // --- CORRECCIÓN: Asignar cada cosa a su input correspondiente ---
+        // 1. Dirección al input nuevo
+        document.getElementById('direccion').value = datos.DIM_EventAddress || datos.evento_lugar || "";
+
+        // 2. Descripción (Notas) al textarea de descripción
+        document.getElementById('descripcion').value = datos.DIM_Notes || "";
         document.getElementById('dim_totalamount').value = datos.DIM_TotalAmount || datos.pago_total || 0;
 
         calcularTotalHoras();

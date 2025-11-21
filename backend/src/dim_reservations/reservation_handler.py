@@ -167,7 +167,7 @@ class ReservationService:
             
             
             if not date_id or "No se pudo" in date_id:
-                 return 500, "esta fecha no existe"
+                return 500, "esta fecha no existe"
 
             n_hours = (new_end - new_start).total_seconds() / 3600.0
 
@@ -322,12 +322,27 @@ class ReservationService:
 
             # 4. Construir el objeto Reservation con datos actualizados y existentes
             dim_date_service = DIM_DATE(conexion) # Para obtener la fecha de modificación
+            
+            # Extraer la fecha del evento para usarla como DIM_DateId
+            event_date = datetime.fromisoformat(_reservation['DIM_StartDate'])
+            event_date_id = dim_date_service.get_id_by_object_date(event_date.year, event_date.month, event_date.day)
+
+            # Nuevamente, validar que la fecha del evento exista en DIM_Date
+            if event_date_id is None:
+                # Si la fecha del evento no existe en DIM_Date, no podemos continuar.
+                return 400, "La fecha del evento no se encuentra en el sistema de fechas.", []
 
             new_reservation = Reservation(
                 DIM_ReservationId=reservation_id, # ID Original
                 DIM_PeopleId=people_id, # Obtenido de la reserva existente
                 DIM_StatusId=existing_reservation_data['DIM_StatusId'], # Obtenido de la reserva existente
-                DIM_DateId=dim_date_service.dateId, # Fecha de la modificación
+                
+                # Linea original del DIM_DateId
+                #DIM_DateId= dim_date_service.dateId, # Fecha de la modificación
+
+                # Nueva linea para el DIM_DateId basado en la fecha del evento
+                DIM_DateId=event_date_id, # Usamos el ID de la fecha del evento
+
                 DIM_ServiceOwnersId=existing_reservation_data['DIM_ServiceOwnersId'], # Obtenido de la reserva existente
                 DIM_EventAddress=existing_reservation_data['DIM_EventAddress'], # Obtenido de la reserva existente
                 DIM_StartDate=_reservation['DIM_StartDate'], # Dato nuevo del frontend
@@ -366,19 +381,19 @@ class ReservationService:
 # se debe de comprobar que el estatus de la reservacion sea completo o cancelado
 # ya que por razones de seguridad 
 
-    def archivate_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str, list | None]:
+    def archivate_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str]:
         conexion = conn or Conexion()
         reserva_service = ReservaService(conexion)
         try:
             # 1. Validar que el ID de la reservación venga en el diccionario
             reservation_id = _reservation.get('DIM_ReservationId')
             if not reservation_id:
-                return 400, "Falta el ID de la reservación (DIM_ReservationId).", None
+                return 400, "Falta el ID de la reservación (DIM_ReservationId).", []
 
             # 2. Obtener la reservación para verificar su estatus
             existing_reservation = reserva_service.get_reservation_by_id(reservation_id)
             if not existing_reservation:
-                return 404, f"No se encontró una reserva con el ID {reservation_id}", None
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", []
 
             # 3. Verificar si el estatus es 'completado' o 'cancelado'
             current_status_id = existing_reservation['DIM_StatusId']
@@ -389,7 +404,7 @@ class ReservationService:
             ]
 
             if current_status_id not in allowed_statuses:
-                return 400, "La reservación no puede ser archivada porque no está en estatus 'Completada' o 'Cancelada'.", None
+                return 400, "La reservación no puede ser archivada porque su estatus no es 'Completada' o 'Cancelada'.", []
 
             # 4. Llamar a la función del repositorio para archivar
             success = archive_reservation_by_id(reservation_id, conexion)
@@ -399,17 +414,16 @@ class ReservationService:
                 updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
                 if not updated_reservation:
                     # Esto sería raro, pero es un buen control de seguridad
-                    return 404, "La reservación fue archivada, pero no se pudo recuperar la información actualizada.", None
+                    return 404, "La reservación fue archivada, pero no se pudo recuperar la información actualizada.", []
                 
                 return 200, "Reservación archivada exitosamente.", [updated_reservation]
             else:
                 # Si la función de archivado falla, devolvemos un error de servidor.
-                return 500, "Ocurrió un error al intentar archivar la reservación.", None
-
+                return 500, "Ocurrió un error al intentar archivar la reservación.", []
         except Exception as e:
             print(f"❌ Error en el handler al archivar la reserva: {e}")
             # No hacemos rollback aquí porque la función de archivado maneja su propia transacción.
-            return 500, f"Error interno del servidor: {e}", None
+            return 500, f"Error interno del servidor: {e}", []
         finally:
             # Solo cierra la conexión si fue creada dentro de este método.
             if not conn:
@@ -457,6 +471,8 @@ class ReservationService:
 
             # Procesar y formatear los datos
             evento_fecha = contract_data['evento_fecha']
+            
+            # El tema de pagos aun esta en prueba por lo que se deja asi
             pago_total = float(contract_data['pago_total'])
             
             # Asumimos un 50% de anticipo por ahora. Esto se puede ajustar.
@@ -472,12 +488,13 @@ class ReservationService:
                 "evento_horas": contract_data['evento_horas'],
                 "evento_hora_inicio": contract_data['evento_hora_inicio'].strftime('%H:%M'),
                 "evento_hora_fin": contract_data['evento_hora_fin'].strftime('%H:%M'),
-                "pago_total": pago_total,
-                "pago_anticipo": pago_anticipo,
-                "pago_restante": pago_restante,
+                "pago_total": pago_total, # Esto aun esta en prueba
+                "pago_anticipo": pago_anticipo, # Esto aun esta en prueba
+                "pago_restante": pago_restante, # Esto aun esta en prueba
                 "contratante_domicilio": contract_data['contratante_domicilio'],
                 "contratante_telefono": contract_data['contratante_telefono'],
-                "contratante_segundo_telefono": contract_data['contratante_segundo_telefono']
+                "contratante_segundo_telefono": contract_data['contratante_segundo_telefono'],
+                "servicio_notas": contract_data["servicio_notas"]
             }
 
             return 200, "Información del contrato obtenida exitosamente.", formatted_contract

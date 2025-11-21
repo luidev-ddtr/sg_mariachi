@@ -1,29 +1,32 @@
-V<!DOCTYPE html>
+V
+<!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Control</title>
 </head>
+
 <body>
   <h1>Panel de Control</h1>
-  
+
   <button onclick="testAPI()">Probar API GetContractInfo</button>
   <div id="result"></div>
 
   <script type="module">
     import { GetContractInfo } from '../src/api/api_reservacion_read.js';
-    
-    window.testAPI = async function() {
+
+    window.testAPI = async function () {
       try {
-        const id = 'ccc62149-e5ff-5a96';
+        const id = '9fa04218-9914-5ed0';
         const contractInfo = await GetContractInfo(id);
-        
+
         document.getElementById('result').innerHTML = `
           <h3>Resultado:</h3>
           <pre>${JSON.stringify(contractInfo, null, 2)}</pre>
         `;
-        
+
       } catch (error) {
         document.getElementById('result').innerHTML = `
           <h3>Error:</h3>
@@ -33,4 +36,5 @@ V<!DOCTYPE html>
     }
   </script>
 </body>
+
 </html>
