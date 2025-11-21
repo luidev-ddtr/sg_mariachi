@@ -110,7 +110,13 @@ class ReservationService:
         # Esto es clave para que las pruebas puedan compartir una transacción.
         conexion = conn or Conexion()
         dim_date_service = DIM_DATE(conexion)
-        date_id = dim_date_service.dateId
+
+        # Extraer la fecha del evento para usarla como DIM_DateId
+        event_date = datetime.fromisoformat(_reservation['DIM_StartDate'])
+        #date_id = dim_date_service.dateId
+        #Nueva forma de obtener el dateId basado en la fecha del evento
+        event_date_id = dim_date_service.get_id_by_object_date(event_date.year, event_date.month, event_date.day)
+
         try:
             # 1. Validación de campos requeridos
             required_fields = [ 'DIM_ServiceOwnersId', 'DIM_StartDate', 'DIM_EndDate', 'DIM_EventAddress']
@@ -166,7 +172,7 @@ class ReservationService:
             print(res_id)
             
             
-            if not date_id or "No se pudo" in date_id:
+            if not event_date_id or "No se pudo" in event_date_id:
                 return 500, "esta fecha no existe"
 
             n_hours = (new_end - new_start).total_seconds() / 3600.0
@@ -176,7 +182,13 @@ class ReservationService:
                 DIM_ReservationId=res_id,
                 DIM_PeopleId=people_id,
                 DIM_StatusId= get_status_pending(),
-                DIM_DateId=date_id,
+                
+                # Linea original del DIM_DateId
+                #DIM_DateId=date_id,
+
+                # Nueva linea para el DIM_DateId basado en la fecha del evento
+                DIM_DateId=event_date_id,
+
                 DIM_ServiceOwnersId=service_owners_id,
                 DIM_EventAddress=_reservation['DIM_EventAddress'],
                 DIM_StartDate=new_start.isoformat(),
