@@ -34,7 +34,38 @@ document.addEventListener('DOMContentLoaded', () => {
   horaInicioEl.addEventListener('change', calcularTotalHoras);
   horaFinalEl.addEventListener('change', calcularTotalHoras);
 
+  // VALIDACIÓN DE TELÉFONOS (Solo Números, Max 10)
+  const inputsTelefonos = [
+      document.getElementById('telefono'),
+      document.getElementById('telefono_secundario')
+  ];
 
+  inputsTelefonos.forEach(input => {
+      if (input) {
+          input.addEventListener('input', function(e) {
+              // 1. Quita todo lo que NO sea número (incluyendo signo menos)
+              let valorLimpio = this.value.replace(/[^0-9]/g, '');
+              
+              // 2. Corta a 10 dígitos
+              if (valorLimpio.length > 10) {
+                  valorLimpio = valorLimpio.slice(0, 10);
+              }
+
+              // 3. Asigna de vuelta
+              if (this.value !== valorLimpio) {
+                  this.value = valorLimpio;
+              }
+          });
+      }
+  });
+
+  // Validación para el MONTO (evitar negativos)
+  const inputMonto = document.getElementById('dim_totalamount');
+  if (inputMonto) {
+      inputMonto.addEventListener('input', function() {
+          if (this.value < 0) this.value = '';
+      });
+  }
   /**
    * 4. Función principal para manejar el envío del formulario
    */
@@ -63,10 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const montoInput = document.getElementById('dim_totalamount');
     const dim_totalamount_raw = montoInput ? montoInput.value : '0';
 
-    // --- VALIDACIÓN BÁSICA ---
-    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal) {
+   // --- VALIDACIÓN BÁSICA ---
+    // Agregué: || !dim_totalamount_raw
+    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal || !dim_totalamount_raw) {
       showFormMessage('Por favor, completa todos los campos obligatorios.', 'error');
       return; 
+    }
+
+    // NUEVO: Validar longitud exacta de 10 dígitos
+    if (dim_phonenumber.length !== 10) {
+        showFormMessage('El teléfono principal debe tener 10 dígitos exactos.', 'error');
+        return;
     }
 
     // --- TRANSFORMACIÓN DE DATOS ---
