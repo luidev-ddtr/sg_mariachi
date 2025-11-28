@@ -222,3 +222,30 @@ JOIN dim_people AS people
 -- Aqui se tendran que agregar los datos de pago despues
 -- Todo lo de fact revenue.
 WHERE Vrsv.DIM_ReservationId = %s;
+
+
+
+--id reservacion: 4e4dad3d-e0ce-5a29
+-- Correccion de quey para que se pueda ver bien en el contrato
+
+    SELECT 
+    Vrsv.DIM_fullname AS contratante_nombre,
+    rsv.DIM_EventAddress  AS evento_locacion,
+    Vrsv.FullDate AS evento_fecha,
+    rsv.DIM_NHours AS evento_horas,	
+    Vrsv.DIM_StartDate AS evento_hora_inicio,
+    Vrsv.DIM_EndDate AS evento_hora_fin,
+    Vrsv.DIM_TotalAmount AS pago_total,
+    people.DIM_Address AS contratante_domicilio,
+    people.DIM_PhoneNumber AS contratante_telefono,
+    people.DIM_SecondPhoneNumber AS contratante_segundo_telefono,
+    rsv.DIM_Notes  AS servicio_notas
+    FROM vista_reservaciones AS Vrsv
+    JOIN dim_reservation AS rsv 
+        ON rsv.DIM_ReservationId = Vrsv.DIM_ReservationId
+    JOIN dim_people AS people 
+        ON rsv.DIM_PeopleId = people.DIM_PeopleId
+    -- 
+    -- Aqui se tendran que agregar los datos de pago despues
+    -- Todo lo de fact revenue.
+    WHERE Vrsv.DIM_ReservationId = %s;

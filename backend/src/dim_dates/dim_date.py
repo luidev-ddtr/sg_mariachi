@@ -88,7 +88,8 @@ class DIM_DATE:
             self.connection.cursor.execute(query_select, (date_id,))
             result = self.connection.cursor.fetchone()
             if not  result:
-                return "No se pudo conseguir la fecha"
+                #return "No se pudo conseguir la fecha"
+                return None # Retornar None si la fecha no se encuentra
 
             # execute_query devuelve una lista, tomamos el primer elemento
             return result['DIM_DateId']

@@ -34,7 +34,38 @@ document.addEventListener('DOMContentLoaded', () => {
   horaInicioEl.addEventListener('change', calcularTotalHoras);
   horaFinalEl.addEventListener('change', calcularTotalHoras);
 
+  // VALIDACIÓN DE TELÉFONOS (Solo Números, Max 10)
+  const inputsTelefonos = [
+      document.getElementById('telefono'),
+      document.getElementById('telefono_secundario')
+  ];
 
+  inputsTelefonos.forEach(input => {
+      if (input) {
+          input.addEventListener('input', function(e) {
+              // 1. Quita todo lo que NO sea número (incluyendo signo menos)
+              let valorLimpio = this.value.replace(/[^0-9]/g, '');
+              
+              // 2. Corta a 10 dígitos
+              if (valorLimpio.length > 10) {
+                  valorLimpio = valorLimpio.slice(0, 10);
+              }
+
+              // 3. Asigna de vuelta
+              if (this.value !== valorLimpio) {
+                  this.value = valorLimpio;
+              }
+          });
+      }
+  });
+
+  // Validación para el MONTO (evitar negativos)
+  const inputMonto = document.getElementById('dim_totalamount');
+  if (inputMonto) {
+      inputMonto.addEventListener('input', function() {
+          if (this.value < 0) this.value = '';
+      });
+  }
   /**
    * 4. Función principal para manejar el envío del formulario
    */
@@ -43,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     messageEl.textContent = '';
     messageEl.className = '';
 
-    // --- OBTENER VALORES (SECCIÓN MODIFICADA) ---
+    // --- OBTENER VALORES ---
     const dim_name = document.getElementById('nombre').value.trim();
     const dim_secondname = document.getElementById('segundo_nombre').value.trim();
     const dim_lastname = document.getElementById('apellido_paterno').value.trim();
@@ -63,11 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const montoInput = document.getElementById('dim_totalamount');
     const dim_totalamount_raw = montoInput ? montoInput.value : '0';
 
-    // --- VALIDACIÓN BÁSICA ---
-    // Modificado para incluir apellido_paterno
-    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal) {
+   // --- VALIDACIÓN BÁSICA ---
+    // Agregué: || !dim_totalamount_raw
+    if (!dim_name || !dim_lastname || !dim_phonenumber || !dim_address || !fecha || !horaInicio || !horaFinal || !dim_totalamount_raw) {
       showFormMessage('Por favor, completa todos los campos obligatorios.', 'error');
       return; 
+    }
+
+    // NUEVO: Validar longitud exacta de 10 dígitos
+    if (dim_phonenumber.length !== 10) {
+        showFormMessage('El teléfono principal debe tener 10 dígitos exactos.', 'error');
+        return;
     }
 
     // --- TRANSFORMACIÓN DE DATOS ---
@@ -77,21 +114,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const dim_startdate = `${fecha} ${horaInicio}:00`;
     const dim_enddate = `${fecha} ${horaFinal}:00`;
 
-    // --- CREAR EL "DICCIONARIO" (SECCIÓN MODIFICADA) ---
+    // --- CREAR EL OBJETO PARA LA API ---
     const datosParaAPI = {
-      DIM_EventAddress: `${dim_address}, ${municipio}, ${estado}`, // Combinamos dirección, municipio y estado
+      DIM_EventAddress: `${dim_address}, ${municipio}, ${estado}`,
       DIM_StartDate: dim_startdate,
       DIM_EndDate: dim_enddate,
       DIM_NHours: dim_nhours, 
       DIM_TotalAmount: dim_totalamount, 
       DIM_Notes: dim_notes,
       DIM_Name: dim_name,
-      DIM_SecondName: dim_secondname, // <-- CAMPO ACTUALIZADO
+      DIM_SecondName: dim_secondname,
       DIM_LastName: dim_lastname,
-      DIM_SecondLastName: dim_secondlastname, // <-- CAMPO ACTUALIZADO
+      DIM_SecondLastName: dim_secondlastname,
       DIM_PhoneNumber: dim_phonenumber,
-      DIM_SecondPhoneNumber: dim_secondphonenumber, // Tu HTML aún no tiene teléfono secundario
-      DIM_Address: dim_address, // Mantenemos la dirección de calle por separado si la API lo requiere
+      DIM_SecondPhoneNumber: dim_secondphonenumber,
+      DIM_Address: dim_address,
       DIM_ServiceOwnersId: DIM_ServiceOwnersId
     };
 
@@ -106,22 +143,40 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Entrando al try");
         const respuesta = await crear_reservacion(datosParaAPI);
         console.log("Respuesta de la API:", respuesta);
+
         if (respuesta.success) {
+            // ✅ CASO DE ÉXITO
             showFormMessage('¡Reservación creada con éxito!', 'success');
             eventForm.reset(); 
             totalHorasEl.value = "00:00";
             
-            // AVISAR A LA PÁGINA PRINCIPAL PARA CERRAR EL MODAL
+            // AVISAR A LA PÁGINA PRINCIPAL PARA CERRAR EL MODAL (Rápido: 500ms)
             setTimeout(() => {
                 window.parent.postMessage('eventoRegistrado', '*');
-            }, 1500); 
+            }, 500); 
 
         } else {
-            showFormMessage(`Error: ${respuesta.message || 'Error desconocido'}`, 'error');
+            // ❌ CASO DE ERROR (Lógica nueva para detectar fechas ocupadas)
+            const errorMsg = (respuesta.message || '').toLowerCase();
+
+            // Buscamos palabras clave que indiquen conflicto de horario
+            if (errorMsg.includes('ocupad') || errorMsg.includes('cruce') || errorMsg.includes('overlap') || errorMsg.includes('existe')) {
+                showFormMessage('⚠️ FECHA OCUPADA: Ya existe un evento en este horario.', 'error');
+            } else {
+                // Error genérico
+                showFormMessage(`Error: ${respuesta.message || 'Error desconocido'}`, 'error');
+            }
         }
     } catch (error) {
+        // ❌ ERROR DE CONEXIÓN O EXCEPCIÓN
         console.error("Error al enviar el formulario:", error);
-        showFormMessage(`Error al conectar con el servidor: ${error.message}`, 'error');
+        
+        const errorMsg = error.message.toLowerCase();
+        if (errorMsg.includes('ocupad') || errorMsg.includes('409')) {
+             showFormMessage('⚠️ HORARIO NO DISPONIBLE: Por favor revisa la fecha y hora.', 'error');
+        } else {
+             showFormMessage(`Error al conectar con el servidor: ${error.message}`, 'error');
+        }
     } finally {
         submitButton.disabled = false;
     }
@@ -133,6 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function showFormMessage(message, type) {
     messageEl.textContent = message;
     messageEl.className = type; 
+    // Opcional: Si quieres que los mensajes de error se borren después de unos segundos:
+    // if (type === 'error') setTimeout(() => { messageEl.textContent = ''; }, 5000);
   }
   
   /**
@@ -143,13 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const final = horaFinalEl.value;
  
     if (inicio && final) {
-      // Extraemos solo la parte de la hora (ej: "14" de "14:00")
       const inicioH = parseInt(inicio.split(':')[0], 10);
       const finalH = parseInt(final.split(':')[0], 10);
  
       let diffHoras = finalH - inicioH;
  
-      // Si la hora final es menor (ej: de 22:00 a 02:00), es un evento que cruza la medianoche
       if (diffHoras < 0) {
         diffHoras += 24;
       }

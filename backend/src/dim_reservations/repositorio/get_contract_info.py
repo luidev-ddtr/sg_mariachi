@@ -39,7 +39,8 @@ def get_contract_info(dim_reservation_id: str, conexion: Conexion) -> dict:
     Vrsv.DIM_TotalAmount AS pago_total,
     people.DIM_Address AS contratante_domicilio,
     people.DIM_PhoneNumber AS contratante_telefono,
-    people.DIM_SecondPhoneNumber AS contratante_segundo_telefono
+    people.DIM_SecondPhoneNumber AS contratante_segundo_telefono,
+    rsv.DIM_Notes  AS servicio_notas
     FROM vista_reservaciones AS Vrsv
     JOIN dim_reservation AS rsv 
         ON rsv.DIM_ReservationId = Vrsv.DIM_ReservationId
