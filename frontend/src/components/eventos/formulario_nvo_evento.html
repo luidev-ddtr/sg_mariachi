@@ -23,7 +23,7 @@
 
 
   <div class="form-container">
-    <form id="event-form">
+    <form id="event-form" novalidate>
       <h2>Nuevo evento</h2>
 
       <div class="form-row">
@@ -51,11 +51,11 @@
       <div class="form-row">
         <div class="form-group">
           <label for="telefono">Teléfono *</label>
-          <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="10 dígitos">
+          <input type="tel" id="telefono" name="telefono" required pattern="[0-9]{10}" placeholder="10 dígitos" maxlength="10">
         </div>
         <div class="form-group">
           <label for="telefono_secundario">Teléfono 2</label>
-          <input type="tel" id="telefono_secundario" name="telefono_secundario" pattern="[0-9]{10}" placeholder="10 dígitos">
+          <input type="tel" id="telefono_secundario" name="telefono_secundario" pattern="[0-9]{10}" placeholder="10 dígitos" maxlength="10">
         </div>
         <div class="form-group">
           <label for="fecha">Fecha *</label>
@@ -106,7 +106,7 @@
 
       <div class="form-group full-width">
         <label for="dim_totalamount">Monto Total *</label>
-        <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required>
+        <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required step="500" min="8000">
       </div>
 
       <div id="form-message"></div>

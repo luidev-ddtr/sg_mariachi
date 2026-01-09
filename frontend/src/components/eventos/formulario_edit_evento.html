@@ -16,7 +16,7 @@
     </div>
 
     <div class="form-container">
-        <form id="event-form">
+        <form id="event-form" novalidate>
             <h2>Editar Evento</h2>
 
             <div class="form-section">
@@ -46,7 +46,7 @@
                     </div>
                     <div class="form-group">
                         <label for="telefono_secundario">Teléfono 2 (Opcional)</label>
-                        <input type="tel" id="telefono_secundario" name="telefono_secundario" pattern="[0-9]{10}">
+                        <input type="tel" id="telefono_secundario" name="telefono_secundario" ppattern="[0-9]{10}" maxlength="10">
                     </div>
                 </div>
             </div>
@@ -89,13 +89,13 @@
                 <h3>Costo</h3>
                 <div class="form-group">
                     <label for="dim_totalamount">Monto Total (Precio)</label>
-                    <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required>
+                    <input type="number" id="dim_totalamount" name="DIM_TotalAmount" required step="500" min="0" >
                 </div>
             </div>
 
             <div id="form-message"></div>
 
-            <button type="submit" class="submit-btn">Guardar cambios</button>
+            <button type="submit" class="submit-btn" formnovalidate>Guardar cambios</button>
         </form>
     </div>
 </div>

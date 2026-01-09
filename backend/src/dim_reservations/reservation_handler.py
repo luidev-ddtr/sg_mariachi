@@ -110,7 +110,13 @@ class ReservationService:
         # Esto es clave para que las pruebas puedan compartir una transacción.
         conexion = conn or Conexion()
         dim_date_service = DIM_DATE(conexion)
-        date_id = dim_date_service.dateId
+
+        # Extraer la fecha del evento para usarla como DIM_DateId
+        event_date = datetime.fromisoformat(_reservation['DIM_StartDate'])
+        #date_id = dim_date_service.dateId
+        #Nueva forma de obtener el dateId basado en la fecha del evento
+        event_date_id = dim_date_service.get_id_by_object_date(event_date.year, event_date.month, event_date.day)
+
         try:
             # 1. Validación de campos requeridos
             required_fields = [ 'DIM_ServiceOwnersId', 'DIM_StartDate', 'DIM_EndDate', 'DIM_EventAddress']
@@ -166,7 +172,7 @@ class ReservationService:
             print(res_id)
             
             
-            if not date_id or "No se pudo" in date_id:
+            if not event_date_id or "No se pudo" in event_date_id:
                 return 500, "esta fecha no existe"
 
             n_hours = (new_end - new_start).total_seconds() / 3600.0
@@ -176,7 +182,13 @@ class ReservationService:
                 DIM_ReservationId=res_id,
                 DIM_PeopleId=people_id,
                 DIM_StatusId= get_status_pending(),
-                DIM_DateId=date_id,
+                
+                # Linea original del DIM_DateId
+                #DIM_DateId=date_id,
+
+                # Nueva linea para el DIM_DateId basado en la fecha del evento
+                DIM_DateId=event_date_id,
+
                 DIM_ServiceOwnersId=service_owners_id,
                 DIM_EventAddress=_reservation['DIM_EventAddress'],
                 DIM_StartDate=new_start.isoformat(),
@@ -502,5 +514,39 @@ class ReservationService:
             print(f"❌ Error en handler al obtener información del contrato: {e}")
             return 500, f"Error interno del servidor: {e}", None
         finally:
+            if not conn:
+                conexion.close_conexion()
+
+# La cancelacion de una reservacion se hara de la misma forma que la de archivar
+# Esto esta aun en prueba
+    def cancelled_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str]:
+        conexion = conn or Conexion()
+        reserva_service = ReservaService(conexion)
+        try:
+            # 1. Validar que el ID de la reservación venga en el diccionario
+            reservation_id = _reservation.get('DIM_ReservationId')
+            if not reservation_id:
+                return 400, "Falta el ID de la reservación (DIM_ReservationId).", []
+
+            # 2. Llamar a la función del repositorio para cancelar
+            success = reserva_service.cancelled_reservation_by_id(reservation_id, conexion)
+
+            if success:
+                # Después de cancelar, obtenemos los datos actualizados
+                updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
+                if not updated_reservation:
+                    # Esto sería raro, pero es un buen control de seguridad
+                    return 404, "La reservación fue cancelada, pero no se pudo recuperar la información actualizada.", []
+                
+                return 200, "Reservación cancelada exitosamente.", [updated_reservation]
+            else:
+                # Si la función de cancelado falla, devolvemos un error de servidor.
+                return 500, "Ocurrió un error al intentar cancelar la reservación.", []
+        except Exception as e:
+            print(f"❌ Error en el handler al cancelar la reserva: {e}")
+            # No hacemos rollback aquí porque la función de cancelado maneja su propia transacción.
+            return 500, f"Error interno del servidor: {e}", []
+        finally:
+            # Solo cierra la conexión si fue creada dentro de este método.
             if not conn:
                 conexion.close_conexion()

@@ -32,6 +32,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     horaFinalInput.addEventListener('change', stopAndCalculate);
     horaFinalInput.addEventListener('click', (e) => e.stopPropagation());
 
+    // VALIDACIÓN ESTRICTA (Solo Números)
+    const inputsTelefonos = [
+        document.getElementById('telefono'),
+        document.getElementById('telefono_secundario')
+    ];
+
+    inputsTelefonos.forEach(input => {
+        if (input) {
+            input.addEventListener('input', function(e) {
+                // 1. Guardamos el valor original para comparar
+                const valorOriginal = this.value;
+                
+                // 2. Reemplazamos CUALQUIER cosa que no sea número (letras, espacios, símbolos)
+                // /[^0-9]/g significa: "Busca todo lo que NO sea un dígito del 0 al 9 y bórralo"
+                let valorLimpio = valorOriginal.replace(/[^0-9]/g, '');
+
+                // 3. Limitamos a 10 dígitos
+                if (valorLimpio.length > 10) {
+                    valorLimpio = valorLimpio.slice(0, 10);
+                }
+
+                // 4. Solo actualizamos si hubo cambios (evita parpadeos)
+                if (valorOriginal !== valorLimpio) {
+                    this.value = valorLimpio;
+                }
+            });
+            
+            // Seguridad extra: Evitar pegar texto con formato
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
+                const textoLimpio = textoPegado.replace(/[^0-9]/g, '').slice(0, 10);
+                document.execCommand('insertText', false, textoLimpio);
+            });
+        }
+    });
+    // =======================================================
+    // NUEVO: Validación para el MONTO (evitar negativos)
+    // =======================================================
+    const inputMonto = document.getElementById('dim_totalamount');
+    if (inputMonto) {
+        inputMonto.addEventListener('input', function() {
+            if (this.value < 0) this.value = '';
+        });
+    }
     // 4. ENVIAR CAMBIOS (UPDATE)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
