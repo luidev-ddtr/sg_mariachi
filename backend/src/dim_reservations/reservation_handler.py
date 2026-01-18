@@ -14,6 +14,7 @@ from src.dim_reservations.repositorio.read_reservations import read_reservations
 from src.dim_reservations.repositorio.archive_reservation import archive_reservation_by_id
 from src.dim_reservations.repositorio.get_contract_info import get_contract_info
 
+from src.dim_reservations.repositorio.cancelled_reservation import cancelled_reservation_by_id
 
 
 people_services = PeopleService()
@@ -517,7 +518,7 @@ class ReservationService:
             if not conn:
                 conexion.close_conexion()
 
-# La cancelacion de una reservacion se hara de la misma forma que la de archivar
+#La cancelacion de una reservacion se hara de la misma forma que la de archivar
 # Esto esta aun en prueba
     def cancelled_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str]:
         conexion = conn or Conexion()
@@ -528,8 +529,25 @@ class ReservationService:
             if not reservation_id:
                 return 400, "Falta el ID de la reservación (DIM_ReservationId).", []
 
+            # 2. Obtener la reservación para verificar su estatus
+            existing_reservation = reserva_service.get_reservation_by_id(reservation_id)
+            if not existing_reservation:
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", []
+            
+            #3. Verificar si el estatus es 'pendiente, cancelado, archivado o completado'
+            current_status_id = existing_reservation['DIM_StatusId']
+            allowed_statuses = [
+                'c842035f-aecb-5099',  # ID de cancelada
+                'd9664265-818c-52dc',  # ID de completada
+                '624a7243-52a7-5e88'   # ID de archivada (para evitar errores si se intenta cancelar de nuevo)
+
+            ]
+
+            if current_status_id not in allowed_statuses:
+                return 400, "La reservación no puede ser cancelada porque su estatus no es 'Pendiente'.", []
+
             # 2. Llamar a la función del repositorio para cancelar
-            success = reserva_service.cancelled_reservation_by_id(reservation_id, conexion)
+            success = cancelled_reservation_by_id(reservation_id, conexion)
 
             if success:
                 # Después de cancelar, obtenemos los datos actualizados
@@ -548,5 +566,58 @@ class ReservationService:
             return 500, f"Error interno del servidor: {e}", []
         finally:
             # Solo cierra la conexión si fue creada dentro de este método.
+            if not conn:
+                conexion.close_conexion()
+
+
+#Agregaremos una tipo logica de pagos
+#donde se restara el anticipo al total y se actualizara el restante
+    def process_payment(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str]:
+        """
+        Procesa un pago para una reservación existente.
+
+        Flujo:
+        1. Valida que los campos requeridos del frontend estén presentes.
+        2. Obtiene los datos completos de la reserva existente desde la BD.
+        3. Calcula el nuevo pago restante después de aplicar el pago recibido.
+        4. Actualiza el registro de la reservación con el nuevo pago restante.
+        """
+        conexion = conn or Conexion()
+        reserva_service = ReservaService(conexion)
+        try:
+            # 1. Validar campos de entrada del frontend
+            required_fields = ['DIM_ReservationId', 'payment_amount']
+            if not all(field in _reservation for field in required_fields):
+                return 400, "Faltan campos requeridos para procesar el pago.", []
+
+            reservation_id = _reservation['DIM_ReservationId']
+            payment_amount = float(_reservation['payment_amount'])
+
+            # 2. Obtener datos completos de la reserva existente
+            existing_reservation_data = reserva_service.get_reservation_by_id(reservation_id)
+            if not existing_reservation_data:
+                return 404, f"No se encontró una reserva con el ID {reservation_id}", []
+
+            current_remaining_payment = float(existing_reservation_data['DIM_RemainingPayment'])
+
+            # 3. Calcular el nuevo pago restante
+            if payment_amount > current_remaining_payment:
+                return 400, "El monto del pago excede el pago restante.", []
+
+            new_remaining_payment = current_remaining_payment - payment_amount
+
+            # 4. Actualizar el registro de la reservación
+            success = reserva_service.update_remaining_payment(reservation_id, new_remaining_payment)
+            if not success:
+                return 500, "Error al actualizar el pago restante en la reservación.", []
+
+            conexion.save_changes()
+            return 200, "Pago procesado exitosamente.", []
+
+        except Exception as e:
+            print(f"❌ Error al procesar el pago: {e}")
+            conexion.conn.rollback()
+            return 500, f"Error al procesar el pago: {e}", []
+        finally:
             if not conn:
                 conexion.close_conexion()
