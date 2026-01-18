@@ -6,6 +6,21 @@ import { ArchivarReservacion } from '../../api/api_reservacion_archivar.js';
 import { renderReservationsTable } from './eventos_logic.js';
 import { TableDropdownManager } from './dropdown_manajer.js';
 
+// === FUNCIÓN PARA ABRIR EL CONTRATO (DETALLES) ===
+const openContractModal = (eventId) => {
+  // La ruta debe ser relativa al panel de control que está en /pages
+  const url = `../src/components/eventos/formulario_contrato.html?id=${eventId}`;
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalFrame = document.getElementById('modalFrame');
+  
+  if (modalOverlay && modalFrame) {
+    modalFrame.src = url;
+    modalOverlay.classList.add('visible');
+  } else {
+    console.error('No se encontró el modal para el contrato');
+  }
+};
+
 // === FUNCIÓN PARA ABRIR MODAL DE EDICIÓN ===
 const openEditModal = (eventId) => {
   const url = `../src/components/eventos/formulario_edit_evento.html?id=${eventId}`;
@@ -25,7 +40,6 @@ const openArchiveModal = (reservationId) => {
   const modal = document.getElementById('confirmArchiveModal');
   
   if (modal) {
-    // Guardamos el ID en el botón de confirmación
     const confirmBtn = modal.querySelector('#btn-confirm-archive');
     if (confirmBtn) {
       confirmBtn.dataset.id = reservationId;
@@ -49,26 +63,18 @@ const setupConfirmationModalListeners = () => {
   const modal = document.getElementById('confirmArchiveModal');
   if (!modal) return;
 
-  // Botón de cerrar (X)
   const closeBtn = modal.querySelector('.close-modal');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeArchiveModal);
-  }
+  if (closeBtn) closeBtn.addEventListener('click', closeArchiveModal);
 
-  // Botón de cancelar
   const cancelBtn = modal.querySelector('#btn-cancel-archive');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeArchiveModal);
-  }
+  if (cancelBtn) cancelBtn.addEventListener('click', closeArchiveModal);
 
-  // Botón de confirmar
   const confirmBtn = modal.querySelector('#btn-confirm-archive');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', async () => {
       const reservationId = confirmBtn.dataset.id;
       if (reservationId) {
         try {
-          console.log('Archivando reservación desde eventos_ui:', reservationId);
           await ArchivarReservacion(reservationId);
           closeArchiveModal();
           document.dispatchEvent(new CustomEvent('evento-actualizado', { detail: 'archivado' }));
@@ -80,11 +86,8 @@ const setupConfirmationModalListeners = () => {
     });
   }
 
-  // Cerrar al hacer clic fuera del modal
   window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      closeArchiveModal();
-    }
+    if (event.target === modal) closeArchiveModal();
   });
 };
 
@@ -97,12 +100,8 @@ const setupFilterListener = () => {
   if (filterButton && dateInput && statusSelect) {
     filterButton.addEventListener('click', (event) => {
       event.preventDefault();
-      const fecha = dateInput.value;
-      const estado = statusSelect.value;
-      renderReservationsTable(fecha, estado);
+      renderReservationsTable(dateInput.value, statusSelect.value);
     });
-  } else {
-    console.error("No se encontraron los elementos del filtro. Revisa los IDs.");
   }
 };
 
@@ -114,42 +113,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   if (dateInput) dateInput.value = today;
 
-  // 1. Carga inicial de la tabla
   renderReservationsTable(today, statusSelect?.value || 'todos');
   
-  // 2. Configurar listeners de modales y filtros
   setupConfirmationModalListeners();
   setupFilterListener();
 
-  // 3. 🔥 NUEVO: Inicializar el dropdown manager
+  // 3. 🔥 VINCULACIÓN CON EL DROPDOWN MANAGER
   new TableDropdownManager('#tabla-eventos tbody', {
-    onEdit: (id) => {
-      console.log('Editando reservación:', id);
-      openEditModal(id);
-    },
-    onArchive: (id) => {
-      console.log('Solicitando archivar reservación:', id);
-      openArchiveModal(id);
-    },
-    onDetails: (id) => {
-      console.log('Ver detalles de reservación:', id);
-      // Aquí puedes agregar la lógica para ver detalles
-      // Por ejemplo: abrirModalDetalles(id);
-    },
-    onPay: (id) => {
-      console.log('Procesando pago de reservación:', id);
-      // Aquí puedes agregar la lógica para pagar
-      // Por ejemplo: abrirModalPago(id);
-    }
+    onEdit: (id) => openEditModal(id),
+    onArchive: (id) => openArchiveModal(id),
+    onDetails: (id) => openContractModal(id), // <--- Llama a la función del contrato
+    onPay: (id) => console.log('Procesando pago de reservación:', id)
   });
 
-  // 4. Listener para recarga automática
   document.addEventListener('evento-actualizado', () => {
-    console.log("🔄 Recibida señal de actualización: Repintando tabla...");
-    
     const fechaActual = dateInput ? dateInput.value : today;
     const estadoActual = statusSelect ? statusSelect.value : 'todos';
-
     renderReservationsTable(fechaActual, estadoActual);
   });
 });
