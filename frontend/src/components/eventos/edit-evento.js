@@ -202,7 +202,7 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById('direccion').value = datos.DIM_EventAddress || datos.evento_lugar || "";
 
         // 2. Descripción (Notas) al textarea de descripción
-        document.getElementById('descripcion').value = datos.DIM_Notes || "";
+        document.getElementById('descripcion').value = datos.servicio_notas || "";
         document.getElementById('dim_totalamount').value = datos.DIM_TotalAmount || datos.pago_total || 0;
 
         calcularTotalHoras();

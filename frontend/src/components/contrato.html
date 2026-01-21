@@ -3,69 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <title>Contrato Mariachi San Nicolas</title>
-    <link rel="stylesheet" href="../styles/styles_contrato.css"> <!--  Editar ruta-->
+    <link rel="stylesheet" href="../../styles/style_contrato.css">
 </head>
 <body>
     <div class="contrato-container">
         <img src="../../public/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo"> <!--editar-->
 
-    <h1>Mariachi San Nicolas</h1>
-    <h2>DE LOS HNOS. HERNANDEZ</h2>
-    <p>#si señor</p>
-    <p>Oficina (759) 7233732 7721516602 7721451172 7721513364 7721177996</p>
-    <h2>Contrato</h2>
+    <div class="contrato-container">
+        <h1>Mariachi San Nicolas</h1>
+        <h2>DE LOS HNOS. HERNANDEZ</h2>
+        <p>#si señor</p>
+        <p>Oficina (759) 7233732 7721516602 7721451172 7721513364 7721177996</p>
+        <h2>Contrato</h2>
 
-    <p>
-        Bajo este presente contrato la agrupación musical mariachi San
-        Nicolás y por otra parte el señor(a) ____<span id="contratante_nombre"></span>
-        bajo las siguientes clausulas:
-    </p>
+        <p>
+            Bajo este presente contrato la agrupación musical mariachi San
+            Nicolás y por otra parte el señor(a) <span id="contratante_nombre"></span>
+            bajo las siguientes clausulas:
+        </p>
 
-    <ol>
-        <li>
-            <p>Mariachi San Nicolás deberá presentarse en: <span id="evento_lugar"></span></p>
-            <p>
-                El día __<span id="evento_dia"></span> de __<span id="evento_mes"></span> del __ <span id="evento_anio"></span> con un total
-                de: __ <span id="evento_horas"></span> hrs, dando principio a las __ <span id="evento_hora_inicio"></span> hrs y concluyendo
-                a las __ <span id="evento_hora_fin"></span> hrs.
-            </p>
-        </li>
-        <li>
-            <p>
-                El contratante se compromete a pagar la cantidad de
-                $__<span id="pago_total"></span> de la siguiente forma $__<span id="pago_anticipo"></span> al firmar el
-                presente contrato y la cantidad restante $__ <span id="pago_restante"></span> al
-                concluir el evento.
-            </p>
-        </li>
-        <li>
-            <p>El contratante se compromete a brindar todo tipo de garantías tanto a los integrantes del mariachi San Nicolás como a su equipo de trabajo.</p>
-        </li>
-        <li>
-            <p>En caso de no llevarse a cabo el evento organizado por causas de fuerza mayor deberá de ser cubierto el importe total que marca dicho contrato.</p>
-        </li>
-        <li>
-            <p>Domicilio del contratante: ___ <span id="contratante_domicilio"></span> con teléfono: __ <span id="contratante_telefono"></span></p>
-        </li>
-    </ol>
+        <ol>
+            <li>
+                <p>Mariachi San Nicolás deberá presentarse en: <span id="evento_lugar"></span></p>
+                <p>
+                    El día <span id="evento_dia"></span> de <span id="evento_mes"></span> del <span id="evento_anio"></span> con un total
+                    de: <span id="evento_horas"></span> hrs, dando principio a las <span id="evento_hora_inicio"></span> hrs y concluyendo
+                    a las <span id="evento_hora_fin"></span> hrs.
+                </p>
+            </li>
+            <li>
+                <p>
+                    El contratante se compromete a pagar la cantidad de
+                    $<span id="pago_total"></span> de la siguiente forma $<span id="pago_anticipo"></span> al firmar el
+                    presente contrato y la cantidad restante $<span id="pago_restante"></span> al
+                    concluir el evento.
+                </p>
+            </li>
+            <li>
+                <p>Domicilio del contratante: <span id="contratante_domicilio"></span> con teléfono: <span id="contratante_telefono"></span></p>
+            </li>
+        </ol>
 
-    <p>Ixmiquilpan Hgo a ___ <span id="contrato_dia"></span> de ____ <span id="contrato_mes"></span> del ___<span id="contrato_anio"></span></p>
+        <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
+    </div>
+<script type="module">
+    // ✅ Importamos la función de la API
+    import { GetContractInfo } from '../../api/api_reservacion_read.js';
 
-    <br>
-    <br>
-    <p>___________________________________</p>
-    <p>Mariachi San Nicolás</p>
-    <br>
-    <br>
-    <p>___________________________________</p>
-    <p>Contratante</p>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
 
-    <p>
-        <strong>Nota:</strong> Estimado cliente no reconocemos arreglos verbales las condiciones del
-        contrato se dejan estipuladas al firmar el presente
-    </p>
+        // 1. Definimos la lista de meses una sola vez
+        const meses = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+
+        if (id) {
+            try {
+                const info = await GetContractInfo(id);
+                
+                // 2. Definimos 'data' correctamente
+                const data = Array.isArray(info) ? info[0] : info;
+
+                if (data) {
+                    // 3. Llenado automático de campos
+                    Object.keys(data).forEach(key => {
+                        const el = document.getElementById(key);
+                        if (el) {
+                            // 🔥 Lógica especial para convertir el número de mes a texto
+                            if (key === 'evento_mes') {
+                                const numeroMes = parseInt(data[key]);
+                                // Restamos 1 porque los meses en el array empiezan en 0
+                                el.textContent = meses[numeroMes - 1] || data[key];
+                            } else {
+                                el.textContent = data[key];
+                            }
+                        }
+                    });
+
+                    // 4. Llenado de fecha actual del contrato (Firma)
+                    const hoy = new Date();
+                    document.getElementById('contrato_dia').textContent = hoy.getDate();
+                    document.getElementById('contrato_mes').textContent = meses[hoy.getMonth()];
+                    document.getElementById('contrato_anio').textContent = hoy.getFullYear();
+
+                } else {
+                    console.warn("La API no devolvió datos para el ID:", id);
+                }
+            } catch (error) {
+                console.error("Error al cargar contrato:", error);
+            }
+        }
+    });
+</script>
     
-      </div>
-
+</script>
 </body>
 </html>

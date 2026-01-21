@@ -1,6 +1,6 @@
 from src.utils.conexion import Conexion
 
-def archive_reservation_by_id(id: str, connection: Conexion):
+def cancelled_reservation_by_id(id: str, connection: Conexion):
     """
     Archiva lógicamente una reserva en la base de datos por su ID.
 
