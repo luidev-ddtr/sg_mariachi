@@ -142,17 +142,17 @@ def archive_reservation() -> tuple[Any]:
 @reservation_route.route('/cancel', methods=['POST'])
 def cancel_reservation() -> tuple[Any]:
     """
-    Crea una nueva reserva en la tabla dim_people
+    Cancela una reserva existente
     """
     try:
         id_reservation = request.get_json()
-        status, message = reservation_options.cancel(id_reservation) #TODO Cambiar al nombre verdadero que se pornga
+        status, message, data = reservation_options.cancelled_reservation(id_reservation)
         
-        if status != 201:
+        if status != 200:
             print(message)
             return send_error(message, status)
         
-        return send_success("Reserva creada exitosamente", None, 200)
+        return send_success(message, data, 200)
     except Exception as e:
         print(e)
         return send_error(str(e), 500)
