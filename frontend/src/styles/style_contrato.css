@@ -1,4 +1,4 @@
-/* ESTILOS GENERALES DEL DOCUMENTO*/
+/*ESTILOS GENERALES DEL DOCUMENTO*/
 
 body {
     font-family: "Times New Roman", serif;
@@ -17,7 +17,7 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.15);
 }
 
-/*ENCABEZADO DEL CONTRATO*/
+/* Encabezado del contrato*/
 h1 {
     text-align: center;
     font-size: 32px;
@@ -57,7 +57,7 @@ h2:nth-of-type(2) {
     text-decoration: underline;
 }
 
-/* LISTA DE CLÁUSULAS*/
+/* Listas de clausulas*/
 ol {
     margin-top: 20px;
 }
@@ -67,7 +67,7 @@ ol li {
     text-align: justify;
 }
 
-/*FIRMAS*/
+/* Firmas*/
 .firmas {
     margin-top: 40px;
     text-align: center;
@@ -85,7 +85,7 @@ ol li {
     height: 1px;
 }
 
-/* NOTA DEL CONTRATO*/
+/*Nota del contrato*/
 .nota {
     margin-top: 40px;
     font-size: 14px;
@@ -93,7 +93,7 @@ ol li {
     text-align: justify;
 }
 
-/* LOGO DEL MARICACHI SAN NICOLÁS*/
+/*Logo*/
 .logo {
     width: 200px;
     display: block;
