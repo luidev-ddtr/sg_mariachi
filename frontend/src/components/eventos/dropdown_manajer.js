@@ -54,7 +54,11 @@ export class TableDropdownManager {
             this.actions.onEdit(id);
           }
           break;
-        
+        case 'cancel':
+          if (this.actions.onCancel) {
+            this.actions.onCancel(id);
+          }
+          break;
         default:
           console.warn(`Acción no reconocida: ${action}`);
       }
