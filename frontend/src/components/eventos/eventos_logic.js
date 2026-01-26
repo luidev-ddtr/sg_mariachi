@@ -60,6 +60,7 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
             <option value="archive">Archivar</option>
             <option value="pay">Pagar</option>
             <option value="edit">Actualizar</option>
+            <option value="cancel">Cancelar</option>
           </select></center>
         </td>
       </tr> 
