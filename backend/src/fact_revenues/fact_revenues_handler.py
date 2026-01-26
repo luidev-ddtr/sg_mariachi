@@ -41,7 +41,9 @@ class FactRevenuesHandler:
             # Si es mayor a 0 pero menor a 4000, es un error (asumiendo anticipo mínimo)
             if 0 < revenue.FACT_PaymentAmount < 4000:
                 return 400, "El monto del pago debe ser mayor a 4000 o 0.", []
+             
             
+
             #4. Generar el ID de la factura ya que no se proporciona
             fact_id =create_id([_revenue['DIM_DateId'], _revenue['DIM_ReservationId']])
             revenue.FACT_RevenueId = fact_id
@@ -62,16 +64,13 @@ class FactRevenuesHandler:
 
     def get_revenue_info(self, _revenue: dict, conn: Conexion = None) -> tuple:
         """
-        Obtiene la información de un ingreso facturado por su ID.
-
+        Obtiene la información de la reserva que se le aplicará el pago.
         Args:
             revenue_id (str): ID del ingreso facturado.
 
         Returns:
             dict: Diccionario con la información del ingreso facturado.
         """
-        # Aquí se podría agregar lógica para obtener el objeto desde la base de datos usando el servicio.
-        # Por ahora, devolvemos un diccionario vacío como marcador de posición.
         
         conexion = conn or Conexion()
         fact_revenue_service = FactRevenuesService(conexion)

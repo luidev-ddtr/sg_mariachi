@@ -41,6 +41,16 @@ class FactRevenuesService:
 
     def get_fact_revenues_by_id(self, reservation_id: str) -> list:
         """
-        Obtiene la información de los ingresos asociados a una reserva.
+        Obtiene la información de la reserva que se le aplicará el pago.
+
+        Args:
+            revenue_id (str): ID del ingreso facturado.
+
+        Returns:
+            list: Lista de diccionarios con la información del ingreso facturado.
         """
-        return get_fact_revenues_by_id(self.conn, reservation_id)
+        try:
+            return get_fact_revenues_by_id(reservation_id, self.conn)
+        except Exception as e:
+            print(f"Error al obtener los ingresos facturados: {e}")
+            return []
