@@ -13,6 +13,8 @@ from src.dim_reservations.repositorio.read_reservations import read_reservations
 #from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
 from src.dim_reservations.repositorio.archive_reservation import archive_reservation_by_id
 from src.dim_reservations.repositorio.get_contract_info import get_contract_info
+from src.fact_revenues.repositorio.get_total_paid import get_total_paid
+from src.fact_revenues.repositorio.get_payments_history import get_payments_history
 
 from src.dim_reservations.repositorio.cancelled_reservation import cancelled_reservation_by_id
 
@@ -489,10 +491,29 @@ class ReservationService:
             pago_total = float(contract_data['pago_total'])
             
             # Asumimos un 50% de anticipo por ahora. Esto se puede ajustar.
-            pago_anticipo = pago_total / 2
+            #pago_anticipo = pago_total / 2
+            
+            
+            # CÁLCULO REAL: Consultamos la tabla fact_revenues para ver cuánto han pagado realmente
+            # Esto suma todos los abonos registrados hasta el momento.
+            pago_anticipo = get_total_paid(reservation_id, conexion)
+            
+            # OBTENER HISTORIAL: Lista detallada de abonos
+            historial_pagos = get_payments_history(reservation_id, conexion)
+            
+            # El restante es simplemente el total menos lo acumulado
             pago_restante = pago_total - pago_anticipo
+            
+            # Evitamos números negativos por seguridad visual (opcional)
+            if pago_restante < 0: pago_restante = 0
+
+            # Obtener el ID de la fecha actual (DateId) para la transacción/factura
+            dim_date_service = DIM_DATE(conexion)
+            current_date_id = dim_date_service.dateId
 
             formatted_contract = {
+                "DIM_ReservationId": reservation_id, # Dato oculto para el frontend
+                "DIM_DateId": current_date_id,       # Dato oculto (Fecha de creación de factura)
                 "contratante_nombre": contract_data['contratante_nombre'],
                 "evento_lugar": contract_data['evento_locacion'],
                 "evento_dia": evento_fecha.day,
@@ -501,9 +522,10 @@ class ReservationService:
                 "evento_horas": contract_data['evento_horas'],
                 "evento_hora_inicio": contract_data['evento_hora_inicio'].strftime('%H:%M'),
                 "evento_hora_fin": contract_data['evento_hora_fin'].strftime('%H:%M'),
-                "pago_total": pago_total, # Esto aun esta en prueba
-                "pago_anticipo": pago_anticipo, # Esto aun esta en prueba
-                "pago_restante": pago_restante, # Esto aun esta en prueba
+                "pago_total": pago_total,
+                "pago_anticipo": pago_anticipo, # Ahora refleja la suma real de la BD
+                "pago_restante": pago_restante, # Ahora refleja la deuda real
+                "historial_pagos": historial_pagos, # Nueva lista para el frontend
                 "contratante_domicilio": contract_data['contratante_domicilio'],
                 "contratante_telefono": contract_data['contratante_telefono'],
                 "contratante_segundo_telefono": contract_data['contratante_segundo_telefono'],
