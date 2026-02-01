@@ -31,13 +31,14 @@ class FactRevenuesHandler:
                 if field not in _revenue:
                     return 400, f"Falta el campo requerido: {field}", []
 
-            # 2. Crear el objeto FactRevenues
+            #2. Crear el objeto FactRevenues
             revenue = FactRevenues(
                 FACT_RevenueId="", # Se genera abajo
-                FACT_PaymentAmount=_revenue['FACT_PaymentAmount'],
+                #FACT_PaymentAmount=_revenue['FACT_PaymentAmount'],
+                FACT_PaymentAmount=float(_revenue['FACT_PaymentAmount']), # Asegurar conversión a float
                 DIM_DateId=_revenue['DIM_DateId'],
                 DIM_ReservationId=_revenue['DIM_ReservationId']
-            )
+             )
 
             # 3. Validar que la factura no sea negativa
             # Se permite cualquier monto positivo para facilitar abonos y liquidaciones pequeñas

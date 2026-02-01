@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flask.wrappers import Response
 from typing import Any
 from src.fact_revenues.fact_revenues_handler import FactRevenuesHandler
 from src.routes.handle_message import send_error, send_success
@@ -10,6 +11,7 @@ revenue_handler = FactRevenuesHandler()
 # 2. Definimos el Blueprint (La Carpeta Virtual)
 # url_prefix define que todas las rutas aquí empezarán con /api/revenues/
 fact_revenues_route = Blueprint('fact_revenues_route', __name__, url_prefix='/api/revenues/')
+from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
 
 @fact_revenues_route.route('/create', methods=['POST'])
 def create_revenue() -> tuple[Any]:
