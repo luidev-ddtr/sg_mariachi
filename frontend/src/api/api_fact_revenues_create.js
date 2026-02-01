@@ -23,10 +23,10 @@ export const registrarPago = async (data) => {
             FACT_PaymentAmount: data.Amount // Mapeo de 'Amount' a 'FACT_PaymentAmount'
         };
 
-        console.log("Enviando pago a api/revenue/create:", payload);
+        console.log("Enviando pago a api/revenues/create:", payload);
 
         // La ruta 'revenue/create' es correcta.
-        const response = await axiosInstance.post('revenue/create', payload);
+        const response = await axiosInstance.post('revenues/create', payload);
         
         console.log("Respuesta del servidor al registrar pago:", response.data);
          
