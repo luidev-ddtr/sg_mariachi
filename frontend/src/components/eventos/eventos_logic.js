@@ -1,13 +1,10 @@
-// ✅ event_logic.js (VERSIÓN FINAL LIMPIA)
-// (TODA LA LÓGICA DE DATOS Y RENDERIZADO)
-
+// ✅ eventos_logic.js (VERSIÓN ACTUALIZADA)
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
 
-// 1. Función de fecha ajustada (Sin sumar días extra, confiamos en la hora del evento)
+// Funciones de formato (mantén las que ya tienes)
 const formatDate = (isoString) => {
   if (!isoString) return 'N/A';
   const date = new Date(isoString);
-  // Eliminada la suma de día +1 porque DIM_StartDate ya trae la fecha exacta con hora
   return date.toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
@@ -22,6 +19,37 @@ const formatCurrency = (amount) => {
   return amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 };
 
+// Función para calcular estadísticas
+export const calcularEstadisticas = (reservaciones) => {
+  const total = reservaciones.length;
+  const completados = reservaciones.filter(r => 
+    (r.DIM_StatusName || '').toLowerCase() === 'completado'
+  ).length;
+  const pendientes = reservaciones.filter(r => {
+    const status = (r.DIM_StatusName || '').toLowerCase();
+    return status === 'pendiente' || status === 'confirmado' || status === 'programado';
+  }).length;
+  
+  // También puedes calcular cancelados si lo necesitas
+  const cancelados = reservaciones.filter(r => 
+    (r.DIM_StatusName || '').toLowerCase() === 'cancelado'
+  ).length;
+  
+  return { total, completados, pendientes, cancelados };
+};
+
+// Función para actualizar las cards en el DOM
+export const actualizarCardsEstadisticas = (estadisticas) => {
+  const totalCompletados = document.getElementById('totalCompletados');
+  const totalPendientes = document.getElementById('totalPendientes');
+  const totalEventos = document.getElementById('totalEventos');
+  
+  if (totalCompletados) totalCompletados.textContent = estadisticas.completados;
+  if (totalPendientes) totalPendientes.textContent = estadisticas.pendientes;
+  if (totalEventos) totalEventos.textContent = estadisticas.total;
+};
+
+// Función principal para renderizar la tabla
 export const renderReservationsTable = async (dateParam, statusParam) => {
   const tbody = document.querySelector('#tabla-eventos tbody');
   if (!tbody) return;
@@ -31,9 +59,21 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
   try {
     const reservaciones = await GetReservaciones(dateParam);
     
+    // Calcular y actualizar estadísticas globales
+    const estadisticasGlobales = calcularEstadisticas(reservaciones);
+    actualizarCardsEstadisticas(estadisticasGlobales);
+    
+    // Filtrar para la tabla según el estado seleccionado
     let reservacionesFiltradas = statusParam.toLowerCase() !== 'todos'
       ? reservaciones.filter(r => (r.DIM_StatusName || 'pendiente').toLowerCase() === statusParam.toLowerCase())
       : reservaciones;
+    
+    // Calcular estadísticas de los eventos filtrados
+    const estadisticasFiltradas = calcularEstadisticas(reservacionesFiltradas);
+    
+    // Actualizar cards con estadísticas filtradas
+    // (Si quieres que muestren solo las estadísticas filtradas, descomenta la siguiente línea)
+    // actualizarCardsEstadisticas(estadisticasFiltradas);
 
     if (reservacionesFiltradas.length === 0) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No hay reservaciones.</td></tr>';
@@ -46,9 +86,7 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
         <td>${counter++}</td>
         <td>${item.DIM_fullname || 'N/A'}</td>
         <td>${item.DIM_PhoneNumber || 'N/A'}</td>
-        
         <td>${formatDate(item.DIM_StartDate)}</td>
-        
         <td>${formatTime(item.DIM_StartDate)}</td>
         <td>${formatTime(item.DIM_EndDate)}</td>
         <td>${formatCurrency(item.DIM_TotalAmount)}</td>
@@ -63,7 +101,7 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
             <option value="cancel">Cancelar</option>
           </select></center>
         </td>
-      </tr> 
+      </tr>
     `).join('');
   } catch (error) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
