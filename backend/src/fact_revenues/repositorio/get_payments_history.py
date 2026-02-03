@@ -9,8 +9,8 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
     # Seleccionamos la fecha legible (FullDate) y el monto
     query = """
         SELECT 
-            dd.FullDate,
-            fr.FACT_PaymentAmount
+            dd.FullDate AS fecha,
+            fr.FACT_PaymentAmount AS monto
         FROM fact_revenue fr
         INNER JOIN dim_date dd ON fr.DIM_DateId = dd.DIM_DateId
         WHERE fr.DIM_ReservationId = %s
@@ -24,12 +24,14 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
         history = []
         for row in rows:
             history.append({
-                'fecha': str(row[0]), # Convertimos fecha a string
-                'monto': float(row[1])
+                'fecha': str(row['fecha']), # Convertimos fecha a string
+                'monto': float(row['monto'])
             })
             
         return history
         
     except Exception as e:
         print(f"❌ Error al obtener historial de pagos: {e}")
+        # import traceback
+        # print(f"Error details: {traceback.format_exc()}")
         return []
