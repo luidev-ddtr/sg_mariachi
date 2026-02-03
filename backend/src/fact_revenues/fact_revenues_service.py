@@ -2,6 +2,7 @@ from src.utils.conexion import Conexion
 from src.fact_revenues.fact_revenues_model import FactRevenues
 from src.fact_revenues.repositorio.insert_payAmount import insert_payAmount
 from src.fact_revenues.repositorio.get_fact_revenues_by_id import get_fact_revenues_by_id
+from src.fact_revenues.repositorio.get_revenue_stats import get_revenue_stats
 
 
 class FactRevenuesService:
@@ -54,3 +55,16 @@ class FactRevenuesService:
         except Exception as e:
             print(f"Error al obtener los ingresos facturados: {e}")
             return []
+
+    def get_revenue_statistics(self, filter_type: str, year: int) -> list:
+        """
+        Obtiene las estadísticas de ingresos.
+
+        Args:
+            filter_type (str): Tipo de filtro ('month', 'week', 'year').
+            year (int): Año a consultar.
+
+        Returns:
+            list: Lista con los datos estadísticos.
+        """
+        return get_revenue_stats(self.conn, filter_type, year)

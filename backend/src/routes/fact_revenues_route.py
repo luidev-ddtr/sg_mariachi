@@ -53,3 +53,26 @@ def get_revenue_info() -> tuple[Any]:
         return send_success(message, result, status)
     except Exception as e:
         return send_error(str(e), 500)
+
+@fact_revenues_route.route('/stats', methods=['GET'])
+def get_revenue_stats() -> tuple[Any]:
+    """
+    Endpoint para obtener estadísticas de ganancias para las gráficas.
+    Acepta query params: 'filter_type' (month, week, year) y 'year'.
+    Ej: /api/revenues/stats?filter_type=week&year=2025
+    """
+    try:
+        # Para peticiones GET, los parámetros se leen de request.args
+        request_data = {
+            'filter_type': request.args.get('filter_type'), # El handler ya pone 'month' por defecto
+            'year': request.args.get('year') # El handler pone el año actual si es None
+        }
+        
+        status, message, result = revenue_handler.get_revenue_statistics(request_data)
+        
+        if status != 200:
+            return send_error(message, status)
+            
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)

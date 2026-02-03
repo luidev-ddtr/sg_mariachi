@@ -105,3 +105,35 @@ class FactRevenuesHandler:
             return 200, "Información obtenida correctamente", existing_revenue
         except Exception as e:
             return 500, f"Error interno del servidor: {e}", []
+        
+
+    def get_revenue_statistics(self, request_data: dict, conn: Conexion = None) -> tuple:
+        """
+        Obtiene las estadísticas de ganancias para las gráficas.
+        
+        Args:
+            request_data (dict): Puede contener 'filter_type' (month, week, year) y 'year'.
+        
+        Returns:
+            tuple: (status, message, data)
+        """
+        conexion = conn or Conexion()
+        fact_revenue_service = FactRevenuesService(conexion)
+        
+        try:
+            # Valores por defecto: filtro por mes y año actual
+            filter_type = request_data.get('filter_type', 'month')
+            year_from_request = request_data.get('year')
+            
+            # Si el año no viene en el request o es nulo, usar el actual.
+            # Si viene, convertirlo a entero.
+            year = int(year_from_request) if year_from_request else datetime.now().year
+            stats = fact_revenue_service.get_revenue_statistics(filter_type, year)
+            
+            return 200, "Estadísticas obtenidas correctamente", stats
+            
+        except Exception as e:
+            return 500, f"Error interno del servidor: {e}", []
+        finally:
+            if not conn:
+                conexion.close_conexion()
