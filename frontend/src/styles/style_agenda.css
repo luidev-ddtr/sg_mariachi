@@ -1,0 +1,132 @@
+
+/*RESET*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/*CONTENIDO*/
+.content {
+  min-height: 100vh;
+  padding: 20px;
+  background: #f9f9f9;
+}
+
+/*HEADER*/
+.header h1 {
+  /*background: linear-gradient(to right, #e6d5a3, #c3a46b);*/
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+/*mostrar mes-prueba
+*/
+.current-date {
+  font-size: 20px;
+  font-weight: 500;
+  color: #202124; 
+  margin: 0 15px;
+  white-space: nowrap;
+}
+/* CONTROLES*/
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Botón activo */
+.controls button.active {
+  background: rgb(51, 74, 221);
+  color: #fff;
+}
+
+/* Iconos */
+.material-icons {
+  font-size: 18px;
+}
+
+/* NAVEGACIÓN*/
+.nav-buttons {
+  display: flex;
+  gap: 5px;
+}
+/* Contenedor de botones de vista */
+.view-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+/*BUSCADOR*/
+.controls input {
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* CALENDARIO */
+#calendar {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/*Estilo encabezado de días*/
+.fc .fc-col-header-cell {
+  background-color: #f5f5f5;
+  border: none;
+  border-bottom: 1px solid #ddd;
+}
+
+.fc .fc-col-header-cell-cushion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-col-header-cell-cushion span {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Día actual */
+.fc .fc-day-today .fc-col-header-cell-cushion {
+  color: rgb(51, 68, 221);/*color de letra del dia actual*/
+}
+
+/* Día actual - fondo personalizado */
+.fc .fc-daygrid-day.fc-day-today,
+.fc .fc-timegrid-col.fc-day-today {
+  background-color: rgba(26, 115, 232, 0.08);
+}
+
+/*RESPONSIVE */
+@media (max-width: 768px) {
+  .controls input {
+    width: 100%;
+    margin-left: 0;
+  }
+}
