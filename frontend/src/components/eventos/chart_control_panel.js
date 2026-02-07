@@ -70,6 +70,13 @@ function initializeChart() {
 function processStatsData(stats) {
   console.log("Procesando datos estadísticos:", stats);
   
+  // Mapa para convertir números a nombres de meses
+  const monthNames = {
+    "1": "Ene", "2": "Feb", "3": "Mar", "4": "Abr", 
+    "5": "May", "6": "Jun", "7": "Jul", "8": "Ago", 
+    "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dic"
+  };
+
   if (!Array.isArray(stats)) {
     if (stats && stats.body && Array.isArray(stats.body)) {
       stats = stats.body;
@@ -89,34 +96,30 @@ function processStatsData(stats) {
   const values = [];
   
   stats.forEach((item, index) => {
-    // 1. Extraer label (Mes)
-    let label = item.label || item.mes || item.month || `Mes ${index + 1}`;
+    // 1. Extraer el identificador del mes
+    let rawLabel = item.label || item.mes || item.month || (index + 1);
     
-    // 2. EXTRAER VALOR (Aquí es donde estaba el detalle)
-    let value = 0;
+    // 2. Convertir número a nombre si es necesario
+    // Si rawLabel es "1" o 1, se convierte a "Ene"
+    let label = monthNames[String(rawLabel)] || rawLabel;
     
-    // Intentamos todas las posibilidades de nombres de columna que usa tu API
-    // Agregué 'total_revenue' y 'monto' que son comunes en tus proyectos anteriores
-    value = item.total || item.ingreso || item.total_revenue || item.monto || item.amount || 0;
+    // 3. Extraer valor (ingresos)
+    let value = item.total || item.ingreso || item.total_revenue || item.monto || item.amount || 0;
     
-    // Si el valor es un texto (como "14994.00"), lo convertimos a número real
     if (typeof value === 'string') {
       value = parseFloat(value);
     }
 
-    // Plan B: Si sigue siendo 0, buscamos cualquier propiedad que tenga un número
     if (value === 0) {
       const keys = Object.keys(item);
       for (let key of keys) {
-        // Si la propiedad es un número y no es el ID del mes, ese es nuestro dinero
-        if (!isNaN(item[key]) && key !== 'month' && key !== 'mes' && key !== 'label') {
+        if (!isNaN(item[key]) && !['month', 'mes', 'label'].includes(key)) {
           value = parseFloat(item[key]);
           break; 
         }
       }
     }
     
-    // Asegurar que no sea NaN para que ApexCharts no explote
     value = isNaN(value) ? 0 : value;
     
     labels.push(String(label).trim());
