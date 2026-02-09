@@ -14,8 +14,17 @@ document.addEventListener('DOMContentLoaded', function () {
   allDaySlot: false,
   height: 'auto',
   headerToolbar: false,
-//para el backend
+//para agregar los evento de la bd
   events: [],
+
+  //Código para la vista de año
+  views: {
+    multiMonthYear: {
+      type: 'multiMonth',
+      duration: { years: 1 },
+      buttonText: 'Año'
+        }
+  },
 
   //actualiza el título al cambiar fecha o vista
   datesSet: function () {
@@ -62,17 +71,15 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   document.getElementById('year').onclick = function () {
-    changeView('dayGridYear', this);
+    changeView('multiMonthYear', this);//SE CAMBIO ESTA LINEA
+    /*changeView('dayGridYear', this);*/
   };
 
 });
 
 
 
-/**
- * Actualiza el título según la vista actual
- * Mes / semana / día/ Año
- */
+/** Actualiza el título según la vista actual(mes y año)*/
 function updateCurrentDate(calendar) {
   const date = calendar.getDate();
   const viewType = calendar.view.type;
