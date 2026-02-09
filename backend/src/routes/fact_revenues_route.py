@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flask.wrappers import Response
 from typing import Any
 from src.fact_revenues.fact_revenues_handler import FactRevenuesHandler
 from src.routes.handle_message import send_error, send_success
@@ -10,6 +11,7 @@ revenue_handler = FactRevenuesHandler()
 # 2. Definimos el Blueprint (La Carpeta Virtual)
 # url_prefix define que todas las rutas aquí empezarán con /api/revenues/
 fact_revenues_route = Blueprint('fact_revenues_route', __name__, url_prefix='/api/revenues/')
+from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
 
 @fact_revenues_route.route('/create', methods=['POST'])
 def create_revenue() -> tuple[Any]:
@@ -44,6 +46,29 @@ def get_revenue_info() -> tuple[Any]:
         data = request.get_json()
         
         status, message, result = revenue_handler.get_revenue_info(data)
+        
+        if status != 200:
+            return send_error(message, status)
+            
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)
+
+@fact_revenues_route.route('/stats', methods=['GET'])
+def get_revenue_stats() -> tuple[Any]:
+    """
+    Endpoint para obtener estadísticas de ganancias para las gráficas.
+    Acepta query params: 'filter_type' (month, week, year) y 'year'.
+    Ej: /api/revenues/stats?filter_type=week&year=2025
+    """
+    try:
+        # Para peticiones GET, los parámetros se leen de request.args
+        request_data = {
+            'filter_type': request.args.get('filter_type'), # El handler ya pone 'month' por defecto
+            'year': request.args.get('year') # El handler pone el año actual si es None
+        }
+        
+        status, message, result = revenue_handler.get_revenue_statistics(request_data)
         
         if status != 200:
             return send_error(message, status)

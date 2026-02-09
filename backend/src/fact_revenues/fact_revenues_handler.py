@@ -1,7 +1,9 @@
+from src.dim_dates.dim_date import DIM_DATE
 from src.fact_revenues.fact_revenues_service import FactRevenuesService
 from src.fact_revenues.fact_revenues_model import FactRevenues
 from src.utils.conexion import Conexion
 from src.utils.id_generator import create_id
+from datetime import datetime
 
 class FactRevenuesHandler:
     def __init__(self):
@@ -29,25 +31,34 @@ class FactRevenuesHandler:
                 if field not in _revenue:
                     return 400, f"Falta el campo requerido: {field}", []
 
-            # 2. Crear el objeto FactRevenues
+            #2. Crear el objeto FactRevenues
             revenue = FactRevenues(
                 FACT_RevenueId="", # Se genera abajo
-                FACT_PaymentAmount=_revenue['FACT_PaymentAmount'],
+                #FACT_PaymentAmount=_revenue['FACT_PaymentAmount'],
+                FACT_PaymentAmount=float(_revenue['FACT_PaymentAmount']), # Asegurar conversión a float
                 DIM_DateId=_revenue['DIM_DateId'],
                 DIM_ReservationId=_revenue['DIM_ReservationId']
-            )
+             )
 
             # 3. Validar que la factura no sea negativa
-            # Si es mayor a 0 pero menor a 4000, es un error (asumiendo anticipo mínimo)
-            if 0 < revenue.FACT_PaymentAmount < 4000:
-                return 400, "El monto del pago debe ser mayor a 4000 o 0.", []
+            # Se permite cualquier monto positivo para facilitar abonos y liquidaciones pequeñas
+            if revenue.FACT_PaymentAmount <= 0:
+                return 400, "El monto del pago debe ser mayor a 0.", []
              
             
 
             #4. Generar el ID de la factura ya que no se proporciona
-            fact_id =create_id([_revenue['DIM_DateId'], _revenue['DIM_ReservationId']])
+            # Agregamos datetime.now() para evitar IDs duplicados si se hacen 2 pagos el mismo día
+            fact_id = create_id([_revenue['DIM_DateId'], _revenue['DIM_ReservationId'], str(datetime.now())])
             revenue.FACT_RevenueId = fact_id
             print(revenue.FACT_RevenueId)
+
+            # Para asegurar que el dim_date_id registre la fecha actual,
+            # podríamos validar que el DIM_DateId proporcionado corresponde a la fecha actual.
+            dim_date_service = DIM_DATE(conexion)
+            current_date_id = dim_date_service.dateId
+            if revenue.DIM_DateId != current_date_id:
+                return 400, f"El DIM_DateId proporcionado no corresponde a la fecha actual. Se esperaba {current_date_id}", []
 
             # 3. Usar el servicio para crear el ingreso facturado
             created = fact_revenue_service.create_revenue(revenue)
@@ -94,3 +105,35 @@ class FactRevenuesHandler:
             return 200, "Información obtenida correctamente", existing_revenue
         except Exception as e:
             return 500, f"Error interno del servidor: {e}", []
+        
+
+    def get_revenue_statistics(self, request_data: dict, conn: Conexion = None) -> tuple:
+        """
+        Obtiene las estadísticas de ganancias para las gráficas.
+        
+        Args:
+            request_data (dict): Puede contener 'filter_type' (month, week, year) y 'year'.
+        
+        Returns:
+            tuple: (status, message, data)
+        """
+        conexion = conn or Conexion()
+        fact_revenue_service = FactRevenuesService(conexion)
+        
+        try:
+            # Valores por defecto: filtro por mes y año actual
+            filter_type = request_data.get('filter_type', 'month')
+            year_from_request = request_data.get('year')
+            
+            # Si el año no viene en el request o es nulo, usar el actual.
+            # Si viene, convertirlo a entero.
+            year = int(year_from_request) if year_from_request else datetime.now().year
+            stats = fact_revenue_service.get_revenue_statistics(filter_type, year)
+            
+            return 200, "Estadísticas obtenidas correctamente", stats
+            
+        except Exception as e:
+            return 500, f"Error interno del servidor: {e}", []
+        finally:
+            if not conn:
+                conexion.close_conexion()

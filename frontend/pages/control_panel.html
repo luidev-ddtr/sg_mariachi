@@ -1,38 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Control</title>
-
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <!-- Iconos -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
-  <!-- Estilos del panel -->
   <link rel="stylesheet" href="../src/styles/style_control_panel.css">
-  <!-- ApexCharts CDN -->
+  <!-- IMPORTANTE: ApexCharts debe cargarse ANTES de tu script -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
-
 <body>
 
   <main class="main-content">
-    
-    <!-- ENCABEZADO -->
     <header class="header">
       <h1>Panel de Control</h1>
       <p>Vista general del negocio</p>
     </header>
 
-    <!-- TARJETAS RESUMEN -->
+    <!-- TARJETAS RESUMEN - Asegúrate de que los IDs coincidan -->
     <section class="cards-section">
-
       <div class="card ingresos">
         <div>
           <p>Ingresos Totales</p>
-          <h2>$50,000.00</h2><!-- Editar -->
+          <h2 id="ingresos-monto">$0.00</h2>
         </div>
         <span class="material-symbols-outlined icon-card">trending_up</span>
       </div>
@@ -40,49 +31,27 @@
       <div class="card ganancias">
         <div>
           <p>Ganancia Neta</p>
-          <h2>$39,000.00</h2><!-- Editar -->
+          <h2 id="ganancia-monto">$0.00</h2>
         </div>
         <span class="material-symbols-outlined icon-card">paid</span>
       </div>
-
     </section>
 
     <!-- Gráfica -->
     <section class="chart-section">
       <h2>Ingresos</h2>
-      <div id="chart"></div>
+      <div id="chart" style="width: 100%; min-height: 400px;"></div>
     </section>
 
+    <!-- Botón para debug -->
+    <button onclick="reloadDashboard()" style="margin: 20px; padding: 10px 20px; background: #00b050; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      Recargar Datos
+    </button>
 
   </main>
 
-  <!-- Script de gráfica -->
+  <!-- Tu script - debe ir DESPUÉS de ApexCharts -->
   <script type="module" src="../src/components/eventos/chart_control_panel.js"></script>
 
-  <!-- Script de prueba de la api(este es el codigo que ya estaba) -->
-    <button onclick="testAPI()">Probar API GetContractInfo</button>
-  <div id="result"></div>
-
-  <script type="module">
-    import { GetContractInfo } from '../src/api/api_reservacion_read.js';
-
-    window.testAPI = async function () {
-      try {
-        const id = '9fa04218-9914-5ed0';
-        const contractInfo = await GetContractInfo(id);
-
-        document.getElementById('result').innerHTML = `
-          <h3>Resultado:</h3>
-          <pre>${JSON.stringify(contractInfo, null, 2)}</pre>
-        `;
-
-      } catch (error) {
-        document.getElementById('result').innerHTML = `
-          <h3>Error:</h3>
-          <p>${error.message}</p>
-        `;
-      }
-    }
-  </script>
 </body>
 </html>

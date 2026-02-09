@@ -1,7 +1,7 @@
-// ✅ eventos_ui.js
+// ✅ eventos_ui.js (VERSIÓN ACTUALIZADA)
 import { ArchivarReservacion } from '../../api/api_reservacion_archivar.js';
-import { CancelarReservacion } from '../../api/api_reservacion_cancelar.js'; 
-import { renderReservationsTable } from './eventos_logic.js';
+import { CancelarReservacion } from '../../api/api_reservacion_cancelar.js';
+import { renderReservationsTable, actualizarCardsEstadisticas, calcularEstadisticas } from './eventos_logic.js';
 import { TableDropdownManager } from './dropdown_manajer.js';
 
 // === FUNCIÓN PARA ABRIR EL CONTRATO (DETALLES) ===
@@ -28,11 +28,10 @@ const openEditModal = (eventId) => {
 
 // === FUNCIÓN PARA ABRIR MODAL DE PAGOS ===
 const openPaymentModal = (eventId) => {
-  // Se asume que modal_pago1.html está en la misma carpeta que los otros formularios
   const url = `../src/components/eventos/modal_pago1.html?id=${eventId}`;
   const modalOverlay = document.getElementById('modalOverlay');
   const modalFrame = document.getElementById('modalFrame');
-  
+ 
   if (modalOverlay && modalFrame) {
     modalFrame.src = url;
     modalOverlay.classList.add('visible');
@@ -45,7 +44,7 @@ const openPaymentModal = (eventId) => {
 const handleCancelation = async (reservationId) => {
   if (confirm("¿Estás seguro de que deseas cancelar esta reservación?")) {
     try {
-      await CancelarReservacion(reservationId); 
+      await CancelarReservacion(reservationId);
       alert("Reservación cancelada correctamente.");
       document.dispatchEvent(new CustomEvent('evento-actualizado'));
     } catch (error) {
@@ -103,15 +102,36 @@ const setupFilterListener = () => {
   });
 };
 
+// === INICIALIZAR LAS ESTADÍSTICAS ===
+const inicializarEstadisticas = async () => {
+  try {
+    // Importa GetReservaciones si no está disponible aquí
+    const { GetReservaciones } = await import('../../api/api_reservacion_read.js');
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    const reservaciones = await GetReservaciones(fechaHoy);
+    const estadisticas = calcularEstadisticas(reservaciones);
+    actualizarCardsEstadisticas(estadisticas);
+  } catch (error) {
+    console.error('Error al inicializar estadísticas:', error);
+    // Establecer valores por defecto en caso de error
+    actualizarCardsEstadisticas({ total: 0, completados: 0, pendientes: 0 });
+  }
+};
+
 // === INICIO DE LA APLICACIÓN ===
 document.addEventListener('DOMContentLoaded', () => {
   const dateInput = document.getElementById('inputFecha');
   const statusSelect = document.getElementById('selectEstado');
   const today = new Date().toISOString().split('T')[0];
-  
+ 
   if (dateInput) dateInput.value = today;
-  renderReservationsTable(today, statusSelect?.value || 'todos');
   
+  // Inicializar estadísticas
+  inicializarEstadisticas();
+  
+  // Renderizar tabla
+  renderReservationsTable(today, statusSelect?.value || 'todos');
+ 
   setupConfirmationModalListeners();
   setupFilterListener();
 
@@ -120,10 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
     onEdit: (id) => openEditModal(id),
     onArchive: (id) => openArchiveModal(id),
     onDetails: (id) => openContractModal(id),
-    onPay: (id) => openPaymentModal(id), // 👈 Vinculado a la nueva modal
-    onCancel: (id) => handleCancelation(id) 
+    onPay: (id) => openPaymentModal(id),
+    onCancel: (id) => handleCancelation(id)
   });
 
+  // Escuchar evento de actualización para refrescar todo
   document.addEventListener('evento-actualizado', () => {
     renderReservationsTable(dateInput?.value || today, statusSelect?.value || 'todos');
   });
