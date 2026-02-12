@@ -2,7 +2,7 @@ from src.dim_dates.dim_date import DIM_DATE
 from src.fact_revenues.fact_revenues_service import FactRevenuesService
 from src.fact_revenues.fact_revenues_model import FactRevenues
 from src.utils.conexion import Conexion
-from src.utils.id_generator import create_id
+from src.utils.id_generator import create_id_fact_reservation
 from datetime import datetime
 
 class FactRevenuesHandler:
@@ -49,7 +49,7 @@ class FactRevenuesHandler:
 
             #4. Generar el ID de la factura ya que no se proporciona
             # Agregamos datetime.now() para evitar IDs duplicados si se hacen 2 pagos el mismo día
-            fact_id = create_id([_revenue['DIM_DateId'], _revenue['DIM_ReservationId'], str(datetime.now())])
+            fact_id = create_id_fact_reservation([_revenue['DIM_DateId'], _revenue['DIM_ReservationId'], str(datetime.now())])
             revenue.FACT_RevenueId = fact_id
             print(revenue.FACT_RevenueId)
 

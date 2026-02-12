@@ -1,6 +1,6 @@
 from src.dim_dates.dim_date import DIM_DATE
 from src.utils.conexion import Conexion
-from src.utils.id_generator import create_id
+from src.utils.id_generator import create_id_fact_reservation
 from src.dim_reservations.reservation_model import Reservation
 from src.dim_people.people_services import PeopleService
 from src.dim_people.people_handler import PeopleHandler
@@ -17,6 +17,7 @@ from src.fact_revenues.repositorio.get_total_paid import get_total_paid
 from src.fact_revenues.repositorio.get_payments_history import get_payments_history
 
 from src.dim_reservations.repositorio.cancelled_reservation import cancelled_reservation_by_id
+from src.dim_reservations.repositorio.status_complete_auto import update_past_reservations_to_complete
 
 
 people_services = PeopleService()
@@ -171,7 +172,7 @@ class ReservationService:
 
             # 4. Generación de IDs y métricas
             year, month, day = dim_date_service.full_date
-            res_id = create_id([people_id, day, _reservation['DIM_EventAddress']])
+            res_id = create_id_fact_reservation([people_id, day, _reservation['DIM_EventAddress']])
             print(res_id)
             
             
@@ -268,6 +269,10 @@ class ReservationService:
         
         try:
             # Calcula la semana del mes. (Días 1-7 -> Semana 1, 8-14 -> Semana 2, etc.)
+            
+            # 0. Paso previo: Actualizar automáticamente las reservas que ya pasaron de hora
+            update_past_reservations_to_complete(conexion)
+            
             week_of_month = (day - 1) // 7 + 1
 
             reservations_result = read_reservations_with_date_filter(year, month, week_of_month, conexion)
