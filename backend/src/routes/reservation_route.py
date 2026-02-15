@@ -167,3 +167,32 @@ def prueba1() -> tuple[Any]:
     except Exception as e:
         print(e)
         return send_error(str(e), 500)
+    
+
+@reservation_route.route('/stats_calendar', methods=['GET'])
+def stats_calendar() -> tuple[Any]:
+    """
+    Obtiene estadísticas de reservas para el calendario según los parámetros de consulta
+
+    """
+    try:
+        # Obtener los parámetros de consulta
+        filter_type = request.args.get('filter_type')  # 'day', 'week', 'month', 'year'
+        year = request.args.get('year', type=int)  # Año es obligatorio
+        month = request.args.get('month', type=int)  # Mes es opcional, solo necesario para 'month'
+        # Validar que el tipo de filtro es válido
+        if filter_type not in ['day', 'week', 'month', 'year']:
+            return send_error("El parámetro 'filter_type' debe ser uno de: 'day', 'week', 'month', 'year'", 400)
+        if not year:
+            return send_error("El parámetro 'year' es obligatorio", 400)
+        if filter_type == 'month' and not month:
+            return send_error("El parámetro 'month' es obligatorio para el filtro tipo 'month'", 400)
+        # Llamar a la función de lógica de negocio para obtener las estadísticas
+        status, message, data_stats = reservation_options.get_reservation_stats(filter_type, year, month)
+        if status != 200:
+            print(message)
+            return send_error(message, status)
+        return send_success(message, data_stats, 200)
+    except Exception as e:
+        print(e)
+        return send_error(str(e), 500)

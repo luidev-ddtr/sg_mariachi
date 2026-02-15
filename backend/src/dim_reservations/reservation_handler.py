@@ -19,6 +19,8 @@ from src.fact_revenues.repositorio.get_payments_history import get_payments_hist
 from src.dim_reservations.repositorio.cancelled_reservation import cancelled_reservation_by_id
 from src.dim_reservations.repositorio.status_complete_auto import update_past_reservations_to_complete
 
+from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
+
 
 people_services = PeopleService()
 handler_people = PeopleHandler()
@@ -591,5 +593,57 @@ class ReservationService:
             return 500, f"Error interno del servidor: {e}", []
         finally:
             # Solo cierra la conexión si fue creada dentro de este método.
+            if not conn:
+                conexion.close_conexion()
+
+    
+    def get_reservation_stats(self, request_data: dict, conn: Conexion = None) -> tuple[int, str, list]:
+        """
+        Obtiene estadísticas de reservaciones para diferentes vistas (día, semana, mes).
+
+        Args:
+            request_data (dict): Puede contener 'filter_type' (day, week, month) y 'year', 'month' (opcional para month).
+            conn (Conexion, optional): Conexión a la base de datos.
+
+        Returns:
+            tuple: (status_code, message, data)
+        """
+        conexion = conn or Conexion()
+        try:
+            filter_type = request_data.get('filter_type', 'day')  # Valor por defecto: 'day'
+            year_from_request = request_data.get('year')
+            month_from_request = request_data.get('month')
+
+            # Validar el filter_type
+            if filter_type not in ['day', 'week', 'month']:
+                return 400, "Tipo de filtro no válido. Debe ser 'day', 'week' o 'month'.", []
+
+            # Validar que el año sea un entero si viene en el request
+            if year_from_request is not None:
+                try:
+                    year = int(year_from_request)
+                except ValueError:
+                    return 400, "El año debe ser un número entero.", []
+            else:
+                year = datetime.now().year  # Año actual por defecto
+
+            # Para el filtro por mes, validar que el mes también esté presente y sea un entero válido
+            month = None
+            if filter_type == 'month':
+                if month_from_request is None:
+                    return 400, "Se requiere el mes para el filtro tipo 'month'.", []
+                try:
+                    month = int(month_from_request)
+                    if month < 1 or month > 12:
+                        return 400, "El mes debe ser un número entre 1 y 12.", []
+                except ValueError:
+                    return 400, "El mes debe ser un número entero.", []
+
+            stats = get_reservation_stats(conexion, filter_type, year, month)
+            return 200, "Estadísticas obtenidas exitosamente.", stats
+        except Exception as e:
+            print(f"❌ Error al obtener estadísticas de reservaciones: {e}")
+            return 500, f"Error interno del servidor: {e}", []
+        finally:
             if not conn:
                 conexion.close_conexion()
