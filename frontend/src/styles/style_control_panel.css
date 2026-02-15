@@ -65,12 +65,149 @@ body {
 }
 
 /* GRAFICA*/
+.chart{
+  width: 100%;
+   min-height: 400px;
+}
 .chart-section {
   background: white;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
+
+.chart-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.view-buttons_c {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chart-controls .nav-buttons button,
+.view-buttons_c .view-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-buttons_c .view-btn.active {
+  background: #3346dd;
+  color: #fff;
+  border-color: #3346dd;
+  box-shadow: 0 4px 10px rgba(51, 70, 221, 0.25);
+}
+
+.chart-controls .material-icons {
+  font-size: 18px;
+}
+
+#chart-current-date {
+  margin-left: auto;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+
+/* CONTENEDOR DE FILTROS DE GRÁFICA*/
+.graph-filters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Alineado a la izquierda */
+  gap: 16px;
+  margin: 20px 0;
+}
+
+/* Navegación */
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-buttons button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons button:hover {
+  background: #e5e7eb;
+}
+
+/* Botones semana, mes y año */
+.view-buttons_c {
+  display: flex;
+  gap: 8px;
+}
+
+.view-buttons_c .view-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.view-buttons_c .view-btn.active {
+  background: #3346dd;
+  color: #fff;
+  border-color: #3346dd;
+  box-shadow: 0 4px 10px rgba(51, 70, 221, 0.25);
+}
+
+/* Para el texto de la fecha actual*/
+.current-period {
+  margin-left: 10px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+/* BOTÓN RECARGAR DATOS (DEBUG) */
+.btn-reload {
+  margin: 20px;
+  padding: 10px 20px;
+  background-color: #00b050;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-reload:hover {
+  background-color: #009645;
+}
+
+.btn-reload:active {
+  transform: scale(0.97);
+}
+
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
