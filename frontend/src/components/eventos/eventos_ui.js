@@ -1,46 +1,26 @@
-// ✅ eventos_ui.js (VERSIÓN ACTUALIZADA)
+// ✅ eventos_ui.js (VERSIÓN OPTIMIZADA PARA MES)
 import { ArchivarReservacion } from '../../api/api_reservacion_archivar.js';
 import { CancelarReservacion } from '../../api/api_reservacion_cancelar.js';
-import { renderReservationsTable, actualizarCardsEstadisticas, calcularEstadisticas } from './eventos_logic.js';
+import { renderReservationsTable } from './eventos_logic.js';
 import { TableDropdownManager } from './dropdown_manajer.js';
 
-// === FUNCIÓN PARA ABRIR EL CONTRATO (DETALLES) ===
-const openContractModal = (eventId) => {
-  const url = `../src/components/eventos/formulario_contrato.html?id=${eventId}`;
+// === FUNCIONES DE MODALES ===
+const openModal = (url) => {
   const modalOverlay = document.getElementById('modalOverlay');
   const modalFrame = document.getElementById('modalFrame');
-  if (modalOverlay && modalFrame) {
-    modalFrame.src = url;
-    modalOverlay.classList.add('visible');
-  }
-};
-
-// === FUNCIÓN PARA ABRIR MODAL DE EDICIÓN ===
-const openEditModal = (eventId) => {
-  const url = `../src/components/eventos/formulario_edit_evento.html?id=${eventId}`;
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalFrame = document.getElementById('modalFrame');
-  if (modalOverlay && modalFrame) {
-    modalFrame.src = url;
-    modalOverlay.classList.add('visible');
-  }
-};
-
-// === FUNCIÓN PARA ABRIR MODAL DE PAGOS ===
-const openPaymentModal = (eventId) => {
-  const url = `../src/components/eventos/modal_pago1.html?id=${eventId}`;
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalFrame = document.getElementById('modalFrame');
- 
   if (modalOverlay && modalFrame) {
     modalFrame.src = url;
     modalOverlay.classList.add('visible');
   } else {
-    console.error('No se encontró el modalOverlay o modalFrame para pagos');
+    console.error('No se encontró el modalOverlay o modalFrame en el DOM');
   }
 };
 
-// === FUNCIÓN PARA CANCELAR RESERVACIÓN ===
+const openContractModal = (eventId) => openModal(`../src/components/eventos/formulario_contrato.html?id=${eventId}`);
+const openEditModal = (eventId) => openModal(`../src/components/eventos/formulario_edit_evento.html?id=${eventId}`);
+const openPaymentModal = (eventId) => openModal(`../src/components/eventos/modal_pago1.html?id=${eventId}`);
+
+// === ACCIONES DIRECTAS ===
 const handleCancelation = async (reservationId) => {
   if (confirm("¿Estás seguro de que deseas cancelar esta reservación?")) {
     try {
@@ -91,6 +71,7 @@ const setupConfirmationModalListeners = () => {
   });
 };
 
+// === LISTENERS GLOBALES ===
 const setupFilterListener = () => {
   const filterButton = document.getElementById('btnFiltrar');
   const dateInput = document.getElementById('inputFecha');
@@ -102,36 +83,23 @@ const setupFilterListener = () => {
   });
 };
 
-// === INICIALIZAR LAS ESTADÍSTICAS ===
-const inicializarEstadisticas = async () => {
-  try {
-    // Importa GetReservaciones si no está disponible aquí
-    const { GetReservaciones } = await import('../../api/api_reservacion_read.js');
-    const fechaHoy = new Date().toISOString().split('T')[0];
-    const reservaciones = await GetReservaciones(fechaHoy);
-    const estadisticas = calcularEstadisticas(reservaciones);
-    actualizarCardsEstadisticas(estadisticas);
-  } catch (error) {
-    console.error('Error al inicializar estadísticas:', error);
-    // Establecer valores por defecto en caso de error
-    actualizarCardsEstadisticas({ total: 0, completados: 0, pendientes: 0 });
-  }
-};
-
 // === INICIO DE LA APLICACIÓN ===
 document.addEventListener('DOMContentLoaded', () => {
   const dateInput = document.getElementById('inputFecha');
   const statusSelect = document.getElementById('selectEstado');
-  const today = new Date().toISOString().split('T')[0];
- 
-  if (dateInput) dateInput.value = today;
   
-  // Inicializar estadísticas
-  inicializarEstadisticas();
+  // 🔥 Extraemos solo el Año y el Mes (Ej. "2026-02")
+  const currentMonth = new Date().toISOString().substring(0, 7);
   
-  // Renderizar tabla
-  renderReservationsTable(today, statusSelect?.value || 'todos');
- 
+  if (dateInput) {
+    // Forzamos a que el input sea de tipo mes
+    dateInput.type = 'month'; 
+    dateInput.value = currentMonth;
+  }
+  
+  // Renderizar tabla inicial con el MES actual
+  renderReservationsTable(currentMonth, statusSelect?.value || 'todos');
+  
   setupConfirmationModalListeners();
   setupFilterListener();
 
@@ -146,6 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Escuchar evento de actualización para refrescar todo
   document.addEventListener('evento-actualizado', () => {
-    renderReservationsTable(dateInput?.value || today, statusSelect?.value || 'todos');
+    renderReservationsTable(dateInput?.value || currentMonth, statusSelect?.value || 'todos');
   });
 });
