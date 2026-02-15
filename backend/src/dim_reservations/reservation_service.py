@@ -7,6 +7,8 @@ from src.dim_reservations.reservation_model import Reservation
 
 from src.dim_reservations.repositorio.update_reservation import update_reservation
 
+from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
+
 
 class ReservaService:
     """
@@ -201,3 +203,22 @@ class ReservaService:
         except Exception as e:
             print(f"Error en servicio al obtener reserva por ID: {e}")
             return None
+    
+    def get_reservation_stats(self, filter_type: str, year: int, month: int = None) -> list:
+        """
+        Servicio para obtener estadísticas de reservas por día, semana, mes o año.
+
+        Args:
+            filter_type (str): Tipo de filtro ('day', 'week', 'month', 'year').
+            year (int): Año para filtrar.
+            month (int, optional): Mes para filtrar (relevante solo para 'month').
+        Returns:
+            list: Lista de diccionarios con datos de estadísticas de reservas.
+        """
+        try:
+            return get_reservation_stats(self.conn, filter_type, year, month)
+        except Exception as e:
+            print(f"Error en servicio al obtener estadísticas de reservas: {e}")
+            return []
+        finally:
+            self.conn.close_conexion()
