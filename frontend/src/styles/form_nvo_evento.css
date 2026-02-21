@@ -1,157 +1,240 @@
+/*  RESET GENERAL */
 * {
-  margin: 0;
+  margin: 10;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Roboto', sans-serif;
 }
-/* Pagina principal */
+
+/* CONTEXTO GENERAL  Evita recortes  */
 html, body {
-  margin: 0; /* Elimina márgenes por defecto del navegador */
-  padding: 0; /* Elimina rellenos por defecto */
-  height: 100%; /* Hace que el body ocupe toda la altura de la pantalla */
-  overflow: visible; /*Permite que el contenido (como el modal) se muestre completo */
-  display: flex; /* Centra el modal horizontal y verticalmente */
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center; /* Centra verticalmente */
-  backdrop-filter: blur(10px); /* Fondo CRISTAL (como blur) SE PUEDE CAMBIAR POR UNbackground: transparent;*/
+  min-height: 100%;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
 }
 
-/* --- CONTENEDOR PRINCIPAL DEL MODAL (IMAGEN + FORMULARIO) --- */
+/* CONTENEDOR PRINCIPAL DEL MODAL */
 .modal-wrapper {
+  position: fixed;
+  inset: 0;
+  background:#ffffff;
+
   display: flex;
-  flex-direction: row;
-  width: 90%;
-  max-width: 1000px;
-  max-height: 90vh; /* <-- usa max-height, PARA QUE NO SEA FIJA */
-  border-radius: 10px;
-  overflow: visible; /* <-- antes estaba hidden */
-  background: transparent;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+  z-index: 1000;
 }
 
-
-/* --- SECCIÓN DE LA IMAGEN (LADO IZQUIERDO DEL MODAL) --- */
-.image-section {
-  flex: 0 0 35%; /* Ocupa la mitad disponible del modal */
-  background-color: #000; /* Fondo negro de respaldo si la imagen no carga */
-  overflow: hidden; /* Asegura que la imagen no se desborde */
-  border-radius: 10px 0 0 10px; /* ← IZQ superior + IZQ inferior */
-}
-
-.image-section img {
-  width: 100%; /* Imagen ocupa todo el ancho del contenedor */
-  height: 100%; /* Imagen ocupa todo el alto del contenedor */
-  object-fit: cover; /* La imagen se recorta para cubrir sin deformarse */
-  border-radius: 10px 0 0 10px; /* ← También en la imagen */
-}
-
-/* --- SECCIÓN DEL FORMULARIO (LADO DERECHO DEL MODAL) --- */
+/* CONTENEDOR DEL FORMULARIO Tarjeta tipo wizard */
 .form-container {
-  flex: 1;
-  width: 70%;
-  max-width: 850px;
-  max-height: 90vh; /*  evita que crezca más del viewport */
-  border-radius: 0 10px 10px 0; /* ← DER superior + DER inferior */
-  overflow-y: auto; /* scroll si es necesario */
-  background: rgba(255, 253, 251, 0.6);
-  padding: 25px 30px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
-}
+  background: #ffffff;
+  border-radius: 12px;
+  position: relative; /*estaba en absolute*/
+  /*box-shadow: 0 15px 35px rgba(0,0,0,0.12);*/
+  padding: 15px 45px;
+  width: 100%;
 
-/* Ajustes del formulario interno */
-.form-container form {
-  width: 100%; /* Ocupa todo el ancho del contenedor */
-  height: auto; /* Se adapta automáticamente según su contenido */
+  height: 95vh;              /* CLAVE */
   display: flex;
-  flex-direction: column; /* Ordena los elementos en columna */
-  justify-content: flex-start; /* Comienza desde arriba */
+  flex-direction: column;
 }
 
-/* Oculta visualmente la barra de scroll en navegadores WebKit (Chrome, Edge, Safari) */
-.form-container::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
+/* TÍTULO PRINCIPAL */
+form > h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 35px;
 }
 
-/* --- TÍTULO DEL FORMULARIO --- */
-h2 {
-  text-align: center; /* Centra el título */
-  color: #000000; /* Texto gris oscuro */
-  margin-bottom: 20px; /* Espacio inferior */
+/*  SECCIONES DEL WIZARD (Datos personales, Dirección, Evento) */
+.wizard-step {
+  display: none;               /* Ocultos por defecto */
+  animation: fadeStep 0.3s ease-in-out;
+  
 }
 
-/* --- ESTRUCTURA DE FILAS Y CAMPOS --- */
+.wizard-step.active {
+  display: block;              /*Solo el paso activo */
+/*display: flex;*/
+  flex-direction: column;
+  justify-content: center;   /*CENTRADO VERTICAL */
+}
+
+/* Animación suave */
+@keyframes fadeStep {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/*TÍTULO DE CADA PASO */
+.wizard-step h2 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 25px;
+  border-left: 4px solid #3b82f6;
+  padding-left: 12px;
+}
+
+/*  FILAS Y GRUPOS DE INPUTS */
 .form-row {
-  display: flex; /* Coloca grupos en la misma línea */
-  flex-wrap: wrap; /* Si no caben, bajan de línea */
-  justify-content: space-between; /* Espacio uniforme entre campos */
-  gap: 10px; /* Espaciado horizontal entre elementos */
-  margin-bottom: 10px; /* Espaciado vertical entre filas */
+  display: flex;
+  gap: 24px;
+  margin-bottom: 22px;
 }
 
 .form-group {
-  flex: 1; /* Cada grupo ocupa el mismo ancho posible */
+  flex: 1;
   display: flex;
-  flex-direction: column; /* Pone etiqueta e input en columna */
-  margin-bottom: 10px; /* Espaciado vertical entre filas */
+  flex-direction: column;
 }
 
-/* Campos que ocupan el ancho completo */
+/* Campos que ocupan todo el ancho */
 .full-width {
-  flex: 50%; /* Hace que ocupe toda la fila */
+  width: 100%;
+  margin-bottom: 22px;
 }
 
-/* --- ETIQUETAS DE LOS CAMPOS --- */
+/* LABELS*/
 label {
-  font-weight: 500; /* Peso medio de fuente */
-  margin-bottom: 5px; /* Separación entre etiqueta e input */
-  color: #000000; /* Texto gris oscuro */
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 6px;
 }
 
-/* --- ESTILOS DE LOS INPUTS Y TEXTAREAS --- */
+/* INPUTS Y TEXTAREA */
 input,
 textarea {
-  width: 100%; /* Ocupan todo el ancho disponible */
-  padding: 10px; /* Espaciado interno */
-  border-radius: 8px; /* Bordes redondeados */
-  border: none; /* Borde gris claro */
-  font-size: 0.95rem; /* Tamaño de texto */
-  box-sizing: border-box; /* Incluye el padding dentro del ancho total */
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Suaviza las animaciones al enfocar */
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* --- EFECTO AL ENFOCAR LOS CAMPOS --- */
+input::placeholder {
+  color: #9ca3af;
+}
+
+/* Focus */
 input:focus,
 textarea:focus {
-  outline: none; /* Elimina borde azul predeterminado del navegador */
-  border-color: #020203; /* Borde azul al enfocar */
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); /* Sombra azul alrededor */
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
 }
 
-/* --- BOTÓN PRINCIPAL --- */
+/* Textarea */
+textarea {
+  resize: none;
+}
+
+/* Readonly */
+input[readonly] {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* MENSAJES DEL FORMULARIO */
+#form-message {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+#form-message.success { color: #16a34a; }
+#form-message.error   { color: #dc2626; }
+#form-message.info    { color: #2563eb; }
+
+/* BOTONES DEL WIZARD (siguiente/atras) */
+.wizard-buttons {
+  margin-top: auto;          /*  BOTONES ABAJO */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 25px;
+}
+
+/* Botones base */
+.wizard-buttons button {
+  padding: 12px 26px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.1s ease;
+}
+
+/* Anterior */
+#prevBtn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+#prevBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Siguiente */
+#nextBtn {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+#nextBtn:hover {
+  background: #2563eb;
+}
+
+/* Submit final */
 .submit-btn {
-  width: 100%; /* Ocupa todo el ancho del formulario */
-  background-color: #1eb211; /* Azul principal */
-  color: white; /* Texto blanco */
-  padding: 12px; /* Espaciado interno */
-  border: none; /* Sin borde */
-  border-radius: 8px; /* Bordes redondeados */
-  cursor: pointer; /* Cambia el cursor a mano al pasar encima */
-  font-size: 1rem; /* Tamaño del texto */
-  font-weight: 600; /* Texto seminegrita */
-  margin-top: 15px; /* Espacio superior */
-  transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
+  background: #10b981;
+  color: #ffffff;
 }
 
-/* Efecto hover del botón */
 .submit-btn:hover {
-  background-color: #087a23; /* Azul más oscuro al pasar el mouse */
+  background: #059669;
 }
 
-/* --- RESPONSIVIDAD --- */
-@media (max-width: 768px) {
+/* Oculto (JS controla visibilidad) */
+.hidden {
+  display: none !important;
+}
+
+/* Pequeña interacción */
+.wizard-buttons button:active {
+  transform: scale(0.97);
+}
+
+/*RESPONSIVE  */
+@media (max-width: 900px) {
   .form-row {
-    flex-direction: column; /* Los inputs se apilan verticalmente en pantallas pequeñas */
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-container {
+    padding: 30px 25px;
+  }
+
+  .wizard-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .wizard-buttons button {
+    width: 100%;
   }
 }
