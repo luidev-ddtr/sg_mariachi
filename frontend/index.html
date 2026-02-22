@@ -51,7 +51,7 @@
 
       <!-- Botón de salida -->
       <div class="sidebar-bottom">
-        <a href="/pages/login.html" class="logout-btn">
+        <a href="#" id="logoutBtn" class="logout-btn">
           <span class="material-symbols-outlined">logout</span>
           <span>Salir</span>
         </a>
@@ -62,5 +62,27 @@
       <iframe name="contenido" src="/pages/control_panel.html" class="iframe-content"></iframe>
     </main>
 
+  <script type="module">
+    import { checkSession, logoutUser } from './src/api/api_auth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. PROTECCIÓN: Verificar si hay sesión activa al entrar
+      const session = await checkSession();
+      // Si no hay sesión o el status no es success/200, expulsamos al usuario
+      if (!session || (session.status !== 'success' && session.status !== 200)) {
+        window.location.href = '/pages/login.html';
+        return;
+      }
+
+      // 2. FUNCIONALIDAD LOGOUT: Conectar el botón con la API
+      const btnLogout = document.getElementById('logoutBtn');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', async (e) => {
+          e.preventDefault(); // Evita que el enlace navegue por sí solo
+          await logoutUser(); // Llama al backend para destruir la sesión y redirige
+        });
+      }
+    });
+  </script>
 </body>
 </html>
