@@ -1,6 +1,6 @@
 # Blueprint del usuario, se hace para separar el codigo y dejar app.py limpio
 from typing import Literal
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 from flask.wrappers import Response
 from typing import Any
 from src.dim_reservations.reservation_handler import ReservationService
@@ -8,6 +8,7 @@ from src.dim_reservations.reservation_handler import ReservationService
 from src.routes.handle_message import send_error, send_success
 
 #Importaciones para crear cuenta
+from src.utils.decorators import login_required
 
 reservation_options = ReservationService()
 reservation_route = Blueprint('reservation_route', __name__, url_prefix='/api/reservation/')
@@ -15,12 +16,18 @@ reservation_route = Blueprint('reservation_route', __name__, url_prefix='/api/re
 from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
 
 @reservation_route.route('/create', methods=['POST'])
+@login_required
 def create_reservation() -> tuple[Any]:
     """
     Crea una nueva reserva en la tabla dim_people
     """
     try: 
         data_reservation = request.get_json()
+
+        # --- INYECCIÓN DEL ID DE SESIÓN ---
+        # Tomamos el ID del usuario logueado y lo agregamos a los datos
+        data_reservation['DIM_ServiceOwnersId'] = session['user_id']
+
         for name in data_reservation:
             print(f"'{name}': {data_reservation[name]}", end="\n")
         status, message = reservation_options.create_reservation(data_reservation)
@@ -37,6 +44,7 @@ def create_reservation() -> tuple[Any]:
 
 
 @reservation_route.route('/read', methods=['GET'])
+@login_required
 def read_reservation():
     """
     Obtiene reservas por fecha desde los parámetros de consulta
@@ -62,6 +70,7 @@ def read_reservation():
     
 
 @reservation_route.route('/update', methods=['POST'])
+@login_required
 def update_reservation():
     """
     Actualiza una reserva existente
@@ -79,6 +88,7 @@ def update_reservation():
         return send_error(str(e), 500)
     
 @reservation_route.route('/get_contract', methods=['POST'])
+@login_required
 def get_contract():
     """
     Obtiene la informacion de una reservacion, para mostrarla como contrato
@@ -106,6 +116,7 @@ def get_contract():
 
 
 @reservation_route.route('/archive', methods=['POST'])
+@login_required
 def archive_reservation() -> tuple[Any]:
     """
     Archiva lógicamente una reserva existente utilizando el ID proporcionado en el cuerpo de la solicitud (JSON).
@@ -140,6 +151,7 @@ def archive_reservation() -> tuple[Any]:
 
 
 @reservation_route.route('/cancel', methods=['POST'])
+@login_required
 def cancel_reservation() -> tuple[Any]:
     """
     Cancela una reserva existente
@@ -158,6 +170,7 @@ def cancel_reservation() -> tuple[Any]:
         return send_error(str(e), 500)
 
 @reservation_route.route('/prueba1', methods=['GET'])
+@login_required
 def prueba1() -> tuple[Any]:
     """
     Crea una nueva reserva en la tabla dim_people
@@ -170,6 +183,7 @@ def prueba1() -> tuple[Any]:
     
 
 @reservation_route.route('/stats_calendar', methods=['GET'])
+@login_required
 def stats_calendar() -> tuple[Any]:
     """
     Obtiene estadísticas de reservas para el calendario según los parámetros de consulta

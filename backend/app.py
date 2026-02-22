@@ -11,32 +11,56 @@ from datetime import timedelta
 from src.routes.people_route import people_route
 from src.routes.reservation_route import reservation_route
 from src.routes.fact_revenues_route import fact_revenues_route
+from src.routes.auth_route import auth_route
 
 # --- CORRECCIÓN 1: Cargar el .env PRIMERO ---
 # Esta línea DEBE estar al principio, antes de acceder a cualquier variable de entorno.
-#load_dotenv()
+load_dotenv()
 #Por el moemento no se utilizaran variables de entonro
 
 
 app = Flask(__name__)
 
-"""
-secret_key = os.environ.get('SECRET_KEY')
-if not secret_key:
-    raise ValueError("No se encontró la SECRET_KEY en el entorno. La aplicación no puede iniciar de forma segura.")
-app.config['JWT_SECRET_KEY'] = secret_key
+# """
+# ESTAS CONFIGURACIONES ESTABAN DESDE UN PRINCIPIO
+# secret_key = os.environ.get('SECRET_KEY')
+# if not secret_key:
+#     raise ValueError("No se encontró la SECRET_KEY en el entorno. La aplicación no puede iniciar de forma segura.")
+# app.config['JWT_SECRET_KEY'] = secret_key
 
-Configuración de los tiempos de expiración
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=1)
+# Configuración de los tiempos de expiración
+# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+# app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=1)
 
-jwt = JWTManager(app)
+# jwt = JWTManager(app)
+# NOTA: Si usas sesiones estándar, no necesitas JWTManager por ahora.
+# jwt = JWTManager(app)
+# AQUI TERMINA EL BLOQUE DE CONFIGURACIÓN DE JWT, SI USAMOS SÓLO SESIONES, PODEMOS OMITIRLO O DEJARLO PARA FUTURA EXPANSIÓN.
 
-"""
+# --- CONFIGURACIÓN DE SESIONES (Nueva config, sialgo falla tratamos de solucionarlo desde aqui) ---
+# 1. SECRET_KEY: Necesaria para firmar las cookies de sesión.
+# En producción, esto debe venir de una variable de entorno y ser muy seguro.
+app.secret_key = os.environ.get('SECRET_KEY') or 'clave_super_secreta_para_desarrollo_123'
+
+# 2. TIEMPO DE VIDA: Cuánto tiempo dura la sesión antes de "romperse" sola (expirar).
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
+
+# --- CONFIGURACIÓN DE COOKIES ---
+# Lax permite enviar cookies en navegacion normal y AJAX del mismo sitio (localhost a localhost)
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False # False porque estamos en HTTP (no HTTPS)
+
+# 3. HACER LA SESIÓN PERMANENTE: Para que se respete el tiempo de vida de arriba.
+@app.before_request
+def make_session_permanent():
+    from flask import session
+    session.permanent = True
+
 #Blueprints van aqui ...
 app.register_blueprint(people_route)
 app.register_blueprint(reservation_route)
 app.register_blueprint(fact_revenues_route)
+app.register_blueprint(auth_route)
 
 
 #frontend_urls = os.environ.get("URL_FRONTEND", "http://localhost:5173")
