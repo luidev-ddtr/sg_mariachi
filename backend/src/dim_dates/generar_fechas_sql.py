@@ -43,7 +43,7 @@ def generar_sql_para_anio(year: int) -> List[str]:
             
             # Formateo de la sentencia INSERT
             sql_statement = (
-                f"INSERT INTO DIM_Date (DIM_DateId, FullDate, Year, Month, Week, Day) "
+                f"INSERT INTO dim_date (DIM_DateId, FullDate, Year, Month, Week, Day) "
                 f"VALUES ('{dim_date_id}', '{FullDate}', {Year}, {Month}, {Week}, {Day});"
             )
             
