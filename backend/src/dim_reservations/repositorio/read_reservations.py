@@ -19,7 +19,7 @@ def read_reservations_with_date_filter(year: int, month: int, week: int, object_
     vista_reservaciones.*
     FROM
         vista_reservaciones
-    JOIN DIM_Date AS dates
+    JOIN dim_date AS dates
     ON
         dates.DIM_DateId = vista_reservaciones.DIM_DateId
     WHERE

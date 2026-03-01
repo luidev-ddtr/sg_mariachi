@@ -30,7 +30,7 @@ def get_reservation_stats(conn: Conexion, filter_type: str, year: int, month: Op
                 V.DIM_TotalAmount as total_amount,
                 V.DIM_ReservationId as id
             FROM vista_reservaciones V
-            JOIN DIM_Date D ON V.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON V.DIM_DateId = D.DIM_DateId
             JOIN dim_reservation R ON V.DIM_ReservationId = R.DIM_ReservationId
             WHERE D.Year = %s 
         """
@@ -55,7 +55,7 @@ def get_reservation_stats(conn: Conexion, filter_type: str, year: int, month: Op
                 D.Day as label,
                 COUNT(V.DIM_ReservationId) as total_events
             FROM vista_reservaciones V
-            JOIN DIM_Date D ON V.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON V.DIM_DateId = D.DIM_DateId
             WHERE D.Year = %s AND D.Month = %s
             GROUP BY D.Day
             ORDER BY D.Day ASC
@@ -69,7 +69,7 @@ def get_reservation_stats(conn: Conexion, filter_type: str, year: int, month: Op
                 D.Month as label,
                 COUNT(V.DIM_ReservationId) as total_events
             FROM vista_reservaciones V
-            JOIN DIM_Date D ON V.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON V.DIM_DateId = D.DIM_DateId
             WHERE D.Year = %s
             GROUP BY D.Month
             ORDER BY D.Month ASC

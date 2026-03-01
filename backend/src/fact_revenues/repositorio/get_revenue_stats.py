@@ -23,7 +23,7 @@ def get_revenue_stats(conn: Conexion, filter_type: str, year: int) -> list:
                 D.Month as label, 
                 SUM(F.FACT_PaymentAmount) as total 
             FROM fact_revenue F
-            JOIN DIM_Date D ON F.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON F.DIM_DateId = D.DIM_DateId
             WHERE D.Year = %s
             GROUP BY D.Month
             ORDER BY D.Month ASC
@@ -37,7 +37,7 @@ def get_revenue_stats(conn: Conexion, filter_type: str, year: int) -> list:
                 D.Week as label, 
                 SUM(F.FACT_PaymentAmount) as total 
             FROM fact_revenue F
-            JOIN DIM_Date D ON F.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON F.DIM_DateId = D.DIM_DateId
             WHERE D.Year = %s
             GROUP BY D.Week
             ORDER BY D.Week ASC
@@ -51,7 +51,7 @@ def get_revenue_stats(conn: Conexion, filter_type: str, year: int) -> list:
                 D.Year as label, 
                 SUM(F.FACT_PaymentAmount) as total 
             FROM fact_revenue F
-            JOIN DIM_Date D ON F.DIM_DateId = D.DIM_DateId
+            JOIN dim_date D ON F.DIM_DateId = D.DIM_DateId
             GROUP BY D.Year
             ORDER BY D.Year DESC
             LIMIT 5

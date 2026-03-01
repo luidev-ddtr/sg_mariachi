@@ -83,7 +83,7 @@ class DIM_DATE:
         """
         date_id = int(f"{year}{month:02d}{day:02d}")
         try:
-            query_select = "SELECT DIM_DateId FROM DIM_Date WHERE DIM_DateId = %s"
+            query_select = "SELECT DIM_DateId FROM dim_date WHERE DIM_DateId = %s"
             # Usamos el método execute_query de la clase Conexion
             self.connection.cursor.execute(query_select, (date_id,))
             result = self.connection.cursor.fetchone()
@@ -109,11 +109,11 @@ class DIM_DATE:
 
         :return: None. Imprime los resultados directamente en la consola.
         """
-        query = "SELECT * FROM DIM_Date"
+        query = "SELECT * FROM dim_date"
         try:
             self.connection.cursor.execute(query)
             results = self.connection.cursor.fetchall()
-            print("Fechas en la tabla DIM_Date:")
+            print("Fechas en la tabla dim_date:")
             for row in results:
                 print(row)
         except Exception as e:
