@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | Mariachis San Nicolás</title>
-  <link rel="stylesheet" href="../src/styles/style_login.css">
-  <link rel="icon" href="../images/logo_cn_fondo.png" type="image/png">
+  <link rel="stylesheet" href="/src/styles/style_login.css">
+  <link rel="icon" href="/images/logo_cn_fondo.png" type="image/png">
   <!-- Fuente de íconos de Google -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
+
 <body>
   <div class="background"></div>
 
@@ -16,7 +18,7 @@
   <!-- contenedor del logo mariachis-->
   <div class="login-container">
     <div class="login-card">
-      <img src="../images/logo_cn_fondo.png" alt="Logo Mariachis San Nicolás" class="logo">
+      <img src="/images/logo_cn_fondo.png" alt="Logo Mariachis San Nicolás" class="logo">
       <h1>Mariachis San Nicolás</h1>
       <p class="subtitle">Accede a tu panel y organiza la fiesta perfecta</p>
 
@@ -34,7 +36,18 @@
         </div>
 
         <button type="submit" class="btn">Iniciar sesión</button>
-        
+
+        <figcaption>
+          O inicia sesión con tu cuenta de Google
+        </figcaption>
+
+        <div id="g_id_onload" data-client_id="689896190620-aafcdnvg5lerbuh56bulkmeq9h6gr23p.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
+          data-shape="rectangular" data-logo_alignment="left">
+        </div>
+
       </form>
 
       <footer>
@@ -48,42 +61,58 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script type="module">
-    import { checkSession, loginUser } from '../src/api/api_auth.js';
+    import { checkSession, loginUser } from '/src/api/api_auth.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
-        // 1. Verificar si ya hay sesión activa
-        const session = await checkSession();
-        if (session && (session.status === 'success' || session.status === 200)) {
-            window.location.href = '/index.html'; // Redirigir al dashboard si ya hay sesión
-            return;
+      // 1. Verificar si ya hay sesión activa
+      const session = await checkSession();
+      if (session && (session.status === 'success' || session.status === 200)) {
+        window.location.href = '/index.html'; // Redirigir al dashboard si ya hay sesión
+        return;
+      }
+
+      // 2. Manejar el envío del formulario
+      const form = document.getElementById('loginForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        const username = document.getElementById('usuario').value;
+        const password = document.getElementById('password').value;
+        const btn = form.querySelector('button');
+
+        // Feedback visual
+        const originalText = btn.innerText;
+        btn.innerText = "Verificando...";
+        btn.disabled = true;
+
+        const result = await loginUser({ username, password });
+
+        if (result && (result.status === 'success' || result.status === 200)) {
+          window.location.href = '/index.html'; // Redirigir al dashboard al iniciar sesión
+        } else {
+          alert(result.message || "Error al iniciar sesión");
+          btn.innerText = originalText;
+          btn.disabled = false;
         }
-
-        // 2. Manejar el envío del formulario
-        const form = document.getElementById('loginForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página se recargue
-            
-            const username = document.getElementById('usuario').value;
-            const password = document.getElementById('password').value;
-            const btn = form.querySelector('button');
-            
-            // Feedback visual
-            const originalText = btn.innerText;
-            btn.innerText = "Verificando...";
-            btn.disabled = true;
-
-            const result = await loginUser({ username, password });
-
-            if (result && (result.status === 'success' || result.status === 200)) {
-                window.location.href = '/index.html'; // Redirigir al dashboard al iniciar sesión
-            } else {
-                alert(result.message || "Error al iniciar sesión");
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
+      });
     });
   </script>
+
+  <!-- Librería de Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Lógica para manejar la respuesta de Google, Aun no ridirigira a ninguna pagina ya que aun no hay una tabla para usuarios que inicien sesion con  google -->
+  <script>
+      function handleCredentialResponse(response) {
+          // Aquí recibimos el token de Google (JWT)
+          console.log("Token de Google recibido:", response.credential);
+          
+          // Por ahora solo mostramos un mensaje y no redirigimos
+          alert("Inicio de sesión con Google exitoso. Token recibido en consola.");
+      }
+  </script>
 </body>
+
 </html>

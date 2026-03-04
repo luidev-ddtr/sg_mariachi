@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Contrato Mariachi San Nicolas</title>
-    <link rel="stylesheet" href="../../styles/style_contrato.css">
+    <link rel="stylesheet" href="/src/styles/style_contrato.css">
 </head>
 <body>
     <div class="contrato-container">
-        <img src="../../../public/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo"> <!--editar-->
+        <img src="/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo"> <!--editar-->
 
     <!-- <div class="contrato-container"></div> -->
         <h1>Mariachi San Nicolas</h1>
@@ -46,9 +46,10 @@
 
         <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script type="module">
     // ✅ Importamos la función de la API
-    import { GetContractInfo } from '../../api/api_reservacion_read.js';
+    import { GetContractInfo } from '/src/api/api_reservacion_read.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);

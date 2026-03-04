@@ -4,7 +4,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  background: url('../../images/fondo_login.jpg') no-repeat center center / cover;
+  background: url('../../public/images/fondo_login.jpg') no-repeat center center / cover;
   display: flex;
   justify-content: center;
   align-items: center;
