@@ -10,6 +10,19 @@
 
   <!-- codigo de Archivo CSS -->
   <link rel="stylesheet" href="/src/styles/style_index.css">
+  <style>
+    /* 1. Ocultamos el cuerpo inicialmente. Esto evita que se vea el menú antes de validar. */
+    body {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease-in;
+    }
+    /* 2. Clase que agregaremos con JS si la sesión es válida */
+    body.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -62,6 +75,7 @@
       <iframe name="contenido" src="/pages/control_panel.html" class="iframe-content"></iframe>
     </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script type="module">
     import { checkSession, logoutUser } from './src/api/api_auth.js';
 
@@ -70,9 +84,12 @@
       const session = await checkSession();
       // Si no hay sesión o el status no es success/200, expulsamos al usuario
       if (!session || (session.status !== 'success' && session.status !== 200)) {
-        window.location.href = '/pages/login.html';
+        window.location.replace('/pages/login.html'); // Usamos 'replace' para que no puedan volver atrás con el botón del navegador
         return;
       }
+
+      // 3. Si llegamos aquí, hay sesión. Mostramos el dashboard.
+      document.body.classList.add('visible');
 
       // 2. FUNCIONALIDAD LOGOUT: Conectar el botón con la API
       const btnLogout = document.getElementById('logoutBtn');

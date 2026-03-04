@@ -16,9 +16,9 @@ const openModal = (url) => {
   }
 };
 
-const openContractModal = (eventId) => openModal(`../src/components/eventos/formulario_contrato.html?id=${eventId}`);
-const openEditModal = (eventId) => openModal(`../src/components/eventos/formulario_edit_evento.html?id=${eventId}`);
-const openPaymentModal = (eventId) => openModal(`../src/components/eventos/modal_pago1.html?id=${eventId}`);
+const openContractModal = (eventId) => openModal(`/pages/formulario_contrato.html?id=${eventId}`);
+const openEditModal = (eventId) => openModal(`/pages/formulario_edit_evento.html?id=${eventId}`);
+const openPaymentModal = (eventId) => openModal(`/pages/modal_pago1.html?id=${eventId}`);
 
 // === ACCIONES DIRECTAS ===
 const handleCancelation = async (reservationId) => {
