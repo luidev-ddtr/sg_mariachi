@@ -11,9 +11,11 @@ revenue_handler = FactRevenuesHandler()
 # 2. Definimos el Blueprint (La Carpeta Virtual)
 # url_prefix define que todas las rutas aquí empezarán con /api/revenues/
 fact_revenues_route = Blueprint('fact_revenues_route', __name__, url_prefix='/api/revenues/')
-from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
+
+from src.utils.decorators import login_required
 
 @fact_revenues_route.route('/create', methods=['POST'])
+@login_required
 def create_revenue() -> tuple[Any]:
     """
     Endpoint para registrar un nuevo pago/ingreso.
@@ -38,6 +40,7 @@ def create_revenue() -> tuple[Any]:
         return send_error(str(e), 500)
 
 @fact_revenues_route.route('/info', methods=['POST'])
+@login_required
 def get_revenue_info() -> tuple[Any]:
     """
     Endpoint para obtener información de los pagos de una reserva.
@@ -55,6 +58,7 @@ def get_revenue_info() -> tuple[Any]:
         return send_error(str(e), 500)
 
 @fact_revenues_route.route('/stats', methods=['GET'])
+@login_required
 def get_revenue_stats() -> tuple[Any]:
     """
     Endpoint para obtener estadísticas de ganancias para las gráficas.

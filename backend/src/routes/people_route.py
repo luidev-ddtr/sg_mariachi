@@ -6,15 +6,14 @@ from typing import Any
 from src.dim_people.people_handler import PeopleHandler
 
 from src.routes.handle_message import send_error, send_success
-
 #Importaciones para crear cuenta
+from src.utils.decorators import login_required
 
 people_options = PeopleHandler()
 people_route = Blueprint('people_route', __name__, url_prefix='/api/people/')
 
-from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity
-
 @people_route.route('/create', methods=['POST'])
+@login_required
 def create_people():
     """
     Crea una nueva persona en la tabla dim_people

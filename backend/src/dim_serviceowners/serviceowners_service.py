@@ -1,5 +1,5 @@
 from src.utils.conexion import Conexion
-from src.dim_serviceowners.repositorio.validate_owners import validate_serviceowners
+from src.dim_serviceowners.repositorio.validate_owners import validate_email, validate_serviceowners, validateowner
 from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 
 class ServiceownersService:
@@ -20,4 +20,28 @@ class ServiceownersService:
             return user_data
         except Exception as e:
             print(f"❌ Error al verificar credenciales en el servicio: {e}")
+            return None
+        
+    def verify_email(self, email: str) -> dict | None:
+        """
+        Verifica si existe un email en la tabla dim_people.
+        Retorna el diccionario del usuario si existe, o None si no.
+        """
+        try:
+            user_data = validate_email(email, self.conn)
+            return user_data
+        except Exception as e:
+            print(f"❌ Error al verificar el email en el servicio: {e}")
+            return None
+        
+    def verify_role(self, peopleId: str) -> dict | None:
+        """
+        Verifica si el usuario con el peopleId tiene el rol de administrador en la tabla dim_serviceowners.
+        Retorna el diccionario del usuario si tiene el rol, o None si no.
+        """
+        try:
+            user_data = validateowner(peopleId, self.conn)
+            return user_data
+        except Exception as e:
+            print(f"❌ Error al verificar el rol en el servicio: {e}")
             return None
