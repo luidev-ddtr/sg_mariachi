@@ -61,6 +61,9 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
     // 1. Obtenemos TODOS los datos de la fecha
     const reservaciones = await GetReservaciones(dateParam);
     
+    // 🔥 NUEVO: Ordenar por fecha descendente (más recientes primero)
+    reservaciones.sort((a, b) => new Date(b.DIM_StartDate) - new Date(a.DIM_StartDate));
+    
     // 2. Calculamos estadísticas SIEMPRE sobre el total real del día (sin importar el filtro de estado)
     const estadisticasGlobales = calcularEstadisticas(reservaciones);
     actualizarCardsEstadisticas(estadisticasGlobales);
