@@ -63,7 +63,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script type="module">
-    import { checkSession, loginUser } from '/src/api/api_auth.js';
+    import { checkSession, loginUser, loginWithGoogle } from '/src/api/api_auth.js';
 
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Verificar si ya hay sesión activa
@@ -104,14 +104,21 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Lógica para manejar la respuesta de Google, Aun no ridirigira a ninguna pagina ya que aun no hay una tabla para usuarios que inicien sesion con  google -->
-  <script>
-      function handleCredentialResponse(response) {
-          // Aquí recibimos el token de Google (JWT)
-          console.log("Token de Google recibido:", response.credential);
-          
-          // Por ahora solo mostramos un mensaje y no redirigimos
-          alert("Inicio de sesión con Google exitoso. Token recibido en consola.");
-      }
+  <script type="module">
+    // Importamos la función que acabamos de crear
+    import { loginWithGoogle } from '/src/api/api_auth.js';
+
+    // Hacemos la función global para que el callback de Google la encuentre
+    window.handleCredentialResponse = async function(response) {
+        console.log("Token de Google recibido:", response.credential);
+        const result = await loginWithGoogle(response.credential);
+
+        if (result && result.status === 'success') {
+            window.location.href = "/index.html";
+        } else {
+            alert(result.message || "Error al iniciar sesión con Google");
+        }
+    }
   </script>
 </body>
 

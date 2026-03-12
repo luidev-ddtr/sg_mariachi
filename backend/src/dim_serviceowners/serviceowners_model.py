@@ -39,5 +39,5 @@ class ServiceOwnerModel:
         return (f"ServiceOwnerID: {self.DIM_ServiceOwnersId} | "
                 f"Username: {self.DIM_Username} | "
                 f"Password: {self.DIM_Password} | "
-                f"EmployeeID: {self.DIM_EmployeessId}")
+                f"EmployeeID: {self.DIM_EmployeeId}")
     

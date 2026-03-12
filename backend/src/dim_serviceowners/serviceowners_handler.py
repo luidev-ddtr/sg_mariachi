@@ -1,6 +1,9 @@
 from src.utils.conexion import Conexion
 from .serviceowners_service import ServiceownersService
+from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 from .repositorio.insert_owners import upsert_google_user
+from src.utils.id_generator import create_id_fact_reservation
+from src.utils.encryptPass import hash_password, verify_password
 import urllib.request as request
 import json                                                                                                                                                             
 
@@ -37,11 +40,18 @@ class ServiceownersHandler:
             password = _owner['password']
 
             # 2. Llamar al servicio para verificar en BD
+            # El servicio 'verify_credentials' ahora contiene toda la lógica de
+            # verificación segura: obtiene el usuario, extrae el hash y lo compara
+            # usando bcrypt.
             user_data = serviceowner_service.verify_credentials(username, password)
 
             if user_data:
+                # ¡Éxito! El servicio ya verificó la contraseña de forma segura.
+                # Por seguridad, el servicio ya ha eliminado la contraseña del diccionario.
                 return 200, "Login exitoso", user_data
             else:
+                # El servicio retornó None, lo que significa que el usuario no existe
+                # o la contraseña es incorrecta.
                 return 401, "Credenciales incorrectas", None
 
         except Exception as e:
@@ -119,3 +129,40 @@ class ServiceownersHandler:
             # Asegurarse de que la conexión se cierre si se creó en este método
             if not conn:
                 conexion.close_conexion()
+
+    def insertNewServiceowners(self, _owner: dict, conn: Conexion = None) -> tuple:
+
+        conexion =  conn or Conexion()
+        ServiceOwners = ServiceownersService(conexion)
+
+        try:
+            # 1. Validar que todos los campos necesarios estén presentes
+            required_fields = ['DIM_Username', 'DIM_Password', 'DIM_EmployeeId']
+            for field in required_fields:
+                if field not in _owner:
+                    return 400, f"Falta el campo requerido: {field}", []
+
+            serviceOwner = ServiceOwnerModel (
+                DIM_ServiceOwnersId= "",
+                DIM_Username= _owner['DIM_Username'],
+                DIM_Password= "",
+                DIM_EmployeeId= _owner['DIM_EmployeeId']
+            )
+
+            serviceOwner_id = create_id_fact_reservation([_owner['DIM_Username'], _owner['DIM_Password'], _owner['DIM_EmployeeId']])
+            serviceOwner.DIM_ServiceOwnersId = serviceOwner_id
+
+            # Hashear la contraseña usando la función segura de bcrypt
+            hashed_pwd = hash_password(_owner['DIM_Password'])
+            serviceOwner.DIM_Password = hashed_pwd
+
+             # 3. Usar el servicio para crear el ingreso facturado
+            created, message = ServiceOwners.createOwner(serviceOwner)
+            if not created:
+                # Propagar el mensaje de error desde el servicio
+                return 500, message or "Error al crear las credenciales", None
+
+            return 201, "Credenciales creadas exitosamente", serviceOwner.to_dict()
+        except Exception as err:
+            print(f"❌ Error en insertNewServiceowners: {err}")
+            return 500, f"Error interno del servidor: {str(err)}", None
