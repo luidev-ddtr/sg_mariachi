@@ -1,4 +1,4 @@
-// ✅ eventos_logic.js (VERSIÓN OPTIMIZADA)
+// ✅ eventos_logic.js (VERSIÓN DEFINITIVA CON BUSCADOR Y EXPORT CORREGIDO)
 import { GetReservaciones } from '../../api/api_reservacion_read.js';
 
 // --- Funciones de Formato ---
@@ -20,11 +20,9 @@ const formatCurrency = (amount) => {
 };
 
 // --- Funciones de Estadísticas ---
-// En eventos_logic.js
 export const calcularEstadisticas = (reservaciones) => {
   const total = reservaciones.length;
   
-  // 🔥 AQUÍ ESTÁ EL FIX: Cambiamos 'completado' por 'completo'
   const completados = reservaciones.filter(r => 
     (r.DIM_StatusName || '').toLowerCase() === 'completo'
   ).length;
@@ -40,6 +38,7 @@ export const calcularEstadisticas = (reservaciones) => {
   
   return { total, completados, pendientes, cancelados };
 };
+
 export const actualizarCardsEstadisticas = (estadisticas) => {
   const totalCompletados = document.getElementById('totalCompletados');
   const totalPendientes = document.getElementById('totalPendientes');
@@ -51,29 +50,41 @@ export const actualizarCardsEstadisticas = (estadisticas) => {
 };
 
 // --- Renderizado Principal ---
-export const renderReservationsTable = async (dateParam, statusParam) => {
+// 🔥 AQUÍ ESTÁ EL EXPORT QUE FALTABA Y EL PARÁMETRO DE BÚSQUEDA
+export const renderReservationsTable = async (dateParam, statusParam, searchParam = "") => {
   const tbody = document.querySelector('#tabla-eventos tbody');
   if (!tbody) return;
 
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Cargando eventos...</td></tr>';
 
   try {
-    // 1. Obtenemos TODOS los datos de la fecha
     const reservaciones = await GetReservaciones(dateParam);
     
-    // 🔥 NUEVO: Ordenar por fecha descendente (más recientes primero)
+    // Ordenar por fecha descendente
     reservaciones.sort((a, b) => new Date(b.DIM_StartDate) - new Date(a.DIM_StartDate));
     
-    // 2. Calculamos estadísticas SIEMPRE sobre el total real del día (sin importar el filtro de estado)
+    // Estadísticas
     const estadisticasGlobales = calcularEstadisticas(reservaciones);
     actualizarCardsEstadisticas(estadisticasGlobales);
     
-    // 3. Filtramos solo para lo que se va a mostrar en la tabla
-    const reservacionesFiltradas = statusParam.toLowerCase() !== 'todos'
-      ? reservaciones.filter(r => (r.DIM_StatusName || 'pendiente').toLowerCase() === statusParam.toLowerCase())
-      : reservaciones;
+    // Filtros
+    let reservacionesFiltradas = reservaciones;
 
-    // 4. Renderizamos la tabla
+    if (statusParam.toLowerCase() !== 'todos') {
+        reservacionesFiltradas = reservacionesFiltradas.filter(r => 
+            (r.DIM_StatusName || 'pendiente').toLowerCase() === statusParam.toLowerCase()
+        );
+    }
+
+    if (searchParam.trim() !== "") {
+        const termino = searchParam.toLowerCase().trim();
+        reservacionesFiltradas = reservacionesFiltradas.filter(r => {
+            const nombreCompleto = (r.DIM_fullname || '').toLowerCase();
+            return nombreCompleto.includes(termino);
+        });
+    }
+
+    // Render
     if (reservacionesFiltradas.length === 0) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No hay reservaciones para los filtros seleccionados.</td></tr>';
       return;
@@ -107,7 +118,6 @@ export const renderReservationsTable = async (dateParam, statusParam) => {
   } catch (error) {
     console.error("Error al renderizar tabla:", error);
     tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Error al cargar datos. Verifica tu conexión.</td></tr>`;
-    // Reseteamos las cards en caso de error
     actualizarCardsEstadisticas({ total: 0, completados: 0, pendientes: 0 });
   }
 };

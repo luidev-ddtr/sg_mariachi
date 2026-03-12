@@ -3,6 +3,8 @@
  * Preparada para navegación completa y eventos reales con panel lateral de detalles
  */
 import { GetReservationStatsCalendar } from "../../api/api_reservation_stats_calendar.js";
+// IMPORTANTE: Necesitarás importar tu función que trae los detalles reales de las reservas
+// import { GetReservationsDetails } from "../../api/api_reservations.js"; 
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -18,70 +20,93 @@ document.addEventListener('DOMContentLoaded', function () {
     allDaySlot: true, 
     height: 'auto',
     headerToolbar: false,
+    slotMinTime: "08:00:00", // Opcional: ajustar horario de inicio visible
+    slotMaxTime: "23:59:00", // Opcional: ajustar horario de fin visible
 
-    // Función para agregar los eventos desde la API (Solución al bug de Año)
-    events: async function(fetchInfo, successCallback, failureCallback) {
+events: async function(fetchInfo, successCallback, failureCallback) {
       try {
         const start = fetchInfo.start;
         const end = fetchInfo.end;
-        const diffDays = (end - start) / (1000 * 60 * 60 * 24);
         
-        // Si pide más de 100 días, estamos en la vista de Año
-        const isYearView = diffDays > 100; 
+        // Redondeamos para evitar decimales extraños por zonas horarias
+        const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+        
+        // ¡LA SOLUCIÓN DEFINITIVA!: 
+        // Si el calendario pide 10 días o menos (1 o 7), estamos en Día o Semana.
+        const isDetailView = diffDays <= 10; 
+        // Si pide más de 100 días, estamos en Año.
+        const isYearView = diffDays > 100;
 
         const midDate = new Date((start.getTime() + end.getTime()) / 2);
         const year = midDate.getFullYear();
-        
-        let rawData = [];
+        let formattedEvents = [];
 
-        if (isYearView) {
-          // VISTA DE AÑO: Pedimos los 12 meses en paralelo para saber los días exactos
-          const promesas = [];
-          for (let m = 1; m <= 12; m++) {
-            // Hacemos la petición de cada mes. Si un mes falla o no tiene datos, devolvemos un array vacío
-            promesas.push(GetReservationStatsCalendar('month', year, m).catch(() => []));
-          }
-          
-          const resultadosMeses = await Promise.all(promesas);
-          
-          // Combinamos los datos y les inyectamos a qué mes pertenecen
-          resultadosMeses.forEach((mesData, index) => {
-            const mesActual = index + 1;
-            if (mesData && mesData.length > 0) {
-              mesData.forEach(item => {
-                rawData.push({ ...item, monthForDate: mesActual });
-              });
-            }
+        // --- VISTA DE SEMANA O DÍA (Eventos individuales con nombre de cliente) ---
+        if (isDetailView) {
+          // MOCK DE DATOS (Bórralo y usa tu API real más adelante):
+          const data = [
+            { id: 1, client_name: 'Juan Pérez', date: '2026-03-12', time: '14:00', phone: '555-1234', address: 'Calle Falsa 123' },
+            { id: 2, client_name: 'María García', date: '2026-03-14', time: '19:30', phone: '555-9876', address: 'Salón de Fiestas Los Pinos' }
+          ];
+
+          formattedEvents = data.map(item => {
+            return {
+              id: `evt-${item.id}`,
+              title: item.client_name, 
+              start: `${item.date}T${item.time}`, 
+              backgroundColor: '#198754', 
+              extendedProps: {
+                isDetail: true, 
+                client: item.client_name,
+                phone: item.phone,
+                address: item.address,
+                time: item.time
+              }
+            };
           });
+        } 
+        // --- VISTA DE AÑO O MES (Estadísticas agrupadas) ---
+        else {
+          let rawData = [];
 
-        } else {
-          // VISTA NORMAL (Mes/Semana/Día): Pedimos solo el mes actual
-          const month = midDate.getMonth() + 1; 
-          const data = await GetReservationStatsCalendar('month', year, month);
-          if (data && data.length > 0) {
-            data.forEach(item => {
-              rawData.push({ ...item, monthForDate: month });
-            });
-          }
-        }
-
-        // MAPEAMOS LOS DATOS PARA EL CALENDARIO (Ahora siempre son fechas exactas)
-        const formattedEvents = rawData.map(item => {
-          const mesFormateado = String(item.monthForDate).padStart(2, '0');
-          const diaFormateado = String(item.label).padStart(2, '0');
-          const dateString = `${year}-${mesFormateado}-${diaFormateado}`;
-
-          return {
-            id: `stat-${dateString}`, // ID único basado en la fecha
-            title: `${item.total_events} reserva(s)`, 
-            start: dateString,
-            allDay: true, 
-            backgroundColor: '#0d6efd',
-            extendedProps: {
-              total: item.total_events
+          if (isYearView) {
+            const promesas = [];
+            for (let m = 1; m <= 12; m++) {
+              promesas.push(GetReservationStatsCalendar('month', year, m).catch(() => []));
             }
-          };
-        });
+            const resultadosMeses = await Promise.all(promesas);
+            
+            resultadosMeses.forEach((mesData, index) => {
+              if (mesData && mesData.length > 0) {
+                mesData.forEach(item => rawData.push({ ...item, monthForDate: index + 1 }));
+              }
+            });
+          } else {
+            const month = midDate.getMonth() + 1; 
+            const data = await GetReservationStatsCalendar('month', year, month);
+            if (data && data.length > 0) {
+              data.forEach(item => rawData.push({ ...item, monthForDate: month }));
+            }
+          }
+
+          formattedEvents = rawData.map(item => {
+            const mesFormateado = String(item.monthForDate).padStart(2, '0');
+            const diaFormateado = String(item.label).padStart(2, '0');
+            const dateString = `${year}-${mesFormateado}-${diaFormateado}`;
+
+            return {
+              id: `stat-${dateString}`, 
+              title: `${item.total_events} reserva(s)`, 
+              start: dateString,
+              allDay: true, 
+              backgroundColor: '#0d6efd',
+              extendedProps: {
+                isDetail: false,
+                total: item.total_events
+              }
+            };
+          });
+        }
 
         successCallback(formattedEvents);
       } catch (error) {
@@ -89,24 +114,21 @@ document.addEventListener('DOMContentLoaded', function () {
         failureCallback(error);
       }
     },
-
     // --- ACCIÓN AL HACER CLIC EN EL EVENTO ---
     eventClick: function(info) {
-      const fecha = info.event.start;
-      const totalReservas = info.event.extendedProps.total;
+      const isDetail = info.event.extendedProps.isDetail;
 
-      // 1. Cambiamos la vista del calendario a 'Día' en la fecha seleccionada
-      calendar.changeView('timeGridDay', fecha);
-
-      // 2. Actualizamos los botones de vista para que el botón de 'Día' se vea activo
-      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('day').classList.add('active');
-
-      // 3. Llamamos a la función para abrir el panel profesional con los detalles
-      openDetailPanel(fecha, totalReservas);
+      if (!isDetail) {
+        // Si hicieron clic en "X reservas" (estadística), los llevamos a la vista de Día
+        calendar.changeView('timeGridDay', info.event.start);
+        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('day').classList.add('active');
+      } else {
+        // Si hicieron clic en un cliente (vista semana/día), abrimos el panel con sus datos
+        openClientDetailPanel(info.event);
+      }
     },
 
-    // Código para la vista de año
     views: {
       multiMonthYear: {
         type: 'multiMonth',
@@ -115,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     },
 
-    // Actualiza el título del dashboard al cambiar fecha o vista
     datesSet: function () {
       updateCurrentDate(calendar);
     }
@@ -125,23 +146,50 @@ document.addEventListener('DOMContentLoaded', function () {
   updateCurrentDate(calendar);
 
   /* --- FUNCIONES PARA MANEJAR EL PANEL DE DETALLES --- */
-  function openDetailPanel(date, total) {
+  
+  // ¡NUEVO!: Panel adaptado para mostrar datos del cliente
+  function openClientDetailPanel(event) {
+    const props = event.extendedProps;
+    const date = event.start;
+    
     const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const fechaFormateada = date.toLocaleDateString('es-ES', opcionesFecha).toUpperCase();
+    
+    // Formatear la hora si existe
+    const horaFormateada = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
     const htmlContent = `
       <div class="date-summary">
-        <span class="material-icons date-icon">event_note</span>
+        <span class="material-icons date-icon">event</span>
         <div>
           <h3>${fechaFormateada}</h3>
-          <p>Resumen diario de reservas agendadas.</p>
+          <p>Hora del evento: <strong>${horaFormateada} hrs</strong></p>
         </div>
       </div>
-      <div class="stats-box">
-        <span class="material-icons total-icon">people_alt</span>
-        <div class="total-count">
-          <h4>TOTAL</h4>
-          <span class="reservations-total">${total} reserva(s)</span>
+      <hr>
+      <div class="client-details" style="margin-top: 20px;">
+        <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
+          <span class="material-icons" style="margin-right: 10px; color: #555;">person</span>
+          <div>
+            <small style="color: #666;">Cliente</small>
+            <h4 style="margin: 0;">${props.client}</h4>
+          </div>
+        </div>
+
+        <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
+          <span class="material-icons" style="margin-right: 10px; color: #555;">phone</span>
+          <div>
+            <small style="color: #666;">Teléfono</small>
+            <p style="margin: 0;">${props.phone || 'No registrado'}</p>
+          </div>
+        </div>
+
+        <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
+          <span class="material-icons" style="margin-right: 10px; color: #555;">location_on</span>
+          <div>
+            <small style="color: #666;">Dirección</small>
+            <p style="margin: 0;">${props.address || 'No registrada'}</p>
+          </div>
         </div>
       </div>
     `;
@@ -166,18 +214,10 @@ document.addEventListener('DOMContentLoaded', function () {
     button.classList.add('active');
   }
 
-  document.getElementById('day').onclick = function () {
-    changeView('timeGridDay', this);
-  };
-  document.getElementById('week').onclick = function () {
-    changeView('timeGridWeek', this);
-  };
-  document.getElementById('month').onclick = function () {
-    changeView('dayGridMonth', this);
-  };
-  document.getElementById('year').onclick = function () {
-    changeView('multiMonthYear', this);
-  };
+  document.getElementById('day').onclick = function () { changeView('timeGridDay', this); };
+  document.getElementById('week').onclick = function () { changeView('timeGridWeek', this); };
+  document.getElementById('month').onclick = function () { changeView('dayGridMonth', this); };
+  document.getElementById('year').onclick = function () { changeView('multiMonthYear', this); };
 });
 
 function updateCurrentDate(calendar) {

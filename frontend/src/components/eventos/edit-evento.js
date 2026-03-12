@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!eventId) {
         console.error("ID no encontrado en la URL");
-        alert("Error crítico: No hay ID de evento para editar.");
+        // --- NUEVO MODAL DE ERROR ---
+        await mostrarModalCustom("Error crítico", "No hay ID de evento para editar.", "error");
         return;
     }
 
@@ -41,25 +42,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputsTelefonos.forEach(input => {
         if (input) {
             input.addEventListener('input', function(e) {
-                // 1. Guardamos el valor original para comparar
                 const valorOriginal = this.value;
-                
-                // 2. Reemplazamos CUALQUIER cosa que no sea número (letras, espacios, símbolos)
-                // /[^0-9]/g significa: "Busca todo lo que NO sea un dígito del 0 al 9 y bórralo"
                 let valorLimpio = valorOriginal.replace(/[^0-9]/g, '');
 
-                // 3. Limitamos a 10 dígitos
                 if (valorLimpio.length > 10) {
                     valorLimpio = valorLimpio.slice(0, 10);
                 }
 
-                // 4. Solo actualizamos si hubo cambios (evita parpadeos)
                 if (valorOriginal !== valorLimpio) {
                     this.value = valorLimpio;
                 }
             });
             
-            // Seguridad extra: Evitar pegar texto con formato
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
                 const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
@@ -68,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
     });
+
     // =======================================================
     // NUEVO: Validación para el MONTO (evitar negativos)
     // =======================================================
@@ -77,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (this.value < 0) this.value = '';
         });
     }
+
     // 4. ENVIAR CAMBIOS (UPDATE)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -110,31 +106,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             DIM_StartDate: `${fecha} ${horaInicio}:00`,
             DIM_EndDate: `${fecha} ${horaFin}:00`,
             
-             // --- CORRECCIÓN: Leer de los inputs correctos ---
-            DIM_EventAddress: document.getElementById('direccion').value, // Lee del input Dirección
-            DIM_Notes: document.getElementById('descripcion').value,      // Lee del textarea Descripción
+            DIM_EventAddress: document.getElementById('direccion').value, 
+            DIM_Notes: document.getElementById('descripcion').value,      
             
             DIM_TotalAmount: document.getElementById('dim_totalamount').value,
             DIM_NHours: parseInt(totalHoras) || 0
         };
-        // En edit-evento.js, dentro del form.addEventListener('submit'...)
+
         try {
             console.log("Enviando actualización...", datosParaEnviar);
             await updateReservation(datosParaEnviar);
             
-            alert("¡Evento actualizado correctamente!");
+            // --- NUEVO MODAL DE ÉXITO (Espera a que el usuario de clic) ---
+            await mostrarModalCustom("¡Éxito!", "¡Evento actualizado correctamente!", "success");
             
-            // --- CAMBIO AQUÍ ---
-            // Verificamos si el padre tiene la función puente
             if (window.parent && window.parent.finalizarEdicionExitoso) {
                 window.parent.finalizarEdicionExitoso();
             } else {
-                // Fallback por si se abrió en pestaña nueva
                 window.history.back();
             }
             
         } catch (error) {
-            // ... error handling
+            console.error(error);
+            await mostrarModalCustom("Error", "Hubo un problema al actualizar el evento.", "error");
         }
     });
 });
@@ -147,7 +141,8 @@ async function cargarDatosEnFormulario(id) {
         const datos = Array.isArray(respuesta) ? respuesta[0] : respuesta;
 
         if (!datos) {
-            alert("No se encontraron datos para este evento.");
+            // --- NUEVO MODAL DE ADVERTENCIA ---
+            await mostrarModalCustom("Atención", "No se encontraron datos para este evento.", "warning");
             return;
         }
 
@@ -197,11 +192,7 @@ async function cargarDatosEnFormulario(id) {
         document.getElementById('hora_final').value = extraerHora(horaFinStr);
 
         // OTROS
-        // --- CORRECCIÓN: Asignar cada cosa a su input correspondiente ---
-        // 1. Dirección al input nuevo
         document.getElementById('direccion').value = datos.DIM_EventAddress || datos.evento_lugar || "";
-
-        // 2. Descripción (Notas) al textarea de descripción
         document.getElementById('descripcion').value = datos.servicio_notas || "";
         document.getElementById('dim_totalamount').value = datos.DIM_TotalAmount || datos.pago_total || 0;
 
@@ -236,4 +227,71 @@ function calcularTotalHoras() {
         document.getElementById('total_horas').value = 
             `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
     }
+}
+
+// =======================================================
+// NUEVO: Sistema de Notificaciones basado en tu diseño
+// =======================================================
+function mostrarModalCustom(titulo, mensaje, tipo = 'info') {
+    return new Promise((resolve) => {
+        // Colores según el tipo (Éxito verde, Error rojo, etc)
+        let colorBoton = "#0d6efd"; // azul por defecto
+        if (tipo === 'success') colorBoton = "#198754"; // verde
+        if (tipo === 'error') colorBoton = "#dc3545"; // rojo
+        if (tipo === 'warning') colorBoton = "#fd7e14"; // naranja
+
+        // Crear contenedor del fondo oscuro (Overlay)
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease;
+        `;
+
+        // Crear la caja del modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: white; border-radius: 8px; width: 400px; max-width: 90%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;
+            transform: translateY(-20px); transition: transform 0.3s ease;
+        `;
+
+        // Estructura HTML del modal
+        modal.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #333; font-weight: bold;">${titulo}</h3>
+                <button id="btn-cerrar-x" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #888;">&times;</button>
+            </div>
+            <div style="padding: 25px 20px; text-align: center; color: #555; font-size: 1rem;">
+                ${mensaje}
+            </div>
+            <div style="padding: 15px 20px; display: flex; justify-content: flex-end; gap: 10px; background: #f8f9fa; border-top: 1px solid #e9ecef; border-radius: 0 0 8px 8px;">
+                <button id="btn-aceptar" style="background: ${colorBoton}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500;">Aceptar</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Animación de entrada
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            modal.style.transform = 'translateY(0)';
+        }, 10);
+
+        // Función para cerrar y resolver la promesa
+        const cerrarModal = (resultado) => {
+            overlay.style.opacity = '0';
+            modal.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                resolve(resultado);
+            }, 300); // Esperar a que termine la animación
+        };
+
+        // Eventos de los botones
+        modal.querySelector('#btn-cerrar-x').onclick = () => cerrarModal(false);
+        modal.querySelector('#btn-aceptar').onclick = () => cerrarModal(true);
+    });
 }
