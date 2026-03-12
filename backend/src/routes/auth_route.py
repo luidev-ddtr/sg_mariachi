@@ -47,3 +47,20 @@ def check_session():
             "username": session.get('username')
         }, 200)
     return send_error("No hay sesión activa", 401)
+
+
+@auth_route.route('/google_login', methods = ['POST'])
+def loginGoogle():
+    try:
+        data = request.get_json()
+        status, message, user_data = auth_handler.loginWithGoogle(data)
+        if status == 200 and user_data:
+            # 2. ¡AQUÍ ES DONDE SE CREA LA SESIÓN!
+            # Guardamos datos mínimos necesarios en la cookie firmada del navegador
+            session['user_id'] = user_data['DIM_ServiceOwnersId']
+            session['username'] = user_data['DIM_Name']
+            return send_success(message, user_data, 200)
+        else:
+            return send_error(message, status)
+    except Exception as e:
+        return send_error(str(e), 500)
