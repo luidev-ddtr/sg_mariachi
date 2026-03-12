@@ -44,3 +44,20 @@ export const loginUser = async (credentials) => {
         return { status: 'error', message: 'Error de conexión con el servidor' };
     }
 };
+
+export const loginWithGoogle = async (token) => {
+    try {
+        // 1. Hacemos la petición al backend con el token de Google
+        const response = await axiosInstance.post('auth/google_login', { token });
+        // 2. Si todo sale bien, retornamos la data
+        return response.data;
+    } catch (error) {
+        // 3. Si hay un error...
+        if (error.response) {
+            // 3a. Si el error viene del backend, lo retornamos
+            return error.response.data;
+        }
+        // 3b. Si es un error de red u otro
+        return { status: 'error', message: 'Error de conexión con el servidor' };
+    }
+};

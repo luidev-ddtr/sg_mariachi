@@ -24,6 +24,28 @@ def insert_serviceowners(data_serviceowners: ServiceOwnerModel ,objetc_conn: Con
     # esta destinao a una sola persona, por lo que se podría manejar de forma manual, 
     # pero se deja esta función para futuras implementaciones
 
+    query = """
+        INSERT INTO dim_serviceowners (DIM_ServiceOwnersId, DIM_Username, DIM_Password, DIM_EmployeeId)
+        VALUES (%s, %s, %s, %s)
+        """
+    try:
+        values = (
+           data_serviceowners.DIM_ServiceOwnersId,
+           data_serviceowners.DIM_Username,
+           data_serviceowners.DIM_Password,
+           data_serviceowners.DIM_EmployeeId 
+        )
+
+        objetc_conn.cursor.execute(query, values)
+
+        objetc_conn.save_changes()
+        return True
+    
+    except Exception as err:
+        print(f'Erro al registrar al nuevo administrador: {err}')
+        objetc_conn.conn.rollback()
+        return False
+
 def upsert_google_user(google_user_data: dict, objetc_conn: Conexion) -> bool:
     """
     Inserta o actualiza la información de un usuario de Google en la tabla dim_usergoogle.
