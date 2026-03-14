@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo Administrador</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/form_nvo_evento.css">
+</head>
+<body>
+
+<div class="modal-wrapper">
+  <div class="form-container">
+    <form id="admin-form" novalidate>
+
+      <h2>Nuevo administrador</h2>
+
+      <!--  PASO 1: Datos personales  -->
+      <section class="wizard-step active" data-step="1">
+        <h2>Datos personales</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_nombre">Nombre *</label>
+            <input type="text" id="admin_nombre" name="admin_nombre" required placeholder="Nombre(s)">
+          </div>
+          <div class="form-group">
+            <label for="admin_segundo_nombre">Segundo Nombre</label>
+            <input type="text" id="admin_segundo_nombre" name="admin_segundo_nombre" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_apellido_paterno">Apellido Paterno *</label>
+            <input type="text" id="admin_apellido_paterno" name="admin_apellido_paterno" required>
+          </div>
+          <div class="form-group">
+            <label for="admin_apellido_materno">Apellido Materno *</label>
+            <input type="text" id="admin_apellido_materno" name="admin_apellido_materno">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_telefono">Teléfono *</label>
+            <input type="tel" id="admin_telefono" name="admin_telefono" required
+              pattern="[0-9]{10}" placeholder="10 dígitos" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label for="admin_email">Correo electrónico *</label>
+            <input type="email" id="admin_email" name="admin_email" required
+              placeholder="correo@ejemplo.com">
+          </div>
+        </div>
+      </section>
+
+      <!--PASO 2: Dirección  -->
+      <section class="wizard-step" data-step="2">
+        <h2>Dirección</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_localidad">Localidad</label>
+            <input type="text" id="admin_localidad" name="admin_localidad" placeholder="Colonia / Localidad">
+          </div>
+          <div class="form-group">
+            <label for="admin_municipio">Municipio *</label>
+            <input type="text" id="admin_municipio" name="admin_municipio" required>
+          </div>
+          <div class="form-group">
+            <label for="admin_estado">Estado *</label>
+            <input type="text" id="admin_estado" name="admin_estado" required>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="admin_direccion">Dirección completa *</label>
+          <input type="text" id="admin_direccion" name="admin_direccion" required
+            placeholder="Calle, número, colonia">
+        </div>
+      </section>
+
+      <!--  PASO 3: Datos de cuenta -->
+      <section class="wizard-step" data-step="3">
+        <h2>Datos de cuenta</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_usuario">Nombre de usuario *</label>
+            <input type="text" id="admin_usuario" name="admin_usuario" required
+              placeholder="ej. admin_juan">
+          </div>
+          <div class="form-group">
+            <label for="admin_rol">Rol *</label>
+            <select id="admin_rol" name="admin_rol" required>
+              <option value="" disabled selected>Seleccionar rol</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_password">Contraseña *</label>
+            <input type="password" id="admin_password" name="admin_password" required
+              placeholder="Mínimo 8 caracteres" minlength="8">
+          </div>
+          <div class="form-group">
+            <label for="admin_confirm_password">Confirmar contraseña *</label>
+            <input type="password" id="admin_confirm_password" name="admin_confirm_password" required
+              placeholder="Repite la contraseña">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="admin_notas">Notas / Observaciones</label>
+          <textarea id="admin_notas" name="admin_notas" rows="3"
+            placeholder="Información adicional sobre este administrador..."></textarea>
+        </div>
+      </section>
+
+      <!--  BOTONES WIZARD -->
+      <div class="wizard-buttons">
+        <button type="button" id="prevBtn" disabled>Anterior</button>
+        <button type="button" id="nextBtn">Siguiente</button>
+        <button type="submit" id="submitBtn" class="submit-btn hidden">
+          Registrar administrador
+        </button>
+      </div>
+
+      <div id="form-message"></div>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="/src/components/eventos/wizard-admin.js"></script>
+<script type="module" src="/src/components/eventos/registro-admin.js"></script>
+
+</body>
+</html>
