@@ -4,158 +4,200 @@
   box-sizing: border-box;
   font-family: 'Roboto', sans-serif;
 }
-/* Pagina principal */
+
 html, body {
-  margin: 0; /* Elimina márgenes por defecto del navegador */
-  padding: 0; /* Elimina rellenos por defecto */
-  height: 100%; /* Hace que el body ocupe toda la altura de la pantalla */
-  overflow: visible; /*Permite que el contenido (como el modal) se muestre completo */
-  display: flex; /* Centra el modal horizontal y verticalmente */
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center; /* Centra verticalmente */
-  backdrop-filter: blur(10px); /* Fondo CRISTAL (como blur) SE PUEDE CAMBIAR POR UNbackground: transparent;*/
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  overflow-y: auto;
 }
 
-/* --- CONTENEDOR PRINCIPAL DEL MODAL (IMAGEN + FORMULARIO) --- */
-.modal-wrapper {
-  display: flex;
-  flex-direction: row;
-  width: 90%;
-  max-width: 1000px;
-  max-height: 90vh; /* <-- usa max-height, PARA QUE NO SEA FIJA */
-  border-radius: 10px;
-  overflow: hidden; /* <-- antes estaba hidden */
+/* Scroll invisible en body */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
   background: transparent;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
+/*  MODAL WRAPPER: ocupa todo el iframe */
+.modal-wrapper {
+  width: 100%;          /* 100% del iframe, sin max-width */
+  min-height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
 
-/* --- SECCIÓN DE LA IMAGEN (LADO IZQUIERDO DEL MODAL) --- */
+/* IMAGEN: oculta */
 .image-section {
-  flex: 0 0 40%; /* Ocupa la mitad disponible del modal */
-  background-color: #000; /* Fondo negro de respaldo si la imagen no carga */
-  overflow: hidden; /* Asegura que la imagen no se desborde */
-  border-radius: 10px 0 0 10px; /* ← IZQ superior + IZQ inferior */
+  display: none;
 }
 
-
-.image-section img {
-  width: 100%; /* Imagen ocupa todo el ancho del contenedor */
-  height: 100%; /* Imagen ocupa todo el alto del contenedor */
-  object-fit: cover; /* La imagen se recorta para cubrir sin deformarse */
-  border-radius: 10px 0 0 10px; /* ← También en la imagen */
-}
-
-/* --- SECCIÓN DEL FORMULARIO (LADO DERECHO DEL MODAL) --- */
+/*  FORMULARIO (ocupa todo)  */
 .form-container {
   flex: 1;
-  width: 70%;
-  max-width: 850px;
-  max-height: 90vh; /*  evita que crezca más del viewport */
-  border-radius: 0 10px 10px 0; /* ← DER superior + DER inferior */
-  overflow-y: auto; /* scroll si es necesario */
-  background: rgba(255, 253, 251, 0.6);
-  padding: 25px 30px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  padding: 2rem 2.5rem;
+  background: #ffffff;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Ajustes del formulario interno */
-.form-container form {
-  width: 100%; /* Ocupa todo el ancho del contenedor */
-  height: auto; /* Se adapta automáticamente según su contenido */
-  display: flex;
-  flex-direction: column; /* Ordena los elementos en columna */
-  justify-content: flex-start; /* Comienza desde arriba */
-}
-
-/* Oculta visualmente la barra de scroll en navegadores WebKit (Chrome, Edge, Safari) */
 .form-container::-webkit-scrollbar {
   width: 0;
   background: transparent;
 }
 
-/* --- TÍTULO DEL FORMULARIO --- */
-h2 {
-  text-align: center; /* Centra el título */
-  color: #000000; /* Texto gris oscuro */
-  margin-bottom: 20px; /* Espacio inferior */
+.form-container form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- ESTRUCTURA DE FILAS Y CAMPOS --- */
-/* --- los cambios que se hicieron fue en la estructura de las filas y campos desde .form.row hasta .full-width --- */
+/* --- TÍTULO --- */
+h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 1.75rem;
+}
+
+/* --- SECCIONES --- */
+.form-section {
+  margin-bottom: 1.75rem;
+}
+
+.form-section h3 {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #9599a1; /*Color de la tipografía de las secciones*/
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #020201; /*Color de las lineas que dividen las secciones del formulario*/
+}
+
+/* --- FILAS --- */
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 10px;               /* Igual que Nuevo Evento */
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .form-group {
-  flex: 1;                 /* Igual que Nuevo Evento */
-  min-width: 45%;          /* Para que se comporten como columnas */
+  flex: 1;
+  min-width: 45%;
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;     /* Igual que Nuevo Evento */
+  margin-bottom: 12px;
 }
 
-/* Campos de ancho completo */
 .full-width {
-  flex: 100%;              /* Ocupa la fila completa */
+  flex: 100%;
 }
 
-
-/* --- ETIQUETAS DE LOS CAMPOS --- */
+/* --- LABELS --- */
 label {
-  font-weight: 500; /* Peso medio de fuente */
-  margin-bottom: 5px; /* Separación entre etiqueta e input */
-  color: #000000; /* Texto gris oscuro */
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #444242;
+  margin-bottom: 5px;
 }
 
-/* --- ESTILOS DE LOS INPUTS Y TEXTAREAS --- */
+/* --- INPUTS Y TEXTAREA --- */
 input,
 textarea {
-  width: 100%; /* Ocupan todo el ancho disponible */
-  padding: 10px; /* Espaciado interno */
-  border-radius: 8px; /* Bordes redondeados */
-  border: none; /* Borde gris claro */
-  font-size: 0.95rem; /* Tamaño de texto */
-  box-sizing: border-box; /* Incluye el padding dentro del ancho total */
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Suaviza las animaciones al enfocar */
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* --- EFECTO AL ENFOCAR LOS CAMPOS --- */
+input::placeholder,
+textarea::placeholder {
+  color: #d1d5db;
+}
+
 input:focus,
 textarea:focus {
-  outline: none; /* Elimina borde azul predeterminado del navegador */
-  border-color: #020203; /* Borde azul al enfocar */
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); /* Sombra azul alrededor */
+  outline: none;
+  border-color: #1d1d1c;
+  box-shadow: 0 0 0 3px rgba(85, 73, 218, 0.12);
 }
 
-/* --- BOTÓN PRINCIPAL --- */
+input[readonly] {
+  background: #e6e6e6; /*Color de los inputs a los que ya no se les puede modificar la información*/
+  color: #6b7280;
+  cursor: default;
+  border-color: #f0f0f0;
+}
+
+textarea {
+  resize: none;
+}
+
+/* --- MENSAJE --- */
+#form-message {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+#form-message.success { color: #15803d; background: #f0fdf4; }
+#form-message.error   { color: #dc2626; background: #fef2f2; }
+#form-message.info    { color: #2563eb; background: #eff6ff; }
+
+/* --- BOTÓN GUARDAR --- */
 .submit-btn {
-  width: 100%; /* Ocupa todo el ancho del formulario */
-  background-color: #1eb211; /* Azul principal */
-  color: white; /* Texto blanco */
-  padding: 12px; /* Espaciado interno */
-  border: none; /* Sin borde */
-  border-radius: 8px; /* Bordes redondeados */
-  cursor: pointer; /* Cambia el cursor a mano al pasar encima */
-  font-size: 1rem; /* Tamaño del texto */
-  font-weight: 600; /* Texto seminegrita */
-  margin-top: 15px; /* Espacio superior */
-  transition: background-color 0.3s ease; /* Suaviza el cambio de color al pasar el ratón */
+  width: 100%;
+  background-color: #1eb211;
+  color: white;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* Efecto hover del botón */
-.submit-btn:hover {
-  background-color: #087a23; /* Azul más oscuro al pasar el mouse */
-}
+.submit-btn:hover  { background-color: #179b0d; }
+.submit-btn:active { transform: scale(0.98); }
 
-/* --- RESPONSIVIDAD --- */
-@media (max-width: 768px) {
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+  .form-container {
+    padding: 1.5rem 1.25rem;
+  }
+
   .form-row {
-    flex-direction: column; /* Los inputs se apilan verticalmente en pantallas pequeñas */
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-group {
+    min-width: 100%;
   }
 }

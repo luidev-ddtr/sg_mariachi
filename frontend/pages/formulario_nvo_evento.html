@@ -63,10 +63,7 @@
         <h2>Dirección</h2>
 
         <div class="form-row">
-          <div class="form-group">
-            <label for="fecha">Fecha *</label>
-            <input type="date" id="fecha" name="fecha" required>
-          </div>
+          
           <div class="form-group">
             <label for="localidad">Localidad *</label>
             <input type="text" id="localidad" name="localidad">
@@ -92,6 +89,10 @@
         <h2>Datos del evento</h2>
 
         <div class="form-row">
+          <div class="form-group"><!-- fecha se cambio a la sección de Datos del evento -->
+            <label for="fecha">Fecha *</label>
+            <input type="date" id="fecha" name="fecha" required>
+          </div>
           <div class="form-group">
             <label for="hora_inicio">Hora de inicio *</label>
             <input type="time" id="hora_inicio" name="hora_inicio" required step="3600">
@@ -118,7 +119,6 @@
         </div>
       </section>
 
-      <!-- BOTONES WIZARD -->
       <!-- Botones del wizard -->
       <div class="wizard-buttons">
         <button type="button" id="prevBtn" disabled>Anterior</button>
