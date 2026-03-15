@@ -1,6 +1,6 @@
 /*  RESET GENERAL */
 * {
-  margin: 10;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Roboto', sans-serif;
@@ -20,32 +20,27 @@ html, body {
 .modal-wrapper {
   position: fixed;
   inset: 0;
-  background:#ffffff;
-
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 40px;
   z-index: 1000;
 }
 
-/* CONTENEDOR DEL FORMULARIO Tarjeta tipo wizard */
+/* CONTENEDOR DEL FORMULARIO */
 .form-container {
   background: #ffffff;
   border-radius: 12px;
-  position: relative; /*estaba en absolute*/
-  /*box-shadow: 0 15px 35px rgba(0,0,0,0.12);*/
+  position: relative;
   padding: 15px 45px;
   width: 100%;
-
-  height: 95vh;              /* CLAVE */
+  height: 95vh;
   display: flex;
   flex-direction: column;
-
-  overflow-y: auto;          /* permite scroll vertical */
-  scrollbar-width: none;     /* Firefox */
-  -ms-overflow-style: none;  /* Internet Explorer */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .form-container::-webkit-scrollbar {
@@ -61,18 +56,16 @@ form > h2 {
   margin-bottom: 35px;
 }
 
-/*  SECCIONES DEL WIZARD (Datos personales, Dirección, Evento) */
+/* SECCIONES DEL WIZARD */
 .wizard-step {
-  display: none;               /* Ocultos por defecto */
+  display: none;
   animation: fadeStep 0.3s ease-in-out;
-  
 }
 
 .wizard-step.active {
-  display: block;              /*Solo el paso activo */
-/*display: flex;*/
+  display: block;
   flex-direction: column;
-  justify-content: center;   /*CENTRADO VERTICAL */
+  justify-content: center;
 }
 
 /* Animación suave */
@@ -81,7 +74,7 @@ form > h2 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/*TÍTULO DE CADA PASO */
+/* TÍTULO DE CADA PASO */
 .wizard-step h2 {
   font-size: 1.6rem;
   font-weight: 500;
@@ -91,7 +84,7 @@ form > h2 {
   padding-left: 12px;
 }
 
-/*  FILAS Y GRUPOS DE INPUTS */
+/* FILAS Y GRUPOS DE INPUTS */
 .form-row {
   display: flex;
   gap: 24px;
@@ -104,13 +97,13 @@ form > h2 {
   flex-direction: column;
 }
 
-/* Campos que ocupan todo el ancho */
+/* Campos de ancho completo */
 .full-width {
   width: 100%;
   margin-bottom: 22px;
 }
 
-/* LABELS*/
+/* LABELS */
 label {
   font-size: 0.75rem;
   font-weight: 500;
@@ -154,6 +147,43 @@ input[readonly] {
   cursor: not-allowed;
 }
 
+/* SELECT  */
+select {
+  /* Dimensiones y espaciado idénticos a input */
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px 40px 12px 14px; /* padding-right extra para la flecha */
+  font-size: 0.95rem;
+  font-family: 'Roboto', sans-serif;
+  color: #111827;
+  background-color: #ffffff;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  /* Eliminar la flecha nativa del navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Flecha personalizada con SVG inline */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+/* Focus del select */
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+/* Opción placeholder (la deshabilitada) */
+select option[disabled] {
+  color: #9ca3af;
+}
+
 /* MENSAJES DEL FORMULARIO */
 #form-message {
   margin-top: 20px;
@@ -165,16 +195,15 @@ input[readonly] {
 #form-message.error   { color: #dc2626; }
 #form-message.info    { color: #2563eb; }
 
-/* BOTONES DEL WIZARD (siguiente/atras) */
+/* BOTONES DEL WIZARD */
 .wizard-buttons {
-  margin-top: auto;          /*  BOTONES ABAJO */
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-top: 25px;
 }
 
-/* Botones base */
 .wizard-buttons button {
   padding: 12px 26px;
   font-size: 0.95rem;
@@ -185,7 +214,6 @@ input[readonly] {
   transition: background 0.25s ease, transform 0.1s ease;
 }
 
-/* Anterior */
 #prevBtn {
   background: #e5e7eb;
   color: #374151;
@@ -196,7 +224,6 @@ input[readonly] {
   cursor: not-allowed;
 }
 
-/* Siguiente */
 #nextBtn {
   background: #3b82f6;
   color: #ffffff;
@@ -206,27 +233,24 @@ input[readonly] {
   background: #2563eb;
 }
 
-/* Submit final */
 .submit-btn {
-  background: #10b981;
+  background: #1eb211;
   color: #ffffff;
 }
 
 .submit-btn:hover {
-  background: #059669;
+  background: #179b0d;
 }
 
-/* Oculto (JS controla visibilidad) */
 .hidden {
   display: none !important;
 }
 
-/* Pequeña interacción */
 .wizard-buttons button:active {
   transform: scale(0.97);
 }
 
-/*RESPONSIVE  */
+/* RESPONSIVE */
 @media (max-width: 900px) {
   .form-row {
     flex-direction: column;
