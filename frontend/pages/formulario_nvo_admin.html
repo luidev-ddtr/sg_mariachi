@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nuevo Administrador</title>
+  <title>Administrador</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/form_nvo_evento.css">
@@ -14,9 +14,10 @@
   <div class="form-container">
     <form id="admin-form" novalidate>
 
-      <h2>Nuevo administrador</h2>
+      <!-- El título cambia según el modo: "Nuevo administrador" o "Editar perfil" -->
+      <h2 id="formTitle">Nuevo administrador</h2>
 
-      <!--  PASO 1: Datos personales  -->
+      <!--PASO 1: Datos personales  -->
       <section class="wizard-step active" data-step="1">
         <h2>Datos personales</h2>
 
@@ -37,7 +38,7 @@
             <input type="text" id="admin_apellido_paterno" name="admin_apellido_paterno" required>
           </div>
           <div class="form-group">
-            <label for="admin_apellido_materno">Apellido Materno *</label>
+            <label for="admin_apellido_materno">Apellido Materno</label>
             <input type="text" id="admin_apellido_materno" name="admin_apellido_materno">
           </div>
         </div>
@@ -54,26 +55,6 @@
               placeholder="correo@ejemplo.com">
           </div>
         </div>
-      </section>
-
-      <!--PASO 2: Dirección  -->
-      <section class="wizard-step" data-step="2">
-        <h2>Dirección</h2>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="admin_localidad">Localidad</label>
-            <input type="text" id="admin_localidad" name="admin_localidad" placeholder="Colonia / Localidad">
-          </div>
-          <div class="form-group">
-            <label for="admin_municipio">Municipio *</label>
-            <input type="text" id="admin_municipio" name="admin_municipio" required>
-          </div>
-          <div class="form-group">
-            <label for="admin_estado">Estado *</label>
-            <input type="text" id="admin_estado" name="admin_estado" required>
-          </div>
-        </div>
 
         <div class="form-group full-width">
           <label for="admin_direccion">Dirección completa *</label>
@@ -82,8 +63,8 @@
         </div>
       </section>
 
-      <!--  PASO 3: Datos de cuenta -->
-      <section class="wizard-step" data-step="3">
+      <!--  PASO 2: Datos de cuenta  -->
+      <section class="wizard-step" data-step="2">
         <h2>Datos de cuenta</h2>
 
         <div class="form-row">
@@ -102,30 +83,29 @@
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="admin_password">Contraseña *</label>
-            <input type="password" id="admin_password" name="admin_password" required
-              placeholder="Mínimo 8 caracteres" minlength="8">
-          </div>
-          <div class="form-group">
-            <label for="admin_confirm_password">Confirmar contraseña *</label>
-            <input type="password" id="admin_confirm_password" name="admin_confirm_password" required
-              placeholder="Repite la contraseña">
+        <!-- Contraseña: solo visible en modo "nuevo", oculta en modo "editar" -->
+        <div id="passwordFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin_password">Contraseña *</label>
+              <input type="password" id="admin_password" name="admin_password"
+                placeholder="Mínimo 8 caracteres" minlength="8">
+            </div>
+            <div class="form-group">
+              <label for="admin_confirm_password">Confirmar contraseña *</label>
+              <input type="password" id="admin_confirm_password" name="admin_confirm_password"
+                placeholder="Repite la contraseña">
+            </div>
           </div>
         </div>
 
-        <div class="form-group full-width">
-          <label for="admin_notas">Notas / Observaciones</label>
-          <textarea id="admin_notas" name="admin_notas" rows="3"
-            placeholder="Información adicional sobre este administrador..."></textarea>
-        </div>
       </section>
 
-      <!--  BOTONES WIZARD -->
+      <!-- BOTONES WIZARD -->
       <div class="wizard-buttons">
         <button type="button" id="prevBtn" disabled>Anterior</button>
         <button type="button" id="nextBtn">Siguiente</button>
+        <!-- El texto del botón cambia según el modo -->
         <button type="submit" id="submitBtn" class="submit-btn hidden">
           Registrar administrador
         </button>

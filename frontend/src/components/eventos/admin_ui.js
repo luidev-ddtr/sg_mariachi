@@ -1,71 +1,89 @@
 // admin_ui.js
-// Reutiliza el modal-overlay existente
-// (mismas clases que registro_eventos.html)
+// Los tres botones usan el MISMO modal iframe
+// Solo cambia la URL que se carga
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // Modal principal (reutilizado, mismas IDs) 
-  const btnNuevoAdmin  = document.getElementById("btnNuevoAdmin");
-  const modalOverlay   = document.getElementById("modalOverlay");
-  const modalFrame     = document.getElementById("modalFrame");
-  const modalClose     = document.getElementById("modalClose");
+  // ── Elementos del modal compartido ──
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalFrame   = document.getElementById("modalFrame");
+  const modalClose   = document.getElementById("modalClose");
 
-  // Modal confirmar eliminar 
-  const confirmDeleteModal  = document.getElementById("confirmDeleteModal");
-  const confirmDeleteClose  = document.getElementById("confirmDeleteClose");
-  const btnCancelarDelete   = document.getElementById("btnCancelarDelete");
-  const btnConfirmarDelete  = document.getElementById("btnConfirmarDelete");
-  const deleteAdminName     = document.getElementById("deleteAdminName");
+  // URLs de los formularios 
+  const URL_NUEVO_ADMIN  = "/pages/formulario_nvo_admin.html";
+  const URL_EDITAR_ADMIN = "/pages/formulario_nvo_admin.html?modo=editar&id=";
+  const URL_CAMBIAR_PASS = "/pages/formulario_cambiar_pass.html";
 
-  const inputBuscar = document.getElementById("inputBuscar");
+ 
+  // Botón: Nuevo Admin
+  document.getElementById("btnNuevoAdmin").addEventListener("click", () => {
+    abrirModal(URL_NUEVO_ADMIN);
+  });
 
-  const FORM_NUEVO_ADMIN = "/pages/formulario_nvo_admin.html";
+ 
+  // Botón: Editar Perfil
+  // Carga el mismo formulario en modo editar
+  
+  document.getElementById("btnEditProfile").addEventListener("click", () => {
+    // Cuando tengas API: pasa el ID real del usuario en sesión   -----EDITAR
+    // Ej: abrirModal(URL_EDITAR_ADMIN + sessionUserId);
+    abrirModal(URL_EDITAR_ADMIN + "me");
+  });
 
-  let adminIdToDelete = null;
+
+  // Botón: Cambiar Contraseña
+ 
+  document.getElementById("btnChangePassword").addEventListener("click", () => {
+    abrirModal(URL_CAMBIAR_PASS);
+  });
 
   
-  // ABRIR MODAL — Nuevo Admin
-  // Exactamente igual que btnNuevaReserva en registro_eventos.html
-  //
-  btnNuevoAdmin.addEventListener("click", () => {
-    modalFrame.src = FORM_NUEVO_ADMIN;
-    modalOverlay.classList.add("visible");
-  });
-
-  // Cerrar con X
-  modalClose.addEventListener("click", closeModal);
-
-  // Cerrar al hacer clic en el fondo
+  // Cerrar modal
+  
+  modalClose.addEventListener("click", cerrarModal);
   modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) closeModal();
+    if (e.target === modalOverlay) cerrarModal();
   });
 
-  function closeModal() {
+  function abrirModal(url) {
+    modalFrame.src = url;
+    modalOverlay.classList.add("visible");
+  }
+
+  function cerrarModal() {
     modalOverlay.classList.remove("visible");
     modalFrame.src = "about:blank";
   }
 
-  
-  // Escuchar mensaje del iframe cuando se registra el admin
-  window.addEventListener("message", (event) => {
-    if (event.data === "adminRegistrado") {
-      console.log(" Admin registrado. Cerrando modal...");
-      closeModal();
-      // cargarAdmins(); // recargar tabla cuando tengas la API
+ 
+  // Escuchar mensajes desde los iframes
+ 
+  window.addEventListener("message", (e) => {
+    if (e.data === "adminRegistrado"  ||
+        e.data === "adminActualizado" ||
+        e.data === "passActualizada") {
+      cerrarModal();
+      // Aquí puedes recargar los datos del perfil o la tabla:
+      // cargarPerfil();
+      // cargarAdmins();
     }
   });
 
 
-  // ACCIONES DE LA TABLA
+  // Tabla: acciones editar / eliminar admin
+ 
+  const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+  const deleteAdminName    = document.getElementById("deleteAdminName");
+  let adminIdToDelete = null;
+
   document.getElementById("tbodyAdmins").addEventListener("click", (e) => {
     const btnEdit   = e.target.closest(".btn-edit");
     const btnDelete = e.target.closest(".btn-delete");
 
     if (btnEdit) {
-      // Abrir el mismo formulario en modo edición
-      // Cuando tengas API: pasar el ID → `/pages/formulario_nvo_admin.html?id=${id}`
-      modalFrame.src = FORM_NUEVO_ADMIN;
-      modalOverlay.classList.add("visible");
+      const cells = btnEdit.closest("tr").querySelectorAll("td");
+      const id    = cells[0].textContent.trim();
+      abrirModal(URL_EDITAR_ADMIN + id);
     }
 
     if (btnDelete) {
@@ -76,31 +94,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // editar
-  // MODAL CONFIRMAR ELIMINAR
-  confirmDeleteClose.addEventListener("click",  closeDeleteModal);
-  btnCancelarDelete.addEventListener("click",   closeDeleteModal);
-  confirmDeleteModal.addEventListener("click",  (e) => {
-    if (e.target === confirmDeleteModal) closeDeleteModal();
+  document.getElementById("confirmDeleteClose").addEventListener("click",  () => confirmDeleteModal.style.display = "none");
+  document.getElementById("btnCancelarDelete").addEventListener("click",   () => confirmDeleteModal.style.display = "none");
+  confirmDeleteModal.addEventListener("click", (e) => {
+    if (e.target === confirmDeleteModal) confirmDeleteModal.style.display = "none";
   });
 
-  btnConfirmarDelete.addEventListener("click", async () => {
-    if (!adminIdToDelete) return;
+  document.getElementById("btnConfirmarDelete").addEventListener("click", () => {
     console.log("Eliminar admin ID:", adminIdToDelete);
     // await axios.delete(`/api/admins/${adminIdToDelete}`);
-    closeDeleteModal();
+    confirmDeleteModal.style.display = "none";
     adminIdToDelete = null;
     // cargarAdmins();
   });
 
-  function closeDeleteModal() {
-    confirmDeleteModal.style.display = "none";
-  }
-+
-  // BÚSQUEDA EN TIEMPO REAL
+
+  // Búsqueda en tiempo real
   
-  inputBuscar.addEventListener("input", () => {
-    const term = inputBuscar.value.toLowerCase();
+  document.getElementById("inputBuscar").addEventListener("input", (e) => {
+    const term = e.target.value.toLowerCase();
     document.querySelectorAll("#tbodyAdmins tr").forEach(row => {
       row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
     });
