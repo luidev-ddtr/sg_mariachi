@@ -1,12 +1,13 @@
+
 // cambiar-pass.js
 // Lógica del formulario de cambiar contraseña
-
+//EDITAR 
 document.addEventListener('DOMContentLoaded', () => {
 
   const form    = document.getElementById('pass-form');
   const message = document.getElementById('form-message');
 
-  // Botones mostrar/ocultar contraseña 
+  //Botones mostrar/ocultar contraseña
   document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
     btn.addEventListener('click', () => {
       const input = document.getElementById(btn.getAttribute('data-target'));
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Indicador de fortaleza
+  //Indicador de fortaleza
   const inputNueva    = document.getElementById('cp_nueva');
   const strengthFill  = document.getElementById('strengthFill');
   const strengthLabel = document.getElementById('strengthLabel');
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return           { cls: 'strong', label: 'Fuerte' };
   }
 
-  // Submit
+  //Submit
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     e.stopPropagation();

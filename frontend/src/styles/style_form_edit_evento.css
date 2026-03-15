@@ -14,7 +14,7 @@ html, body {
   overflow-y: auto;
 }
 
-/* Scroll invisible en body */
+/* Scroll en body */
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   width: 0;
@@ -61,7 +61,7 @@ html, body {
   flex-direction: column;
 }
 
-/* --- TÍTULO --- */
+/* TÍTULO */
 h2 {
   text-align: center;
   font-size: 1.5rem;
@@ -70,7 +70,7 @@ h2 {
   margin-bottom: 1.75rem;
 }
 
-/* --- SECCIONES --- */
+/* SECCIONES  */
 .form-section {
   margin-bottom: 1.75rem;
 }
@@ -167,7 +167,7 @@ textarea {
 #form-message.error   { color: #dc2626; background: #fef2f2; }
 #form-message.info    { color: #2563eb; background: #eff6ff; }
 
-/* --- BOTÓN GUARDAR --- */
+/*BOTÓN GUARDAR */
 .submit-btn {
   width: 100%;
   background-color: #1eb211;
@@ -200,4 +200,38 @@ textarea {
   .form-group {
     min-width: 100%;
   }
+}
+
+
+/* SELECT  */
+select {
+  width: 100%;
+  padding: 9px 40px 9px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #111827;
+  background-color: #ffffff;
+  font-family: 'Roboto', sans-serif;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+ 
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+ 
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+ 
+select:focus {
+  outline: none;
+  border-color: #1d1d1c;
+  box-shadow: 0 0 0 3px rgba(85, 73, 218, 0.12);
+}
+ 
+select option[disabled] {
+  color: #d1d5db;
 }

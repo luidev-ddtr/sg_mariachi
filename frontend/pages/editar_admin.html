@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Administrador</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- CSS igual al de editar evento -->
+  <link rel="stylesheet" href="/src/styles/style_form_edit_evento.css">
+</head>
+<body>
+
+<div class="modal-wrapper">
+  <div class="form-container">
+    <form id="edit-admin-form" novalidate>
+
+      <h2>Editar Administrador</h2>
+
+      <!-- Datos Personales -->
+      <div class="form-section">
+        <h3>Datos Personales</h3>
+
+        <div class="form-group">
+          <label for="admin_nombre">Nombre(s)</label>
+          <input type="text" id="admin_nombre" name="admin_nombre" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_apellido_paterno">Apellido Paterno</label>
+            <input type="text" id="admin_apellido_paterno" name="admin_apellido_paterno">
+          </div>
+          <div class="form-group">
+            <label for="admin_apellido_materno">Apellido Materno</label>
+            <input type="text" id="admin_apellido_materno" name="admin_apellido_materno">
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacto  -->
+      <div class="form-section">
+        <h3>Contacto</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_telefono">Teléfono Principal</label>
+            <input type="tel" id="admin_telefono" name="admin_telefono"
+              pattern="[0-9]{10}" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label for="admin_email">Correo electrónico</label>
+            <input type="email" id="admin_email" name="admin_email">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dirección -->
+      <div class="form-section">
+        <h3>Dirección</h3>
+
+        <div class="form-group full-width">
+          <label for="admin_direccion">Dirección completa</label>
+          <input type="text" id="admin_direccion" name="admin_direccion"
+            placeholder="Calle, número, colonia">
+        </div>
+      </div>
+
+      <!--Datos de Cuenta -->
+      <div class="form-section">
+        <h3>Datos de Cuenta</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="admin_usuario">Nombre de usuario</label>
+            <input type="text" id="admin_usuario" name="admin_usuario">
+          </div>
+          <div class="form-group">
+            <label for="admin_rol">Rol</label>
+            <select id="admin_rol" name="admin_rol">
+              <option value="" disabled selected>Seleccionar rol</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="form-message"></div>
+
+      <button type="submit" class="submit-btn">Guardar cambios</button>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="/src/components/eventos/edit-admin.js"></script>
+
+</body>
+</html>

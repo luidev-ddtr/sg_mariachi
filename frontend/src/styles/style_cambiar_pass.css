@@ -1,0 +1,71 @@
+/* style_cambiar_pass.css
+   Estilos para el formulario de cambiar contraseña
+   Complementa form_nvo_evento.css */
+
+/* Wrpper input Y botón ojo */
+.input-pass-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-pass-wrapper input {
+  padding-right: 44px;
+  width: 100%;
+}
+
+.btn-toggle-pass {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #9ca3af;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.btn-toggle-pass:hover { color: #374151; }
+
+/* Barra*/
+.strength-wrapper {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-fill.weak   { width: 33%;  background: #fa5252; }
+.strength-fill.medium { width: 66%;  background: #f59f00; }
+.strength-fill.strong { width: 100%; background: #10b981; }
+
+.strength-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+  min-width: 44px;
+  text-align: right;
+}
+
+.strength-label.weak   { color: #fa5252; }
+.strength-label.medium { color: #f59f00; }
+.strength-label.strong { color: #10b981; }

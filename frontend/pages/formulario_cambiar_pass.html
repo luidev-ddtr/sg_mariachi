@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cambiar Contraseña</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+
+  <!-- Estilos base del wizard (compartido con todos los formularios) -->
+  <link rel="stylesheet" href="/src/styles/form_nvo_evento.css">
+  <!-- Estilos específicos: botón ojo y barra  -->
+  <link rel="stylesheet" href="/src/styles/style_cambiar_pass.css">
+</head>
+<body>
+
+<div class="modal-wrapper">
+  <div class="form-container">
+    <form id="pass-form" novalidate>
+
+      <h2>Cambiar contraseña</h2>
+
+      <section class="wizard-step active" data-step="1">
+        <h2>Nueva contraseña</h2>
+
+        <!-- Contraseña actual -->
+        <div class="form-group full-width">
+          <label for="cp_actual">Contraseña actual *</label>
+          <div class="input-pass-wrapper">
+            <input type="password" id="cp_actual" name="cp_actual" required
+              placeholder="Ingresa tu contraseña actual">
+            <button type="button" class="btn-toggle-pass" data-target="cp_actual">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nueva contraseña -->
+        <div class="form-group full-width">
+          <label for="cp_nueva">Nueva contraseña *</label>
+          <div class="input-pass-wrapper">
+            <input type="password" id="cp_nueva" name="cp_nueva" required
+              placeholder="Mínimo 8 caracteres" minlength="8">
+            <button type="button" class="btn-toggle-pass" data-target="cp_nueva">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+          <div class="strength-wrapper">
+            <div class="strength-bar">
+              <span class="strength-fill" id="strengthFill"></span>
+            </div>
+            <span class="strength-label" id="strengthLabel">—</span>
+          </div>
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="form-group full-width">
+          <label for="cp_confirmar">Confirmar nueva contraseña *</label>
+          <div class="input-pass-wrapper">
+            <input type="password" id="cp_confirmar" name="cp_confirmar" required
+              placeholder="Repite la nueva contraseña">
+            <button type="button" class="btn-toggle-pass" data-target="cp_confirmar">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="wizard-buttons">
+        <button type="button" id="prevBtn" disabled style="visibility:hidden;">Anterior</button>
+        <button type="button" id="nextBtn" class="hidden">Siguiente</button>
+        <button type="submit" id="submitBtn" class="submit-btn">
+          Actualizar contraseña
+        </button>
+      </div>
+
+      <div id="form-message"></div>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="/src/components/eventos/cambiar-pass.js"></script>
+
+</body>
+</html>
