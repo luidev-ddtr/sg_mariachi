@@ -11,9 +11,10 @@ class PeopleHandler:
     perosnas que son agregaras a la tabla dim_people
     """
     
-    def create_people(self, data_people: dict) -> tuple[str, int, str]:
+    def create_people(self, data_people: dict, conn: Conexion = None) -> tuple[str, int, str]:
         """
         Crea una nueva entrada de persona en la tabla dimensional `dim_people`.
+        Acepta una conexión opcional para transacciones atómicas.
         Este método gestiona toda la lógica para preparar e insertar un nuevo registro
         de persona, incluyendo la generación de IDs y la asociación con la dimensión de fechas.
         
@@ -45,7 +46,7 @@ class PeopleHandler:
                  Ejemplo: ("Persona creada exitosamente", 201) o ("Error al crear la persona", 500).
         :rtype: tuple[str, int]
         """
-        conexion = Conexion()
+        conexion = conn or Conexion()
         try:
             #Se rellena el modelo con la informacion que haya 
             #en el json
@@ -66,4 +67,6 @@ class PeopleHandler:
             print(f"Error al crear la persona: {e}")
             return "Error al crear la persona", 500,  ""
         finally:
-            conexion.close_conexion()
+            # Solo cerramos la conexión si fue creada aquí (no si vino de fuera)
+            if not conn:
+                conexion.close_conexion()

@@ -6,7 +6,10 @@ from src.dim_people.repository.update_people import update_people
 class PeopleService:
     """Clase que manejara los servicios, validaciones y API pulbica de personas con otras entidades del programa:"""
 
-    def is_person_exist(self, data_people: dict, conexion: Conexion) -> tuple[int, str, str]:
+    def __init__(self, conn: Conexion):
+        self.conn = conn
+
+    def is_person_exist(self, data_people: dict) -> tuple[int, str, str]:
         """
         Valida si una persona (cliente) existe en la base de datos a partir de un diccionario de datos.
 
@@ -27,7 +30,6 @@ class PeopleService:
                                 - "DIM_Address"
                                 - "DIM_Phone"
                                 - "DIM_SecondPhone"
-            conexion (Conexion): Objeto de conexión a la base de datos.
 
         Returns:
             tuple[int, str, str]: Una tupla conteniendo:
@@ -51,14 +53,33 @@ class PeopleService:
             - Es utilizado por otros servicios (ej. `SaleService`, `OrderService`)
               para asegurar la integridad referencial y evitar duplicados.
         """
+        # Usamos self.conn, que es la conexión inyectada en el constructor
         result = get_id_if_person_exists(data_people["DIM_Name"], data_people["DIM_SecondName"],
                 data_people["DIM_LastName"], data_people["DIM_SecondLastName"],
                 data_people["DIM_Address"], data_people["DIM_PhoneNumber"],
-               data_people["DIM_SecondPhoneNumber"], conexion)
+               data_people["DIM_SecondPhoneNumber"], self.conn)
         if result is None:
             return  404, "No se encontro la persona", ""
         else:
             return 200, "Persona encontrada", result #resul representa el ID en caso de que la persona exista
         
     def update_second_phone(self, people_id: str, new_second_phone: str, conexion: Conexion) -> bool:
-        return update_people(new_second_phone, people_id, conexion)
+        """Actualiza únicamente el teléfono secundario de una persona."""
+        data_to_update = {"DIM_SecondPhoneNumber": new_second_phone}
+        # Se usa la conexión del servicio (self.conn) para consistencia transaccional
+        return update_people(people_id, data_to_update, self.conn)
+
+    def update_person(self, people_id: str, data_to_update: dict) -> tuple[bool, str]:
+        """
+        Actualiza los datos personales de una persona en la base de datos.
+        Se usara unicamente para modificar los datos de los administradores
+        """
+        try:
+            if not data_to_update:
+                return False, "No se proporcionaron datos para actualizar."
+
+            success = update_people(people_id, data_to_update, self.conn)
+            return success, "Datos personales actualizados" if success else "Fallo en el repositorio al actualizar persona"
+        except Exception as e:
+            print(f"Error en servicio al actualizar persona: {e}")
+            return False, f"Error en servicio: {str(e)}"
