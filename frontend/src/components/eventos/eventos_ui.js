@@ -183,3 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   });
 });
+
+// BÚSQUEDA EN TIEMPO REAL
+
+inputBuscar.addEventListener("input", () => {
+  const term = inputBuscar.value.toLowerCase();
+  document.querySelectorAll("#tbodyEvents tr").forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
+  });
+});
