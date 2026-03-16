@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     slotMinTime: "08:00:00", // Opcional: ajustar horario de inicio visible
     slotMaxTime: "23:59:00", // Opcional: ajustar horario de fin visible
 
-events: async function(fetchInfo, successCallback, failureCallback) {
+    events: async function(fetchInfo, successCallback, failureCallback) {
       try {
         const start = fetchInfo.start;
         const end = fetchInfo.end;
@@ -46,7 +46,9 @@ events: async function(fetchInfo, successCallback, failureCallback) {
           // MOCK DE DATOS (Bórralo y usa tu API real más adelante):
           const data = [
             { id: 1, client_name: 'Juan Pérez', date: '2026-03-12', time: '14:00', phone: '555-1234', address: 'Calle Falsa 123' },
-            { id: 2, client_name: 'María García', date: '2026-03-14', time: '19:30', phone: '555-9876', address: 'Salón de Fiestas Los Pinos' }
+            { id: 2, client_name: 'María García', date: '2026-03-14', time: '19:30', phone: '555-9876', address: 'Salón de Fiestas Los Pinos' },
+            { id: 3, client_name: 'Gelasio', date: '2026-03-16', time: '11:00', phone: '0987654321', address: 'Conocido' },
+            { id: 4, client_name: 'Rommel', date: '2026-03-24', time: '10:00', phone: '7711223344', address: 'Centro' }
           ];
 
           formattedEvents = data.map(item => {
@@ -147,7 +149,7 @@ events: async function(fetchInfo, successCallback, failureCallback) {
 
   /* --- FUNCIONES PARA MANEJAR EL PANEL DE DETALLES --- */
   
-  // ¡NUEVO!: Panel adaptado para mostrar datos del cliente
+  // Panel adaptado para mostrar datos del cliente
   function openClientDetailPanel(event) {
     const props = event.extendedProps;
     const date = event.start;
@@ -218,6 +220,55 @@ events: async function(fetchInfo, successCallback, failureCallback) {
   document.getElementById('week').onclick = function () { changeView('timeGridWeek', this); };
   document.getElementById('month').onclick = function () { changeView('dayGridMonth', this); };
   document.getElementById('year').onclick = function () { changeView('multiMonthYear', this); };
+
+  /* =======================================================
+     NUEVO: LÓGICA DE LA BARRA DE BÚSQUEDA DEL CALENDARIO
+     ======================================================= */
+  const searchInput = document.querySelector('input[type="search"]');
+
+  if (searchInput) {
+    searchInput.addEventListener('keypress', async function (e) {
+      if (e.key === 'Enter') {
+        const query = this.value.trim().toLowerCase();
+        
+        if (!query) return; 
+
+        console.log(`Buscando evento para el cliente: ${query}`);
+
+        try {
+          // --- MOCK DE DATOS (Simulación temporal) ---
+          // En el futuro, reemplaza esto con la llamada a tu API: await BuscarReservaGlobal(query);
+          const mockDB = [
+            { client_name: 'Gelasio', date: '2026-03-16', time: '11:00' },
+            { client_name: 'Rommel', date: '2026-03-24', time: '10:00' },
+            { client_name: 'Juan Pérez', date: '2026-03-12', time: '14:00' }
+          ];
+          
+          const eventoEncontrado = mockDB.find(ev => ev.client_name.toLowerCase().includes(query));
+
+          if (eventoEncontrado) {
+            const fechaDelEvento = `${eventoEncontrado.date}T${eventoEncontrado.time}:00`;
+
+            // Cambiamos a vista 'Día' en la fecha exacta
+            calendar.changeView('timeGridDay', fechaDelEvento);
+            
+            // Actualizamos los botones
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('day').classList.add('active');
+
+            this.value = ''; // Limpiamos la barra
+
+          } else {
+            alert(`No se encontró ningún evento próximo para: "${query}"`);
+          }
+
+        } catch (error) {
+          console.error("Error en la búsqueda:", error);
+        }
+      }
+    });
+  }
+
 });
 
 function updateCurrentDate(calendar) {
