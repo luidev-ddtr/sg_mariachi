@@ -63,10 +63,9 @@
         <h2>Dirección</h2>
 
         <div class="form-row">
-          
           <div class="form-group">
             <label for="localidad">Localidad *</label>
-            <input type="text" id="localidad" name="localidad">
+            <input type="text" id="localidad" name="localidad" required>
           </div>
           <div class="form-group">
             <label for="municipio">Municipio *</label>
@@ -82,6 +81,20 @@
           <label for="direccion">Dirección *</label>
           <input type="text" id="direccion" name="direccion" required>
         </div>
+
+        <!-- Contenedor del mapa -->
+        <div id="map"></div>
+
+        <!-- 1. Carga de la API de Google Maps -->
+        <!-- NOTA: La clave de API está expuesta. En un entorno de producción, es crucial restringirla. -->
+        <!-- Se añade &libraries=marker para poder usar los marcadores avanzados. -->
+        <script
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBP-nTtbdTsh-URWYy3SE33oYpGadfs3T8&loading=async&callback=initMap&libraries=marker" defer>
+        </script>
+
+        <!-- 2. Script para inicializar el mapa y el marcador -->
+        <script src="/src/components/eventos/maps.js"></script>
+
       </section>
 
       <!-- PASO 3 -->

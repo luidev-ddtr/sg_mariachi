@@ -49,7 +49,11 @@
           <option value="cancelado">Cancelado</option>
         </select>
 
-        <input type="text" id="inputBuscarNombre" placeholder="Buscar por nombre..." style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; margin-right: 10px;" />
+        <!-- <input type="text" id="inputBuscarNombre" placeholder="Buscar por nombre..." style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; margin-right: 10px;" /> -->
+        <div class="search-box">
+              <input type="text" id="inputBuscar" placeholder="Buscar..." />
+              <span class="material-symbols-outlined search-icon">search</span>
+        </div>
 
         <button id="btnFiltrar" class="btn red">
         <span class="material-symbols-outlined">search</span> Filtrar
@@ -74,8 +78,9 @@
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-             </tbody>
+          <tbody id="tbodyEvents">
+             <!-- Aquí se llenará dinámicamente con JavaScript -->
+          </tbody>
         </table>
       </section>
     </main> 

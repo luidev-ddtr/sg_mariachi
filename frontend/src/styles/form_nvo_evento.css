@@ -270,3 +270,16 @@ select option[disabled] {
     width: 100%;
   }
 }
+
+#map {
+  width: 100%;
+  /* Ancho responsivo */
+  height: 400px;
+  /* Altura del mapa */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  margin-top: 1rem;
+  /* Espacio superior */
+  border: 1px solid #ccc;
+  /* Borde sutil */
+}
