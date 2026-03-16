@@ -4,6 +4,10 @@ from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 from .repositorio.insert_owners import upsert_google_user
 from src.utils.id_generator import create_id_fact_reservation
 from src.utils.encryptPass import hash_password, verify_password
+# --- Imports para la funcionalidad de actualización ---
+from src.dim_employ.employ_service import EmployService
+from src.dim_people.people_services import PeopleService
+# ----------------------------------------------------
 import urllib.request as request
 import json                                                                                                                                                             
 
@@ -166,3 +170,76 @@ class ServiceownersHandler:
         except Exception as err:
             print(f"❌ Error en insertNewServiceowners: {err}")
             return 500, f"Error interno del servidor: {str(err)}", None
+
+    
+    def updateServiceowners(self, update_data: dict, conn: Conexion = None) -> tuple:
+        """
+        Actualiza los datos de un administrador de forma transaccional,
+        abarcando datos personales (dim_people), rol (dim_employ) y
+        credenciales (dim_serviceowners).
+
+        Args:
+            update_data (dict): Diccionario con los datos a actualizar. Debe contener
+                                'DIM_EmployeeId' para identificar al usuario y luego
+                                las claves correspondientes a los datos que se desean
+                                cambiar.
+                                Ejemplo:
+                                {
+                                    "DIM_EmployeeId": "some-uuid",
+                                    "people_data": { "DIM_PhoneNumber": "1234567890" },
+                                    "employ_data": { "DIM_Position": "Super Admin" },
+                                    "serviceowner_data": { "DIM_Password": "new_secure_password" }
+                                }
+            conn (Conexion, optional): Conexión a la base de datos para transacciones.
+
+        Returns:
+            tuple: (status_code, message, data)
+        """
+        conexion = conn or Conexion()
+        
+        # Instanciar todos los servicios necesarios con la conexión compartida
+        owner_service = ServiceownersService(conexion)
+        employ_service = EmployService(conexion)
+        # NOTA: Se asume que PeopleService se ha modificado para aceptar 'conn'
+        people_service = PeopleService(conexion) 
+
+        try:
+            # 1. Validar que el input tenga el ID del empleado
+            employee_id = update_data.get('DIM_EmployeeId')
+            if not employee_id:
+                return 400, "Falta el campo 'DIM_EmployeeId' para identificar al administrador.", None
+
+            # 2. Obtener IDs relacionados (PeopleId) a partir del EmployeeId
+            employee_info = employ_service.get_employ_by_id(employee_id)
+            if not employee_info:
+                return 404, f"No se encontró un empleado con el ID {employee_id}", None
+            
+            people_id = employee_info.DIM_PersonId
+
+            # 3. Procesar actualizaciones para cada módulo si se proporcionan datos
+            
+            if 'people_data' in update_data:
+                success, msg = people_service.update_person(people_id, update_data['people_data'])
+                if not success:
+                    raise Exception(f"Error al actualizar datos personales: {msg}")
+
+            if 'employ_data' in update_data:
+                success, msg = employ_service.update_employee(employee_id, update_data['employ_data'])
+                if not success:
+                    raise Exception(f"Error al actualizar el rol: {msg}")
+
+            if 'serviceowner_data' in update_data:
+                success, msg = owner_service.update_owner(employee_id, update_data['serviceowner_data'])
+                if not success:
+                    raise Exception(f"Error al actualizar las credenciales: {msg}")
+
+            conexion.save_changes()
+            return 200, "Administrador actualizado exitosamente.", None
+
+        except Exception as e:
+            print(f"❌ Error al actualizar administrador: {e}")
+            conexion.conn.rollback()
+            return 500, f"Error interno del servidor: {str(e)}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()

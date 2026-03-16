@@ -7,7 +7,6 @@ from src.dim_people.people_handler import PeopleHandler
 from src.dim_reservations.reservation_service import ReservaService
 from datetime import datetime, timedelta
 import pytz
-from src.dim_people.people_handler import PeopleHandler
 from src.dim_status.status import get_status_pending
 
 from src.dim_reservations.repositorio.read_reservations import read_reservations_with_date_filter
@@ -23,8 +22,7 @@ from src.dim_reservations.repositorio.status_complete_auto import update_past_re
 from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
 
 
-people_services = PeopleService()
-handler_people = PeopleHandler()
+handler_people = PeopleHandler() # PeopleHandler puede seguir global si no maneja conexiones en su init
 
 class ReservationService:
     """
@@ -141,15 +139,19 @@ class ReservationService:
                 "DIM_PhoneNumber": _reservation["DIM_PhoneNumber"],
                 "DIM_SecondPhoneNumber": _reservation["DIM_SecondPhoneNumber"]
             }
+
+            # Instanciamos el servicio aquí, con la conexión correcta
+            people_services = PeopleService(conexion)
  
-            # for data in data_people:
-            #     print(f"'{data}': {_reservation[data]}")
-            estatus, message, data = people_services.is_person_exist(data_people, conexion)
+            # Verificamos existencia usando la conexión compartida (self.conn del servicio)
+            estatus, message, data = people_services.is_person_exist(data_people)
+            
             people_id = ""
             #La funcion no devolvio nada
             if not data:
                 #Se inserta la persona puesto que no existe
-                message, code, id = handler_people.create_people(data_people)
+                # IMPORTANTE: Pasamos 'conexion' para mantener la transacción atómica
+                message, code, id = handler_people.create_people(data_people, conexion)
                 if code != 201:
                     return 500, message
                 
@@ -372,6 +374,9 @@ class ReservationService:
             # 3. Actualizar el teléfono secundario de la persona
             people_id = existing_reservation_data['DIM_PeopleId']
             new_second_phone = _reservation['DIM_SecondPhoneNumber']
+
+            # Instanciamos el servicio aquí, con la conexión correcta
+            people_services = PeopleService(conexion)
             
             if not people_services.update_second_phone(people_id, new_second_phone, conexion):
                 # Podríamos decidir si fallar o solo advertir. Por ahora, fallamos.

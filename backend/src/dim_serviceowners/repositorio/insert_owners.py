@@ -1,5 +1,5 @@
 from src.utils.conexion import Conexion
-from ..serviceowners_model import ServiceOwnerModel
+from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 import uuid
 
 def insert_serviceowners(data_serviceowners: ServiceOwnerModel ,objetc_conn: Conexion ) -> bool:

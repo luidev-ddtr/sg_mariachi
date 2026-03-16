@@ -20,7 +20,13 @@ def create_people():
     """
     try:
         data_people = request.get_json()
-        people_options.create_people(data_people)
-        return send_success("Persona creada exitosamente", None, 201)
+        
+        # Capturamos la respuesta del Handler (mensaje, status, id)
+        message, status, new_id = people_options.create_people(data_people)
+        
+        if status != 201:
+            return send_error(message, status)
+            
+        return send_success(message, {"DIM_PeopleId": new_id}, status)
     except Exception as e:
         return send_error(str(e), 500)

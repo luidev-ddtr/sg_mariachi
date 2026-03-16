@@ -12,6 +12,8 @@ from src.routes.people_route import people_route
 from src.routes.reservation_route import reservation_route
 from src.routes.fact_revenues_route import fact_revenues_route
 from src.routes.auth_route import auth_route
+from src.routes.employ_route import employ_route
+from src.routes.admin_route import admin_route
 
 # --- CORRECCIÓN 1: Cargar el .env PRIMERO ---
 # Esta línea DEBE estar al principio, antes de acceder a cualquier variable de entorno.
@@ -66,6 +68,8 @@ app.register_blueprint(people_route)
 app.register_blueprint(reservation_route)
 app.register_blueprint(fact_revenues_route)
 app.register_blueprint(auth_route)
+app.register_blueprint(employ_route)
+app.register_blueprint(admin_route)
 
 
 frontend_urls = os.environ.get("URL_FRONTEND", "http://localhost:5173")

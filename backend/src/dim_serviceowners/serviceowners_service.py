@@ -2,7 +2,8 @@ from src.utils.conexion import Conexion
 from src.dim_serviceowners.repositorio.validate_owners import validate_email, get_owner_by_username, validateowner
 from src.dim_serviceowners.repositorio.insert_owners import insert_serviceowners
 from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
-from src.utils.encryptPass import verify_password
+from src.dim_serviceowners.repositorio.update_owner import update_owner_credentials
+from src.utils.encryptPass import verify_password, hash_password
 
 class ServiceownersService:
     """
@@ -82,3 +83,26 @@ class ServiceownersService:
         
         except ValueError as ve:
             return False, str(ve)
+
+    def update_owner(self, employee_id: str, data_to_update: dict) -> tuple[bool, str]:
+        """
+        Actualiza las credenciales (username, password) de un administrador.
+        La contraseña se hashea antes de guardarse.
+        """
+        try:
+            # Si se está actualizando la contraseña, hay que hashearla.
+            if 'DIM_Password' in data_to_update:
+                new_password = data_to_update.get('DIM_Password')
+                # Validar que la nueva contraseña no esté vacía
+                if not new_password or not new_password.strip():
+                    return False, "La nueva contraseña no puede estar vacía."
+                data_to_update['DIM_Password'] = hash_password(new_password)
+
+            # Llamar al repositorio para ejecutar la actualización
+            success = update_owner_credentials(employee_id, data_to_update, self.conn)
+            
+            return success, "Credenciales actualizadas correctamente" if success else "Fallo en el repositorio al actualizar credenciales"
+
+        except Exception as e:
+            print(f"Error en servicio al actualizar owner: {e}")
+            return False, f"Error en servicio: {str(e)}"
