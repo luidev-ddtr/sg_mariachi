@@ -1,92 +1,68 @@
-// cambiar-pass.js
-// Lógica del formulario de cambiar contraseña
+//registro-admin.js
+// para: formulario_nvo_admin.html
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  const form    = document.getElementById('pass-form');
+  const form    = document.getElementById('admin-form');
   const message = document.getElementById('form-message');
 
-  // Botones mostrar/ocultar contraseña 
-  document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.getAttribute('data-target'));
-      const icon  = btn.querySelector('.material-symbols-outlined');
-      if (input.type === 'password') {
-        input.type       = 'text';
-        icon.textContent = 'visibility_off';
-      } else {
-        input.type       = 'password';
-        icon.textContent = 'visibility';
-      }
+  // Validación para teléfono
+  const inputTelefono = document.getElementById('admin_telefono');
+  if (inputTelefono) {
+    inputTelefono.addEventListener('input', function () {
+      const limpio = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+      if (this.value !== limpio) this.value = limpio;
     });
-  });
-
-  // Indicador de fortaleza
-  const inputNueva    = document.getElementById('cp_nueva');
-  const strengthFill  = document.getElementById('strengthFill');
-  const strengthLabel = document.getElementById('strengthLabel');
-
-  inputNueva.addEventListener('input', () => {
-    const nivel = calcularFortaleza(inputNueva.value);
-    strengthFill.className    = `strength-fill ${nivel.cls}`;
-    strengthLabel.textContent = nivel.label;
-    strengthLabel.className   = `strength-label ${nivel.cls}`;
-  });
-
-  function calcularFortaleza(pass) {
-    if (!pass) return { cls: '', label: '—' };
-    let score = 0;
-    if (pass.length >= 8)            score++;
-    if (/[A-Z]/.test(pass))          score++;
-    if (/[0-9]/.test(pass))          score++;
-    if (/[^A-Za-z0-9]/.test(pass))   score++;
-
-    if (score <= 1) return { cls: 'weak',   label: 'Débil'  };
-    if (score <= 3) return { cls: 'medium', label: 'Media'  };
-    return           { cls: 'strong', label: 'Fuerte' };
+ 
+    inputTelefono.addEventListener('paste', function (e) {
+      e.preventDefault();
+      const texto  = (e.clipboardData || window.clipboardData).getData('text');
+      const limpio = texto.replace(/[^0-9]/g, '').slice(0, 10);
+      document.execCommand('insertText', false, limpio);
+    });
   }
 
-  // Submit
+
+
+  // Submit registrar nuevo admin
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     e.stopPropagation();
+ 
+    const datos = {
+      nombre:           document.getElementById('admin_nombre').value.trim(),
+      segundo_nombre:   document.getElementById('admin_segundo_nombre').value.trim(),
+      apellido_paterno: document.getElementById('admin_apellido_paterno').value.trim(),
+      apellido_materno: document.getElementById('admin_apellido_materno').value.trim(),
+      telefono:         document.getElementById('admin_telefono').value.trim(),
+      email:            document.getElementById('admin_email').value.trim(),
+      direccion:        document.getElementById('admin_direccion').value.trim(),
+      usuario:          document.getElementById('admin_usuario').value.trim(),
+      rol:              document.getElementById('admin_rol').value,
+      password:         document.getElementById('admin_password').value,
+    };
+ 
+    mostrarMensaje('Registrando administrador...', 'info');
 
-    const actual    = document.getElementById('cp_actual').value;
-    const nueva     = document.getElementById('cp_nueva').value;
-    const confirmar = document.getElementById('cp_confirmar').value;
-
-    // Validaciones
-    if (nueva !== confirmar) {
-      mostrarMensaje('Las contraseñas nuevas no coinciden.', 'error');
-      return;
-    }
-
-    if (nueva.length < 8) {
-      mostrarMensaje('La contraseña debe tener al menos 8 caracteres.', 'error');
-      return;
-    }
-
-    mostrarMensaje('Actualizando contraseña...', 'info');
-
-    // ── Conecta aquí con tu API ──
+    // EDITAR
     // try {
-    //   await axios.put('/api/admins/me/password', { actual, nueva });
-    //   mostrarMensaje('¡Contraseña actualizada correctamente!', 'success');
-    //   setTimeout(() => window.parent.postMessage('passActualizada', '*'), 1000);
+    //   await axios.post('/api/admins', datos);
+    //   mostrarMensaje('¡Administrador registrado correctamente!', 'success');
+    //   setTimeout(() => window.parent.postMessage('adminRegistrado', '*'), 1000);
     // } catch (err) {
-    //   const msg = err.response?.data?.message || 'Contraseña actual incorrecta.';
+    //   const msg = err.response?.data?.message || 'Error al registrar. Intenta de nuevo.';
     //   mostrarMensaje(msg, 'error');
     // }
-
+ 
     // Simulación visual:
-    console.log('Cambiar contraseña:', { actual, nueva });
-    mostrarMensaje('Contraseña actualizada. (conecta tu API)', 'success');
-    setTimeout(() => window.parent.postMessage('passActualizada', '*'), 1200);
+    console.log('Nuevo admin:', datos);
+    mostrarMensaje('Administrador registrado. (conecta tu API)', 'success');
+    setTimeout(() => window.parent.postMessage('adminRegistrado', '*'), 1200);
   });
-
+ 
   function mostrarMensaje(texto, tipo) {
     message.textContent = texto;
     message.className   = tipo;
   }
-
+ 
 });
