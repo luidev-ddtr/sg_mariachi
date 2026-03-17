@@ -4,12 +4,45 @@
     <meta charset="UTF-8">
     <title>Contrato Mariachi San Nicolas</title>
     <link rel="stylesheet" href="/src/styles/style_contrato.css">
+    
+    <style>
+        /* Estilo bonito para el botón */
+        .btn-imprimir {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto; /* Para alinearlo a la derecha */
+        }
+        .btn-imprimir:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* 🔥 MAGIA: Todo lo que tenga la clase 'no-print' desaparecerá en el papel */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            /* Opcional: Quitar márgenes extra de la página al imprimir */
+            body {
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="contrato-container">
-        <img src="/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo"> <!--editar-->
+    
+    <button id="btnImprimir" class="btn-imprimir no-print">🖨️ Imprimir Contrato</button>
 
-    <!-- <div class="contrato-container"></div> -->
+    <div class="contrato-container">
+        <img src="/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo">
+
         <h1>Mariachi San Nicolas</h1>
         <h2>DE LOS HNOS. HERNANDEZ</h2>
         <p>#si señor</p>
@@ -46,60 +79,56 @@
 
         <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script type="module">
-    // ✅ Importamos la función de la API
-    import { GetContractInfo } from '/src/api/api_reservacion_read.js';
+    <script type="module">
+        import { GetContractInfo } from '/src/api/api_reservacion_read.js';
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 🔥 NUEVO: Funcionalidad del botón imprimir
+            document.getElementById('btnImprimir').addEventListener('click', () => {
+                window.print();
+            });
 
-        // 1. Definimos la lista de meses una sola vez
-        const meses = [
-            "enero", "febrero", "marzo", "abril", "mayo", "junio",
-            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-        ];
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
 
-        if (id) {
-            try {
-                const info = await GetContractInfo(id);
-                
-                // 2. Definimos 'data' correctamente
-                const data = Array.isArray(info) ? info[0] : info;
+            const meses = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ];
 
-                if (data) {
-                    // 3. Llenado automático de campos
-                    Object.keys(data).forEach(key => {
-                        const el = document.getElementById(key);
-                        if (el) {
-                            // 🔥 Lógica especial para convertir el número de mes a texto
-                            if (key === 'evento_mes') {
-                                const numeroMes = parseInt(data[key]);
-                                // Restamos 1 porque los meses en el array empiezan en 0
-                                el.textContent = meses[numeroMes - 1] || data[key];
-                            } else {
-                                el.textContent = data[key];
+            if (id) {
+                try {
+                    const info = await GetContractInfo(id);
+                    const data = Array.isArray(info) ? info[0] : info;
+
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            const el = document.getElementById(key);
+                            if (el) {
+                                if (key === 'evento_mes') {
+                                    const numeroMes = parseInt(data[key]);
+                                    el.textContent = meses[numeroMes - 1] || data[key];
+                                } else {
+                                    el.textContent = data[key];
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    // 4. Llenado de fecha actual del contrato (Firma)
-                    const hoy = new Date();
-                    document.getElementById('contrato_dia').textContent = hoy.getDate();
-                    document.getElementById('contrato_mes').textContent = meses[hoy.getMonth()];
-                    document.getElementById('contrato_anio').textContent = hoy.getFullYear();
+                        const hoy = new Date();
+                        document.getElementById('contrato_dia').textContent = hoy.getDate();
+                        document.getElementById('contrato_mes').textContent = meses[hoy.getMonth()];
+                        document.getElementById('contrato_anio').textContent = hoy.getFullYear();
 
-                } else {
-                    console.warn("La API no devolvió datos para el ID:", id);
+                    } else {
+                        console.warn("La API no devolvió datos para el ID:", id);
+                    }
+                } catch (error) {
+                    console.error("Error al cargar contrato:", error);
                 }
-            } catch (error) {
-                console.error("Error al cargar contrato:", error);
             }
-        }
-    });
-</script>
-    
-</script>
+        });
+    </script>
 </body>
 </html>
