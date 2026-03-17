@@ -22,30 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  //Indicador de fortaleza
-  const inputNueva    = document.getElementById('cp_nueva');
-  const strengthFill  = document.getElementById('strengthFill');
-  const strengthLabel = document.getElementById('strengthLabel');
-
-  inputNueva.addEventListener('input', () => {
-    const nivel = calcularFortaleza(inputNueva.value);
-    strengthFill.className    = `strength-fill ${nivel.cls}`;
-    strengthLabel.textContent = nivel.label;
-    strengthLabel.className   = `strength-label ${nivel.cls}`;
-  });
-
-  function calcularFortaleza(pass) {
-    if (!pass) return { cls: '', label: '—' };
-    let score = 0;
-    if (pass.length >= 8)            score++;
-    if (/[A-Z]/.test(pass))          score++;
-    if (/[0-9]/.test(pass))          score++;
-    if (/[^A-Za-z0-9]/.test(pass))   score++;
-
-    if (score <= 1) return { cls: 'weak',   label: 'Débil'  };
-    if (score <= 3) return { cls: 'medium', label: 'Media'  };
-    return           { cls: 'strong', label: 'Fuerte' };
-  }
 
   //Submit
   form.addEventListener('submit', async (e) => {
