@@ -243,3 +243,59 @@ class ServiceownersHandler:
         finally:
             if not conn:
                 conexion.close_conexion()
+
+    def get_all_admins(self, conn: Conexion = None) -> tuple:
+        """Maneja la solicitud para listar todos los administradores."""
+        conexion = conn or Conexion()
+        service = ServiceownersService(conexion)
+        try:
+            admins_list = service.get_all_admins()
+            return 200, "Administradores listados exitosamente.", admins_list
+        except Exception as e:
+            print(f"❌ Error en handler al listar administradores: {e}")
+            return 500, f"Error interno del servidor: {str(e)}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()
+
+    def get_admin_details(self, employee_id: str, conn: Conexion = None) -> tuple:
+        """Maneja la solicitud para obtener los detalles de un administrador específico."""
+        conexion = conn or Conexion()
+        service = ServiceownersService(conexion)
+        try:
+            admin_details = service.get_admin_details(employee_id)
+            if not admin_details:
+                return 404, f"No se encontraron detalles para el administrador con ID {employee_id}", None
+            
+            return 200, "Perfil obtenido exitosamente.", admin_details
+        except Exception as e:
+            print(f"❌ Error en handler al obtener detalles de admin: {e}")
+            return 500, f"Error interno del servidor: {str(e)}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()
+
+    def delete_admin(self, employee_id: str, conn: Conexion = None) -> tuple:
+        """Maneja la eliminación transaccional de un administrador."""
+        conexion = conn or Conexion()
+        service = ServiceownersService(conexion)
+        try:
+            success, message = service.delete_admin(employee_id)
+            if not success:
+                # Si el servicio falla, no hay cambios que guardar, pero hacemos rollback por si acaso.
+                conexion.conn.rollback()
+                # El servicio puede devolver 404 implícito, lo mapeamos aquí.
+                if "No se encontró" in message:
+                    return 404, message, None
+                return 500, message, None
+            
+            # Si el servicio tuvo éxito, confirmamos la transacción.
+            conexion.save_changes()
+            return 200, message, None
+        except Exception as e:
+            print(f"❌ Error en handler al eliminar administrador: {e}")
+            conexion.conn.rollback()
+            return 500, f"Error interno del servidor: {str(e)}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()

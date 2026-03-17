@@ -3,6 +3,9 @@ from src.dim_serviceowners.repositorio.validate_owners import validate_email, ge
 from src.dim_serviceowners.repositorio.insert_owners import insert_serviceowners
 from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 from src.dim_serviceowners.repositorio.update_owner import update_owner_credentials
+from src.dim_serviceowners.repositorio.get_admins import get_all_admins_repo, get_admin_by_id_repo
+from src.dim_serviceowners.repositorio.delete_owner import delete_owner_repo
+from src.dim_employ.repository.delete_employ import delete_employ_repo
 from src.utils.encryptPass import verify_password, hash_password
 
 class ServiceownersService:
@@ -105,4 +108,45 @@ class ServiceownersService:
 
         except Exception as e:
             print(f"Error en servicio al actualizar owner: {e}")
+            return False, f"Error en servicio: {str(e)}"
+
+    def get_all_admins(self) -> list[dict]:
+        """Obtiene una lista de todos los administradores con datos básicos."""
+        try:
+            return get_all_admins_repo(self.conn)
+        except Exception as e:
+            print(f"Error en servicio al listar administradores: {e}")
+            return []
+
+    def get_admin_details(self, employee_id: str) -> dict | None:
+        """Obtiene los detalles completos de un administrador por su EmployeeId."""
+        try:
+            return get_admin_by_id_repo(employee_id, self.conn)
+        except Exception as e:
+            print(f"Error en servicio al obtener detalles de admin: {e}")
+            return None
+
+    def delete_admin(self, employee_id: str) -> tuple[bool, str]:
+        """
+        Elimina un administrador de forma transaccional, borrando sus credenciales
+        y su rol de empleado. No borra el registro de la persona.
+        """
+        try:
+            # La transacción se maneja en el handler, aquí solo ejecutamos las operaciones.
+            # El orden es importante por las claves foráneas.
+            # 1. Eliminar de serviceowners (tabla hija)
+            owner_deleted = delete_owner_repo(employee_id, self.conn)
+            if not owner_deleted:
+                # Puede que no existiera en serviceowners pero sí como empleado,
+                # lo cual es un estado inconsistente, pero permitimos la continuación.
+                print(f"Advertencia: No se encontró registro en dim_serviceowners para EmployeeId {employee_id}")
+
+            # 2. Eliminar de employ (tabla padre respecto a serviceowners)
+            employ_deleted = delete_employ_repo(employee_id, self.conn)
+            if not employ_deleted:
+                return False, f"No se encontró un registro de empleado para el ID {employee_id}."
+
+            return True, "Administrador eliminado correctamente."
+        except Exception as e:
+            print(f"Error en servicio al eliminar administrador: {e}")
             return False, f"Error en servicio: {str(e)}"

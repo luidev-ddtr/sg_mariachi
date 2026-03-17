@@ -1,5 +1,5 @@
-from flask import Blueprint, request
 from typing import Any
+from flask import Blueprint, request, g
 from src.dim_serviceowners.serviceowners_handler import ServiceownersHandler
 from src.routes.handle_message import send_error, send_success
 from src.utils.decorators import login_required
@@ -32,6 +32,50 @@ def update_admin() -> tuple[Any]:
         if status != 200:
             return send_error(message, status)
             
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)
+
+@admin_route.route('/list', methods=['GET'])
+@login_required
+def list_admins() -> tuple[Any]:
+    """Lista todos los administradores del sistema."""
+    try:
+        status, message, result = admin_handler.get_all_admins()
+        if status != 200:
+            return send_error(message, status)
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)
+
+@admin_route.route('/profile', methods=['GET'])
+@login_required
+def get_admin_profile() -> tuple[Any]:
+    """Obtiene los datos del perfil del administrador actualmente logueado."""
+    try:
+        # Extraer el ID del usuario desde el contexto 'g' que inyecta el decorador
+        if not hasattr(g, 'user') or 'DIM_EmployeeId' not in g.user:
+            return send_error("No hay sesión de usuario activa o está incompleta.", 401)
+        
+        employee_id = g.user['DIM_EmployeeId']
+        
+        # Pasar el ID al handler
+        status, message, result = admin_handler.get_admin_details(employee_id)
+        
+        if status != 200:
+            return send_error(message, status)
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)
+
+@admin_route.route('/delete/<string:employee_id>', methods=['DELETE'])
+@login_required
+def delete_admin(employee_id: str) -> tuple[Any]:
+    """Elimina un administrador por su EmployeeId."""
+    try:
+        status, message, result = admin_handler.delete_admin(employee_id)
+        if status != 200:
+            return send_error(message, status)
         return send_success(message, result, status)
     except Exception as e:
         return send_error(str(e), 500)

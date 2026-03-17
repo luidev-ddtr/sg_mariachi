@@ -35,7 +35,7 @@ class DIM_PEOPLE:
         self, DIM_PeopleId: str, DIM_Name: str,
         DIM_SecondName: str, DIM_LastName: str,
         DIM_SecondLastName: str, DIM_Address: str,
-        DIM_PhoneNumber: str, DIM_SecondPhoneNumber: str, 
+        DIM_PhoneNumber: str, DIM_SecondPhoneNumber: str, DIM_Email: str,
         DIM_DateId: str ) -> None:
         """
         Constructor de la clase DIM_PEOPLE. Inicializa un nuevo objeto de persona.
@@ -54,6 +54,7 @@ class DIM_PEOPLE:
             DIM_Address (str): Dirección completa.
             DIM_PhoneNumber (str): Teléfono principal.
             DIM_SecondPhoneNumber (str): Teléfono secundario.
+            DIM_Email (str): Dirección de correo electrónico.
             DIM_DateId (str): ID de la fecha de registro.
         """
         self.DIM_PeopleId = DIM_PeopleId
@@ -64,6 +65,7 @@ class DIM_PEOPLE:
         self.DIM_Address = DIM_Address
         self.DIM_PhoneNumber = DIM_PhoneNumber
         self.DIM_SecondPhoneNumber = DIM_SecondPhoneNumber
+        self.DIM_Email = DIM_Email
         self.DIM_DateId = DIM_DateId
         
     
@@ -85,6 +87,7 @@ class DIM_PEOPLE:
                 f"Address: {self.DIM_Address} | "
                 f"PhoneNumber: {self.DIM_PhoneNumber} | "
                 f"SecondPhoneNumber: {self.DIM_SecondPhoneNumber} | "
+                f"Email: {self.DIM_Email} | "
                 f"DateId: {self.DIM_DateId}")
     
     def to_dict(self) -> Dict[str, Any]:
@@ -108,5 +111,6 @@ class DIM_PEOPLE:
             "DIM_Address": self.DIM_Address,
             "DIM_PhoneNumber": self.DIM_PhoneNumber,
             "DIM_SecondPhoneNumber": self.DIM_SecondPhoneNumber,
+            "DIM_Email": self.DIM_Email,
             "DIM_DateId": self.DIM_DateId
         }
