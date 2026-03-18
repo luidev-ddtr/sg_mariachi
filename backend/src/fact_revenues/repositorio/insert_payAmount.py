@@ -2,6 +2,13 @@ from src.fact_revenues.fact_revenues_model import FactRevenues
 from src.utils.conexion import Conexion
 
 def insert_payAmount(data_fact_revenues: FactRevenues, object_coon: Conexion) -> bool:
+    """
+    Inserta un registro de pago (FactRevenue) en la base de datos.
+    
+    :param data_fact_revenues: Objeto del modelo FactRevenues con los datos a insertar.
+    :param object_coon: Instancia de conexión a la base de datos.
+    :return: True si la inserción fue exitosa y se confirmaron cambios, False si hubo error.
+    """
 
     query ="""
     INSERT INTO `fact_revenue` (

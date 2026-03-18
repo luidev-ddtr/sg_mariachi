@@ -23,7 +23,7 @@ def get_all_admins_repo(conn: Conexion) -> list[dict]:
         admins = conn.cursor.fetchall()
         return admins if admins else []
     except Exception as e:
-        print(f"❌ Error en repositorio al listar administradores: {e}")
+        print(f"Error en repositorio al listar administradores: {e}")
         return []
 
 def get_admin_by_id_repo(employee_id: str, conn: Conexion) -> dict | None:
@@ -54,5 +54,5 @@ def get_admin_by_id_repo(employee_id: str, conn: Conexion) -> dict | None:
         admin = conn.cursor.fetchone()
         return admin
     except Exception as e:
-        print(f"❌ Error en repositorio al obtener detalle de administrador: {e}")
+        print(f"Error en repositorio al obtener detalle de administrador: {e}")
         return None

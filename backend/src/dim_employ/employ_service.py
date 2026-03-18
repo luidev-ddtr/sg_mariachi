@@ -52,7 +52,7 @@ class EmployService:
                 return EmployModel(**employee_data)
             return None
         except Exception as e:
-            print(f"❌ Error crítico en EmployService.get_employ_by_id: {e}")
+            print(f"Error crítico en EmployService.get_employ_by_id: {e}")
             return None
 
     def update_employee(self, employee_id: str, data_to_update: dict) -> tuple[bool, str]:

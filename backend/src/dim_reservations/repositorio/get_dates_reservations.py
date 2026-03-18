@@ -88,9 +88,9 @@ def get_dates_reservations(
             for row in rows
         ]
         
-        print(f"✅ Obtenidas {len(reservations)} reservas para validación")
+        print(f"Obtenidas {len(reservations)} reservas para validación")
         return reservations
     
     except Exception as err:
-        print(f"❌ Error en query de reservas: {err}")
+        print(f"Error en query de reservas: {err}")
         return []

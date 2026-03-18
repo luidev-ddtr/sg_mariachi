@@ -31,9 +31,9 @@ def get_reservations_complete_cancelled(
             if res.get('DIM_EndDate'):
                 res['DIM_EndDate'] = str(res['DIM_EndDate'])
 
-        print(f"✅ Obtenidas {len(reservations)} reservaciones completadas/canceladas.")
+        print(f"Obtenidas {len(reservations)} reservaciones completadas/canceladas.")
         return reservations
 
     except Exception as err:
-        print(f"❌ Error en query de reservaciones completadas/canceladas: {err}")
+        print(f"Error en query de reservaciones completadas/canceladas: {err}")
         return []

@@ -54,7 +54,7 @@ def insert_people(data_people: DIM_PEOPLE, object_coon: Conexion):
         print(f"Esto es la query: {query}")
         object_coon.cursor.execute(query, values)
         
-        print("✅ Cambios guardados correctamente")
+        print("Cambios guardados correctamente")
         object_coon.save_changes()
         
         return True

@@ -30,7 +30,7 @@ def cancelled_reservation_by_id(id: str, connection: Conexion):
     try:
         connection.cursor.execute(query, (id,))
         
-        print("✅ Cambios guardados correctamente. Reserva Cancelada")
+        print("Cambios guardados correctamente. Reserva Cancelada")
         connection.save_changes()
         return True
     except Exception as e:

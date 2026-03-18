@@ -32,5 +32,5 @@ def update_owner_credentials(employee_id: str, data_to_update: dict, conn: Conex
         conn.cursor.execute(query, tuple(values))
         return True
     except Exception as e:
-        print(f"❌ Error en repositorio al actualizar credenciales: {e}")
+        print(f"Error en repositorio al actualizar credenciales: {e}")
         return False

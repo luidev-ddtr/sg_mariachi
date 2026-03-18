@@ -30,5 +30,5 @@ def update_people(people_id: str, data_to_update: dict, conn: Conexion) -> bool:
         conn.cursor.execute(query, tuple(values))
         return True
     except Exception as e:
-        print(f"❌ Error en repositorio al actualizar persona: {e}")
+        print(f"Error en repositorio al actualizar persona: {e}")
         return False

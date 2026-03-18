@@ -13,13 +13,12 @@ class FactRevenuesHandler:
 
     def create_revenue(self, _revenue: dict, conn: Conexion = None) -> tuple:
         """
-        Crea un nuevo registro de ingresos facturados.
+        Crea un nuevo registro de ingresos facturados (pago) asociado a una reserva.
+        Valida los datos, verifica el monto restante de la reserva y genera el ID de transacción.
 
-        Args:
-            revenue_data (dict): Diccionario con los datos del ingreso facturado.
-
-        Returns:
-            FactRevenues: Objeto FactRevenues creado.
+        :param _revenue: Diccionario con los datos del pago ('FACT_PaymentAmount', 'DIM_DateId', 'DIM_ReservationId').
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, datos_creados|lista_vacia).
         """
         conexion = conn or Conexion()
         fact_revenue_service = FactRevenuesService(conexion)
@@ -91,12 +90,11 @@ class FactRevenuesHandler:
 
     def get_revenue_info(self, _revenue: dict, conn: Conexion = None) -> tuple:
         """
-        Obtiene la información de la reserva que se le aplicará el pago.
-        Args:
-            revenue_id (str): ID del ingreso facturado.
-
-        Returns:
-            dict: Diccionario con la información del ingreso facturado.
+        Obtiene la información de la reserva a la que se le aplicará el pago.
+        
+        :param _revenue: Diccionario que debe contener 'DIM_ReservationId'.
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, datos_reserva|lista_vacia).
         """
         
         conexion = conn or Conexion()
@@ -126,12 +124,10 @@ class FactRevenuesHandler:
     def get_revenue_statistics(self, request_data: dict, conn: Conexion = None) -> tuple:
         """
         Obtiene las estadísticas de ganancias para las gráficas.
-        
-        Args:
-            request_data (dict): Puede contener 'filter_type' (month, week, year) y 'year'.
-        
-        Returns:
-            tuple: (status, message, data)
+
+        :param request_data: Diccionario con filtros: 'filter_type' (month, week, year) y opcionalmente 'year'.
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, datos_estadisticos).
         """
         conexion = conn or Conexion()
         fact_revenue_service = FactRevenuesService(conexion)

@@ -81,5 +81,5 @@ def upsert_google_user(google_user_data: dict, objetc_conn: Conexion) -> bool:
         # La transacción se manejará en el handler para asegurar consistencia.
         return True
     except Exception as e:
-        print(f"❌ Error al insertar/actualizar usuario de Google: {e}")
+        print(f"Error al insertar/actualizar usuario de Google: {e}")
         return False

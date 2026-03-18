@@ -13,22 +13,18 @@ import json
 
 class ServiceownersHandler:
     """
-    Docstring for ServiceownersHandler
-    Aqui se crea la lógica de negocio para validaciones
-    entre otra cosas
-
+    Manejador (Handler) para la gestión de administradores (ServiceOwners).
+    Coordina la lógica de negocio, validaciones y llamadas a los servicios
+    para autenticación, registro y gestión de usuarios.
     """
     def validation_login (self, _owner: dict, conn: Conexion = None) -> tuple:
         """
-        Docstring for validation_login
+        Valida las credenciales de inicio de sesión de un administrador.
         
-        :param self: Description
-        :param _owner: Description
-        :type _owner: dict
-        :param conn: Description
-        :type conn: Conexion
-        :return: Description
-        :rtype: tuple
+        :param _owner: Diccionario que contiene las credenciales ('username' y 'password').
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Una tupla (código_http, mensaje, datos_usuario|None).
+                 Retorna 200 si las credenciales son válidas, 401 si no lo son.
         """
 
         conexion = conn or Conexion()
@@ -59,13 +55,30 @@ class ServiceownersHandler:
                 return 401, "Credenciales incorrectas", None
 
         except Exception as e:
-            print(f"❌ Error en el handler de login: {e}")
+            print(f"Error en el handler de login: {e}")
             return 500, f"Error interno del servidor: {e}", None
         finally:
             if not conn:
                 conexion.close_conexion()
     
     def loginWithGoogle(self, _owner:dict, conn: Conexion = None) -> tuple:
+        """
+        Gestiona el inicio de sesión mediante Google OAuth.
+        
+        Verifica el token JWT proporcionado por Google, extrae el correo electrónico
+        y valida que dicho correo exista en el sistema y pertenezca a un administrador activo.
+
+        Flujo:
+        1. Verifica la validez del token con la API de Google.
+        2. Extrae el email y busca si existe en `dim_people`.
+        3. Si existe, verifica si tiene rol de administrador en `dim_serviceowners`.
+        4. Si es válido, actualiza/inserta los datos de auditoría de Google y permite el acceso.
+
+        :param _owner: Diccionario que contiene el token de Google ({'token': '...'}).
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, datos_usuario|None).
+        """
+
         # Usar una única conexión para todo el proceso y asegurar su cierre.
         conexion = conn or Conexion()
         try:
@@ -84,7 +97,7 @@ class ServiceownersHandler:
                         return 401, "Token de Google inválido o expirado", None
                     google_data = json.loads(response.read())
             except Exception as e:
-                print(f"❌ Error al verificar el token con Google: {e}")
+                print(f" Error al verificar el token con Google: {e}")
                 return 500, "Error al contactar los servicios de Google", None
 
             # 3. Obtener el email de la respuesta de Google
@@ -117,7 +130,7 @@ class ServiceownersHandler:
             if not upsert_google_user(google_audit_data, conexion):
                 # Si la auditoría falla, no detenemos el login, pero sí revertimos
                 # para no dejar un registro a medias y lo notificamos en consola.
-                print("⚠️ ADVERTENCIA: El login fue exitoso pero falló el registro de auditoría de Google.")
+                print("ADVERTENCIA: El login fue exitoso pero falló el registro de auditoría de Google.")
                 conexion.conn.rollback()
             else:
                 # Si todo, incluida la auditoría, fue exitoso, guardamos los cambios.
@@ -126,7 +139,7 @@ class ServiceownersHandler:
             # 8. Éxito
             return 200, "Login exitoso con Google", admin_data
         except Exception as e:
-            print(f"❌ Error en el handler de login con Google: {e}")
+            print(f"Error en el handler de login con Google: {e}")
             conexion.conn.rollback()
             return 500, f"Error interno del servidor: {e}", None
         finally:
@@ -135,6 +148,16 @@ class ServiceownersHandler:
                 conexion.close_conexion()
 
     def insertNewServiceowners(self, _owner: dict, conn: Conexion = None) -> tuple:
+        """
+        Crea las credenciales de acceso (ServiceOwner) para un empleado existente.
+        
+        Nota: Este método es el paso final del registro de un administrador. Asume que
+        la persona y el empleado (rol) ya han sido creados previamente.
+
+        :param _owner: Diccionario con los datos: 'DIM_Username', 'DIM_Password' y 'DIM_EmployeeId'.
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, datos_creados|None).
+        """
 
         conexion =  conn or Conexion()
         ServiceOwners = ServiceownersService(conexion)
@@ -168,32 +191,24 @@ class ServiceownersHandler:
 
             return 201, "Credenciales creadas exitosamente", serviceOwner.to_dict()
         except Exception as err:
-            print(f"❌ Error en insertNewServiceowners: {err}")
+            print(f"Error en insertNewServiceowners: {err}")
             return 500, f"Error interno del servidor: {str(err)}", None
 
     
     def updateServiceowners(self, update_data: dict, conn: Conexion = None) -> tuple:
         """
         Actualiza los datos de un administrador de forma transaccional,
-        abarcando datos personales (dim_people), rol (dim_employ) y
-        credenciales (dim_serviceowners).
+        permitiendo modificar datos personales, rol y credenciales en una sola petición.
 
-        Args:
-            update_data (dict): Diccionario con los datos a actualizar. Debe contener
-                                'DIM_EmployeeId' para identificar al usuario y luego
-                                las claves correspondientes a los datos que se desean
-                                cambiar.
-                                Ejemplo:
-                                {
-                                    "DIM_EmployeeId": "some-uuid",
-                                    "people_data": { "DIM_PhoneNumber": "1234567890" },
-                                    "employ_data": { "DIM_Position": "Super Admin" },
-                                    "serviceowner_data": { "DIM_Password": "new_secure_password" }
-                                }
-            conn (Conexion, optional): Conexión a la base de datos para transacciones.
-
-        Returns:
-            tuple: (status_code, message, data)
+        :param update_data: Diccionario con la estructura:
+                            {
+                                "DIM_EmployeeId": "...",
+                                "people_data": {...},
+                                "employ_data": {...},
+                                "serviceowner_data": {...}
+                            }
+        :param conn: (Opcional) Conexión a BD para mantener la atomicidad.
+        :return: Tupla (código_http, mensaje, None).
         """
         conexion = conn or Conexion()
         
@@ -237,7 +252,7 @@ class ServiceownersHandler:
             return 200, "Administrador actualizado exitosamente.", None
 
         except Exception as e:
-            print(f"❌ Error al actualizar administrador: {e}")
+            print(f"Error al actualizar administrador: {e}")
             conexion.conn.rollback()
             return 500, f"Error interno del servidor: {str(e)}", None
         finally:
@@ -245,21 +260,32 @@ class ServiceownersHandler:
                 conexion.close_conexion()
 
     def get_all_admins(self, conn: Conexion = None) -> tuple:
-        """Maneja la solicitud para listar todos los administradores."""
+        """
+        Obtiene una lista de todos los administradores registrados en el sistema.
+        
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, lista_de_admins).
+        """
         conexion = conn or Conexion()
         service = ServiceownersService(conexion)
         try:
             admins_list = service.get_all_admins()
             return 200, "Administradores listados exitosamente.", admins_list
         except Exception as e:
-            print(f"❌ Error en handler al listar administradores: {e}")
+            print(f"Error en handler al listar administradores: {e}")
             return 500, f"Error interno del servidor: {str(e)}", None
         finally:
             if not conn:
                 conexion.close_conexion()
 
     def get_admin_details(self, employee_id: str, conn: Conexion = None) -> tuple:
-        """Maneja la solicitud para obtener los detalles de un administrador específico."""
+        """
+        Obtiene los detalles completos de un administrador específico por su ID de empleado.
+        
+        :param employee_id: ID del empleado (GUID) a consultar.
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, detalles_admin|None).
+        """
         conexion = conn or Conexion()
         service = ServiceownersService(conexion)
         try:
@@ -269,14 +295,21 @@ class ServiceownersHandler:
             
             return 200, "Perfil obtenido exitosamente.", admin_details
         except Exception as e:
-            print(f"❌ Error en handler al obtener detalles de admin: {e}")
+            print(f"Error en handler al obtener detalles de admin: {e}")
             return 500, f"Error interno del servidor: {str(e)}", None
         finally:
             if not conn:
                 conexion.close_conexion()
 
     def delete_admin(self, employee_id: str, conn: Conexion = None) -> tuple:
-        """Maneja la eliminación transaccional de un administrador."""
+        """
+        Ejecuta la eliminación lógica o física de un administrador de forma transaccional.
+        Elimina las credenciales y el registro de empleado.
+        
+        :param employee_id: ID del empleado a eliminar.
+        :param conn: (Opcional) Instancia de conexión a la base de datos.
+        :return: Tupla (código_http, mensaje, None).
+        """
         conexion = conn or Conexion()
         service = ServiceownersService(conexion)
         try:
@@ -293,7 +326,7 @@ class ServiceownersHandler:
             conexion.save_changes()
             return 200, message, None
         except Exception as e:
-            print(f"❌ Error en handler al eliminar administrador: {e}")
+            print(f"Error en handler al eliminar administrador: {e}")
             conexion.conn.rollback()
             return 500, f"Error interno del servidor: {str(e)}", None
         finally:

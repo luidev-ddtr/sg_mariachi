@@ -32,5 +32,5 @@ def get_employ_by_id_repo(employee_id: str, conn: Conexion) -> dict | None:
         # Si ya es un diccionario
         return row
     except Exception as e:
-        print(f"❌ Error en repositorio al obtener empleado por ID: {e}")
+        print(f"Error en repositorio al obtener empleado por ID: {e}")
         return None

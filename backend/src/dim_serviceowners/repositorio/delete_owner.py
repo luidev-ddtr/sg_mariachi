@@ -16,5 +16,5 @@ def delete_owner_repo(employee_id: str, conn: Conexion) -> bool:
         conn.cursor.execute(query, (employee_id,))
         return conn.cursor.rowcount > 0
     except Exception as e:
-        print(f"❌ Error en repositorio al eliminar owner: {e}")
+        print(f"Error en repositorio al eliminar owner: {e}")
         return False

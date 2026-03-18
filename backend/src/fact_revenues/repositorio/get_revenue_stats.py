@@ -2,15 +2,12 @@ from src.utils.conexion import Conexion
 
 def get_revenue_stats(conn: Conexion, filter_type: str, year: int) -> list:
     """
-    Obtiene las estadísticas de ingresos agrupadas por mes, semana o año.
+    Ejecuta la consulta para obtener estadísticas de ingresos agrupadas por mes, semana o año.
     
-    Args:
-        conn (Conexion): Objeto de conexión.
-        filter_type (str): Tipo de filtro ('month', 'week', 'year').
-        year (int): Año para filtrar (relevante para 'month' y 'week').
-        
-    Returns:
-        list: Lista de diccionarios con 'label' y 'total'.
+    :param conn: Objeto de conexión a la base de datos.
+    :param filter_type: Tipo de filtro ('month', 'week', 'year').
+    :param year: Año para filtrar (relevante para 'month' y 'week').
+    :return: Lista de diccionarios con claves 'label' y 'total'.
     """
     # Usamos el cursor de diccionario configurado en Conexion
     cursor = conn.cursor 
@@ -65,5 +62,5 @@ def get_revenue_stats(conn: Conexion, filter_type: str, year: int) -> list:
         results = cursor.fetchall()
         return results
     except Exception as e:
-        print(f"❌ Error al obtener estadísticas de ingresos: {e}")
+        print(f"Error al obtener estadísticas de ingresos: {e}")
         return []

@@ -5,6 +5,10 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
     """
     Obtiene el historial detallado de pagos para una reservación.
     Une fact_revenues con DIM_Date para obtener la fecha legible.
+    
+    :param reservation_id: ID de la reservación.
+    :param conn: Instancia de conexión a la base de datos.
+    :return: Lista de diccionarios con fecha y monto de cada pago.
     """
     # Seleccionamos la fecha legible (FullDate) y el monto
     query = """
@@ -31,7 +35,7 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
         return history
         
     except Exception as e:
-        print(f"❌ Error al obtener historial de pagos: {e}")
+        print(f"Error al obtener historial de pagos: {e}")
         # import traceback
         # print(f"Error details: {traceback.format_exc()}")
         return []
