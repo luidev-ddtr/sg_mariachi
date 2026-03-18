@@ -83,7 +83,7 @@ INSERT INTO `dim_reservation` (
         print(f"Esto es la query: {query}")
         object_coon.cursor.execute(query, values)
         
-        print("✅ Cambios guardados correctamente. Reserva creada")
+        print("Cambios guardados correctamente. Reserva creada")
         object_coon.save_changes()
         
         return True

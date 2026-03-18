@@ -30,5 +30,5 @@ def update_employ_repo(employee_id: str, data_to_update: dict, conn: Conexion) -
         conn.cursor.execute(query, tuple(values))
         return True
     except Exception as e:
-        print(f"❌ Error en repositorio al actualizar empleado: {e}")
+        print(f"Error en repositorio al actualizar empleado: {e}")
         return False

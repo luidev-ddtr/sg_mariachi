@@ -34,8 +34,8 @@ def insert_people(data_people: DIM_PEOPLE, object_coon: Conexion):
     """
     query = """
     INSERT INTO dim_people
-        (DIM_PeopleId, DIM_Name, DIM_SecondName, DIM_LastName, DIM_SecondLastName, DIM_Address,DIM_PhoneNumber, DIM_SecondPhoneNumber, DIM_DateId)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        (DIM_PeopleId, DIM_Name, DIM_SecondName, DIM_LastName, DIM_SecondLastName, DIM_Address, DIM_PhoneNumber, DIM_SecondPhoneNumber, DIM_Email, DIM_DateId)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     try:
         values = (
@@ -47,13 +47,14 @@ def insert_people(data_people: DIM_PEOPLE, object_coon: Conexion):
             data_people.DIM_Address,
             data_people.DIM_PhoneNumber,
             data_people.DIM_SecondPhoneNumber,
+            data_people.DIM_Email,
             data_people.DIM_DateId
         )
         print(f"Estos son los valores: {values}")
         print(f"Esto es la query: {query}")
         object_coon.cursor.execute(query, values)
         
-        print("✅ Cambios guardados correctamente")
+        print("Cambios guardados correctamente")
         object_coon.save_changes()
         
         return True

@@ -47,7 +47,7 @@ def get_reservation_stats(conn: Conexion, filter_type: str, year: int, month: Op
     elif filter_type == 'month':
         if not month:
             # Si piden filtro por mes pero no envían el mes, retornamos vacío o error
-            print("⚠️ Se requiere el mes para el filtro tipo 'month'")
+            print("Se requiere el mes para el filtro tipo 'month'")
             return []
 
         query = """
@@ -85,5 +85,5 @@ def get_reservation_stats(conn: Conexion, filter_type: str, year: int, month: Op
         results = cursor.fetchall()
         return results
     except Exception as e:
-        print(f"❌ Error al obtener estadísticas de reservas: {e}")
+        print(f"Error al obtener estadísticas de reservas: {e}")
         return []

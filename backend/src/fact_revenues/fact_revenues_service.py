@@ -11,13 +11,10 @@ class FactRevenuesService:
     
     def validate_revenue(self, revenue: FactRevenues) -> bool:
         """
-        Valida los datos del ingreso facturado.
-
-        Args:
-            revenue (FactRevenues): Objeto FactRevenues a validar.
-
-        Returns:
-            bool: True si los datos son válidos, False en caso contrario.
+        Valida las reglas de negocio para un objeto de ingreso facturado.
+        
+        :param revenue: Instancia de FactRevenues a validar.
+        :return: True si los datos son válidos, False en caso contrario.
         """
         if revenue.FACT_PaymentAmount < 0:
             print("El monto del pago no puede ser negativo.")
@@ -27,13 +24,10 @@ class FactRevenuesService:
     
     def create_revenue(self, revenue: FactRevenues) -> bool:
         """
-        Crea un nuevo registro de ingresos facturados.
-
-        Args:
-            revenue (FactRevenues): Objeto FactRevenues a crear.
-
-        Returns:
-            bool: True si la creación fue exitosa, False en caso contrario.
+        Persiste un nuevo registro de ingreso facturado en la base de datos.
+        
+        :param revenue: Instancia de FactRevenues a crear.
+        :return: True si la creación fue exitosa, False en caso contrario.
         """
         if not self.validate_revenue(revenue):
             return False
@@ -42,13 +36,10 @@ class FactRevenuesService:
 
     def get_fact_revenues_by_id(self, reservation_id: str) -> list:
         """
-        Obtiene la información de la reserva que se le aplicará el pago.
-
-        Args:
-            revenue_id (str): ID del ingreso facturado.
-
-        Returns:
-            list: Lista de diccionarios con la información del ingreso facturado.
+        Obtiene el historial de ingresos/pagos asociados a una reserva específica.
+        
+        :param reservation_id: ID de la reserva a consultar.
+        :return: Lista de diccionarios con la información de los pagos.
         """
         try:
             return get_fact_revenues_by_id(reservation_id, self.conn)
@@ -58,13 +49,10 @@ class FactRevenuesService:
 
     def get_revenue_statistics(self, filter_type: str, year: int) -> list:
         """
-        Obtiene las estadísticas de ingresos.
-
-        Args:
-            filter_type (str): Tipo de filtro ('month', 'week', 'year').
-            year (int): Año a consultar.
-
-        Returns:
-            list: Lista con los datos estadísticos.
+        Obtiene las estadísticas de ingresos agrupadas según el filtro.
+        
+        :param filter_type: Tipo de agrupación ('month', 'week', 'year').
+        :param year: Año del cual obtener las estadísticas.
+        :return: Lista con los datos estadísticos formateados para gráficas.
         """
         return get_revenue_stats(self.conn, filter_type, year)

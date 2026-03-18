@@ -418,7 +418,7 @@ class ReservationService:
         except ValueError as ve:
             return 400, str(ve), []
         except Exception as e:
-            print(f"❌ Error al actualizar la reserva: {e}")
+            print(f"Error al actualizar la reserva: {e}")
             conexion.conn.rollback()
             return  500, f"Error al actualizar la reserva: {e}", []
         finally:
@@ -483,7 +483,7 @@ class ReservationService:
                 # Si la función de archivado falla, devolvemos un error de servidor.
                 return 500, "Ocurrió un error al intentar archivar la reservación.", []
         except Exception as e:
-            print(f"❌ Error en el handler al archivar la reserva: {e}")
+            print(f"Error en el handler al archivar la reserva: {e}")
             # No hacemos rollback aquí porque la función de archivado maneja su propia transacción.
             return 500, f"Error interno del servidor: {e}", []
         finally:
@@ -581,7 +581,7 @@ class ReservationService:
 
             return 200, "Información del contrato obtenida exitosamente.", formatted_contract
         except Exception as e:
-            print(f"❌ Error en handler al obtener información del contrato: {e}")
+            print(f"Error en handler al obtener información del contrato: {e}")
             return 500, f"Error interno del servidor: {e}", None
         finally:
             if not conn:
@@ -633,7 +633,7 @@ class ReservationService:
                 # Si la función de cancelado falla, devolvemos un error de servidor.
                 return 500, "Ocurrió un error al intentar cancelar la reservación.", []
         except Exception as e:
-            print(f"❌ Error en el handler al cancelar la reserva: {e}")
+            print(f"Error en el handler al cancelar la reserva: {e}")
             # No hacemos rollback aquí porque la función de cancelado maneja su propia transacción.
             return 500, f"Error interno del servidor: {e}", []
         finally:
@@ -687,7 +687,7 @@ class ReservationService:
             stats = get_reservation_stats(conexion, filter_type, year, month)
             return 200, "Estadísticas obtenidas exitosamente.", stats
         except Exception as e:
-            print(f"❌ Error al obtener estadísticas de reservaciones: {e}")
+            print(f"Error al obtener estadísticas de reservaciones: {e}")
             return 500, f"Error interno del servidor: {e}", []
         finally:
             if not conn:

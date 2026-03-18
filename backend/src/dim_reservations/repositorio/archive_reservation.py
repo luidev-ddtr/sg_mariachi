@@ -31,7 +31,7 @@ def archive_reservation_by_id(id: str, connection: Conexion):
     try:
         connection.cursor.execute(query, (id,))
         
-        print("✅ Cambios guardados correctamente. Reserva archivada")
+        print("Cambios guardados correctamente. Reserva archivada")
         connection.save_changes()
         return True
     except Exception as e:

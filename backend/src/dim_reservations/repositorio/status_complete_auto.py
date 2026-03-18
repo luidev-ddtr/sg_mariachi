@@ -31,9 +31,9 @@ def update_past_reservations_to_complete(connection: Conexion) -> int:
         
         if rows_affected > 0:
             connection.save_changes()
-            print(f"🔄 Auto-Completado: Se actualizaron {rows_affected} reservaciones vencidas.")
+            print(f"Auto-Completado: Se actualizaron {rows_affected} reservaciones vencidas.")
             
         return rows_affected
     except Exception as e:
-        print(f"❌ Error al ejecutar auto-completado de reservaciones: {e}")
+        print(f"Error al ejecutar auto-completado de reservaciones: {e}")
         return 0

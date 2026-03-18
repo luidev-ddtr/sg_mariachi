@@ -2,9 +2,19 @@ from src.utils.conexion import Conexion
 from typing import List, Dict
 
 def get_fact_revenues_by_id(
-        object_conn: Conexion,
-        revenue_id: str
+        revenue_id: str,
+        object_conn: Conexion
 ) -> List[Dict[str, str]]:
+    """
+    Obtiene información del cliente asociado a una reserva específica mediante un join con fact_revenue.
+    
+    Nota: Aunque el nombre sugiere obtener facturas por ID, la consulta recupera 
+    datos del cliente (dim_people) relacionados con la reserva dada.
+    
+    :param revenue_id: ID de la reserva (DIM_ReservationId) para filtrar.
+    :param object_conn: Instancia de conexión a la base de datos.
+    :return: Lista de diccionarios con datos del cliente (Name, LastName, etc.).
+    """
     query = """
         SELECT cliente.DIM_Name, cliente.DIM_SecondName, cliente.DIM_LastName, cliente.DIM_SecondLastName
         FROM dim_reservation as reservacion
@@ -23,5 +33,5 @@ def get_fact_revenues_by_id(
         return revenues
 
     except Exception as err:
-        print(f"❌ Error en query de ingresos facturados por ID: {err}")
+        print(f"Error en query de ingresos facturados por ID: {err}")
         return []

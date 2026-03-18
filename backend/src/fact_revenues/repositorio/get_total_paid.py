@@ -5,7 +5,9 @@ def get_total_paid(reservation_id: str, conn: Conexion) -> float:
     Obtiene la suma total (acumulado) de los pagos registrados en fact_revenue
     para una reservación específica.
     
-    Retorna 0.0 si no hay pagos registrados.
+    :param reservation_id: ID de la reservación a consultar.
+    :param conn: Instancia de conexión a la base de datos.
+    :return: Monto total pagado (float). Retorna 0.0 si no hay pagos registrados.
     """
     # Sumamos la columna FACT_PaymentAmount filtrando por el ID de la reservación
     query = "SELECT SUM(FACT_PaymentAmount) AS total_paid FROM fact_revenue WHERE DIM_ReservationId = %s"
@@ -23,7 +25,7 @@ def get_total_paid(reservation_id: str, conn: Conexion) -> float:
         return 0.0
         
     except Exception as e:
-        print(f"❌ Error al obtener el total pagado para {reservation_id}: {e}")
+        print(f"Error al obtener el total pagado para {reservation_id}: {e}")
         import traceback
         print(f"Error details: {traceback.format_exc()}")
         # En caso de error, asumimos 0 para no romper el flujo, pero lo registramos en consola
