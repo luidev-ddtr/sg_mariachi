@@ -3,8 +3,19 @@
  * Preparada para navegación completa y eventos reales con panel lateral de detalles
  */
 import { GetReservationStatsCalendar } from "../../api/api_reservation_stats_calendar.js";
-// IMPORTANTE: Necesitarás importar tu función que trae los detalles reales de las reservas
-// import { GetReservationsDetails } from "../../api/api_reservations.js"; 
+
+// IMPORTANTE: Agregamos una función sencilla para buscar eventos en la base de datos
+// (Asegúrate de importar axios en tu HTML de la agenda si no lo tienes)
+const buscarEventoPorNombre = async (nombre) => {
+  try {
+    // 🔥 Reemplaza '/api/reservations/search' por la ruta real que Alec te indique
+    const response = await axios.get(`/api/reservations/search?name=${encodeURIComponent(nombre)}`);
+    return response.data.body || response.data; // Ajusta según la estructura de tu backend
+  } catch (error) {
+    console.error("Error al buscar el evento en la API:", error);
+    return null;
+  }
+};
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -13,82 +24,72 @@ document.addEventListener('DOMContentLoaded', function () {
   const panelContent = document.getElementById('panelContent');
   const closePanelBtn = document.getElementById('closePanel');
 
-  // Inicialización del calendario
   const calendar = new FullCalendar.Calendar(calendarEl, {
     locale: 'es',
     initialView: 'timeGridWeek',
     allDaySlot: true, 
     height: 'auto',
     headerToolbar: false,
-    slotMinTime: "08:00:00", // Opcional: ajustar horario de inicio visible
-    slotMaxTime: "23:59:00", // Opcional: ajustar horario de fin visible
+    slotMinTime: "08:00:00", 
+    slotMaxTime: "23:59:00", 
 
     events: async function(fetchInfo, successCallback, failureCallback) {
       try {
         const start = fetchInfo.start;
         const end = fetchInfo.end;
         
-        // Redondeamos para evitar decimales extraños por zonas horarias
         const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
-        
-        // ¡LA SOLUCIÓN DEFINITIVA!: 
-        // Si el calendario pide 10 días o menos (1 o 7), estamos en Día o Semana.
         const isDetailView = diffDays <= 10; 
-        // Si pide más de 100 días, estamos en Año.
         const isYearView = diffDays > 100;
 
         const midDate = new Date((start.getTime() + end.getTime()) / 2);
         const year = midDate.getFullYear();
         let formattedEvents = [];
 
-        // --- VISTA DE SEMANA O DÍA (Eventos individuales con nombre de cliente) ---
+        // --- VISTA DE SEMANA O DÍA (Nombres reales de la API) ---
         if (isDetailView) {
-          // MOCK DE DATOS (Bórralo y usa tu API real más adelante):
-          const data = [
-            { id: 1, client_name: 'Juan Pérez', date: '2026-03-12', time: '14:00', phone: '555-1234', address: 'Calle Falsa 123' },
-            { id: 2, client_name: 'María García', date: '2026-03-14', time: '19:30', phone: '555-9876', address: 'Salón de Fiestas Los Pinos' },
-            { id: 3, client_name: 'Gelasio', date: '2026-03-16', time: '11:00', phone: '0987654321', address: 'Conocido' },
-            { id: 4, client_name: 'Rommel', date: '2026-03-24', time: '10:00', phone: '7711223344', address: 'Centro' }
-          ];
+          // 🔥 LLAMADA A LA API REAL PARA OBTENER LOS DETALLES DE LA SEMANA/DÍA 🔥
+          // (Alec necesita habilitar un endpoint que devuelva las reservas en un rango de fechas)
+          // Ejemplo de cómo se vería: 
+          // const response = await axios.get(`/api/reservations/range?start=${start.toISOString()}&end=${end.toISOString()}`);
+          // const data = response.data.body || [];
+
+          // Mientras Alec termina eso, dejamos un array vacío (la tabla se verá en blanco)
+          // Una vez que el backend esté listo, borra "const data = [];" y descomenta lo de arriba.
+          const data = []; 
 
           formattedEvents = data.map(item => {
             return {
-              id: `evt-${item.id}`,
-              title: item.client_name, 
-              start: `${item.date}T${item.time}`, 
+              id: `evt-${item.id || item.DIM_ReservationId}`,
+              title: item.client_name || item.DIM_Name, 
+              start: `${item.date || item.DIM_StartDate.split(' ')[0]}T${item.time || item.DIM_StartDate.split(' ')[1]}`, 
               backgroundColor: '#198754', 
               extendedProps: {
                 isDetail: true, 
-                client: item.client_name,
-                phone: item.phone,
-                address: item.address,
-                time: item.time
+                client: item.client_name || `${item.DIM_Name} ${item.DIM_LastName}`,
+                phone: item.phone || item.DIM_PhoneNumber,
+                address: item.address || item.DIM_EventAddress,
+                time: item.time || item.DIM_StartDate.split(' ')[1]
               }
             };
           });
         } 
-        // --- VISTA DE AÑO O MES (Estadísticas agrupadas) ---
+        // --- VISTA DE AÑO O MES (Estadísticas - ¡Esto ya lo tienes funcionando!) ---
         else {
           let rawData = [];
-
           if (isYearView) {
             const promesas = [];
             for (let m = 1; m <= 12; m++) {
               promesas.push(GetReservationStatsCalendar('month', year, m).catch(() => []));
             }
             const resultadosMeses = await Promise.all(promesas);
-            
             resultadosMeses.forEach((mesData, index) => {
-              if (mesData && mesData.length > 0) {
-                mesData.forEach(item => rawData.push({ ...item, monthForDate: index + 1 }));
-              }
+              if (mesData && mesData.length > 0) mesData.forEach(item => rawData.push({ ...item, monthForDate: index + 1 }));
             });
           } else {
             const month = midDate.getMonth() + 1; 
             const data = await GetReservationStatsCalendar('month', year, month);
-            if (data && data.length > 0) {
-              data.forEach(item => rawData.push({ ...item, monthForDate: month }));
-            }
+            if (data && data.length > 0) data.forEach(item => rawData.push({ ...item, monthForDate: month }));
           }
 
           formattedEvents = rawData.map(item => {
@@ -102,10 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
               start: dateString,
               allDay: true, 
               backgroundColor: '#0d6efd',
-              extendedProps: {
-                isDetail: false,
-                total: item.total_events
-              }
+              extendedProps: { isDetail: false, total: item.total_events }
             };
           });
         }
@@ -116,48 +114,30 @@ document.addEventListener('DOMContentLoaded', function () {
         failureCallback(error);
       }
     },
-    // --- ACCIÓN AL HACER CLIC EN EL EVENTO ---
+    
     eventClick: function(info) {
       const isDetail = info.event.extendedProps.isDetail;
-
       if (!isDetail) {
-        // Si hicieron clic en "X reservas" (estadística), los llevamos a la vista de Día
         calendar.changeView('timeGridDay', info.event.start);
         document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('day').classList.add('active');
       } else {
-        // Si hicieron clic en un cliente (vista semana/día), abrimos el panel con sus datos
         openClientDetailPanel(info.event);
       }
     },
-
-    views: {
-      multiMonthYear: {
-        type: 'multiMonth',
-        duration: { years: 1 },
-        buttonText: 'Año'
-      }
-    },
-
-    datesSet: function () {
-      updateCurrentDate(calendar);
-    }
+    views: { multiMonthYear: { type: 'multiMonth', duration: { years: 1 }, buttonText: 'Año' } },
+    datesSet: function () { updateCurrentDate(calendar); }
   });
 
   calendar.render();
   updateCurrentDate(calendar);
 
   /* --- FUNCIONES PARA MANEJAR EL PANEL DE DETALLES --- */
-  
-  // Panel adaptado para mostrar datos del cliente
   function openClientDetailPanel(event) {
     const props = event.extendedProps;
     const date = event.start;
-    
     const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const fechaFormateada = date.toLocaleDateString('es-ES', opcionesFecha).toUpperCase();
-    
-    // Formatear la hora si existe
     const horaFormateada = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
     const htmlContent = `
@@ -172,57 +152,42 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="client-details" style="margin-top: 20px;">
         <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
           <span class="material-icons" style="margin-right: 10px; color: #555;">person</span>
-          <div>
-            <small style="color: #666;">Cliente</small>
-            <h4 style="margin: 0;">${props.client}</h4>
-          </div>
+          <div><small style="color: #666;">Cliente</small><h4 style="margin: 0;">${props.client}</h4></div>
         </div>
-
         <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
           <span class="material-icons" style="margin-right: 10px; color: #555;">phone</span>
-          <div>
-            <small style="color: #666;">Teléfono</small>
-            <p style="margin: 0;">${props.phone || 'No registrado'}</p>
-          </div>
+          <div><small style="color: #666;">Teléfono</small><p style="margin: 0;">${props.phone || 'No registrado'}</p></div>
         </div>
-
         <div class="detail-item" style="display: flex; align-items: center; margin-bottom: 15px;">
           <span class="material-icons" style="margin-right: 10px; color: #555;">location_on</span>
-          <div>
-            <small style="color: #666;">Dirección</small>
-            <p style="margin: 0;">${props.address || 'No registrada'}</p>
-          </div>
+          <div><small style="color: #666;">Dirección</small><p style="margin: 0;">${props.address || 'No registrada'}</p></div>
         </div>
       </div>
     `;
-
     panelContent.innerHTML = htmlContent;
     detailPanel.classList.add('open');
   }
 
-  closePanelBtn.onclick = function() {
-    detailPanel.classList.remove('open');
-  }
+  closePanelBtn.onclick = function() { detailPanel.classList.remove('open'); }
 
-  /* BOTONES DE NAVEGACIÓN */
+  /* BOTONES DE NAVEGACIÓN Y VISTAS */
   document.getElementById('prev').onclick = () => calendar.prev();
   document.getElementById('next').onclick = () => calendar.next();
   document.getElementById('today').onclick = () => calendar.today();
-
-  /* CAMBIO DE VISTAS */
+  
   function changeView(view, button) {
     calendar.changeView(view);
     document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
   }
-
+  
   document.getElementById('day').onclick = function () { changeView('timeGridDay', this); };
   document.getElementById('week').onclick = function () { changeView('timeGridWeek', this); };
   document.getElementById('month').onclick = function () { changeView('dayGridMonth', this); };
   document.getElementById('year').onclick = function () { changeView('multiMonthYear', this); };
 
   /* =======================================================
-     NUEVO: LÓGICA DE LA BARRA DE BÚSQUEDA DEL CALENDARIO
+     BÚSQUEDA DINÁMICA DE CLIENTE (SIN DATOS FALSOS)
      ======================================================= */
   const searchInput = document.querySelector('input[type="search"]');
 
@@ -230,52 +195,44 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('keypress', async function (e) {
       if (e.key === 'Enter') {
         const query = this.value.trim().toLowerCase();
-        
         if (!query) return; 
 
-        console.log(`Buscando evento para el cliente: ${query}`);
-
         try {
-          // --- MOCK DE DATOS (Simulación temporal) ---
-          // En el futuro, reemplaza esto con la llamada a tu API: await BuscarReservaGlobal(query);
-          const mockDB = [
-            { client_name: 'Gelasio', date: '2026-03-16', time: '11:00' },
-            { client_name: 'Rommel', date: '2026-03-24', time: '10:00' },
-            { client_name: 'Juan Pérez', date: '2026-03-12', time: '14:00' }
-          ];
-          
-          const eventoEncontrado = mockDB.find(ev => ev.client_name.toLowerCase().includes(query));
+          // Ya no hay mockDB. Usamos la función real que consulta al backend.
+          const resultados = await buscarEventoPorNombre(query);
 
-          if (eventoEncontrado) {
-            const fechaDelEvento = `${eventoEncontrado.date}T${eventoEncontrado.time}:00`;
+          if (resultados && resultados.length > 0) {
+            const eventoEncontrado = resultados[0]; 
+            
+            // Extraemos la fecha (Aseguramos formato ISO YYYY-MM-DDTHH:MM:SS)
+            // Esto asume que el backend devuelve un string como "2026-03-24 10:00:00"
+            const fechaString = eventoEncontrado.DIM_StartDate || eventoEncontrado.date; 
+            const separador = fechaString.includes('T') ? '' : 'T';
+            const fechaDelEvento = fechaString.replace(' ', separador);
 
-            // Cambiamos a vista 'Día' en la fecha exacta
             calendar.changeView('timeGridDay', fechaDelEvento);
             
-            // Actualizamos los botones
             document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('day').classList.add('active');
-
-            this.value = ''; // Limpiamos la barra
+            this.value = ''; 
 
           } else {
-            alert(`No se encontró ningún evento próximo para: "${query}"`);
+            alert(`No se encontró ningún evento agendado para: "${query}"`);
           }
 
         } catch (error) {
           console.error("Error en la búsqueda:", error);
+          alert("Ocurrió un error al buscar en la base de datos.");
         }
       }
     });
   }
-
 });
 
 function updateCurrentDate(calendar) {
   const date = calendar.getDate();
   const viewType = calendar.view.type;
   let text = '';
-
   if (viewType === 'multiMonthYear' || viewType === 'dayGridYear') {
     text = date.getFullYear();
   } else {
