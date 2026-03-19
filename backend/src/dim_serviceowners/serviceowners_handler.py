@@ -189,7 +189,12 @@ class ServiceownersHandler:
                 # Propagar el mensaje de error desde el servicio
                 return 500, message or "Error al crear las credenciales", None
 
-            return 201, "Credenciales creadas exitosamente", serviceOwner.to_dict()
+            # Construimos el diccionario manualmente para evitar errores si to_dict() falla
+            return 201, "Credenciales creadas exitosamente", {
+                "DIM_ServiceOwnersId": serviceOwner.DIM_ServiceOwnersId,
+                "DIM_Username": serviceOwner.DIM_Username,
+                "DIM_EmployeeId": serviceOwner.DIM_EmployeeId
+            }
         except Exception as err:
             print(f"Error en insertNewServiceowners: {err}")
             return 500, f"Error interno del servidor: {str(err)}", None

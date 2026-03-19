@@ -55,7 +55,8 @@ export const registerNewAdministrator = async (formData) => {
       DIM_SecondLastName: formData.secondLastName || "",
       DIM_Address: formData.address,
       DIM_PhoneNumber: formData.phone,
-      DIM_SecondPhoneNumber: formData.secondPhone || ""
+      DIM_SecondPhoneNumber: formData.secondPhone || "",
+      DIM_Email: formData.email
     });
 
     console.log("2. Persona creada. Asignando rol...");
