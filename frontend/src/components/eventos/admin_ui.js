@@ -1,7 +1,7 @@
 // admin_ui.js
 
 // 🔥 Importamos la función real desde tu archivo de API
-import { getAdministrators } from '../../api/api_serviceOwners.js'; 
+import {getAdministrators, GetAdminInfo} from '../../api/api_serviceOwnersRead.js';  
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -14,6 +14,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const URL_NUEVO_ADMIN  = "/pages/formulario_nvo_admin.html";
   const URL_EDITAR_ADMIN = "/pages/editar_admin.html?id=";   
   const URL_CAMBIAR_PASS = "/pages/formulario_cambiar_pass.html";
+
+  // AQUI LE AGREGAS FUNCIÓN ARMANDO XD
+  async function getProfileInfo() {
+    try {
+      const profile = await GetAdminInfo ;
+      if (response.data.success) {
+        const data = response.data.body;
+      }
+    }
+    catch{
+
+    }
+  }
+
+  getProfileInfo();
+
 
   // ==========================================
   // CARGAR LA TABLA DE ADMINISTRADORES

@@ -10,7 +10,7 @@ from src.routes.handle_message import send_error, send_success
 from src.utils.decorators import login_required
 
 people_options = PeopleHandler()
-people_route = Blueprint('people_route', __name__, url_prefix='/api/people/')
+people_route = Blueprint('people_route', __name__, url_prefix='/api/people')
 
 @people_route.route('/create', methods=['POST'])
 @login_required
