@@ -1,7 +1,8 @@
 // admin_ui.js
 
-// 🔥 Importamos la función real desde tu archivo de API
-import {getAdministrators, GetAdminInfo} from '../../api/api_serviceOwnersRead.js';  
+// 🔥 Importamos las funciones reales desde tus archivos de API
+import { getAdministrators, GetAdminInfo } from '../../api/api_serviceOwnersRead.js';  
+import { deleteAdministrator } from '../../api/api_serviceOwnersDelete.js'; // <-- NUEVO IMPORT AGREGADO
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -18,16 +19,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // AQUI LE AGREGAS FUNCIÓN ARMANDO XD
   async function getProfileInfo() {
     try {
-      const profile = await GetAdminInfo ;
-      if (response.data.success) {
-        const data = response.data.body;
-      }
-    }
-    catch{
+      // 1. Ejecutar la función importada de la API correctamente con ()
+      const response = await GetAdminInfo(); 
+      
+      // 2. Validar que la petición fue exitosa
+      if (response && response.data && response.data.success) {
+        const adminData = response.data.body;
+        
+        // 3. Armar el nombre completo
+        const nombreCompleto = `${adminData.DIM_Name || ''} ${adminData.DIM_LastName || ''}`.trim();
+        
+        // 4. Inyectar los datos en el HTML
+        // (Asegúrate de que las etiquetas en tu HTML tengan estos 'id')
+        const domName     = document.getElementById("profileName");
+        const domEmail    = document.getElementById("profileEmail");
+        const domUsername = document.getElementById("profileUsername");
+        const domPosition = document.getElementById("profilePosition");
 
+        if (domName)     domName.textContent     = nombreCompleto || 'Administrador';
+        if (domEmail)    domEmail.textContent    = adminData.DIM_Email || adminData.Email || 'Sin correo';
+        if (domUsername) domUsername.textContent = adminData.DIM_Username || 'Sin usuario';
+        if (domPosition) domPosition.textContent = adminData.DIM_Position || 'Administrador';
+      }
+    } catch (error) {
+      console.error("Error al obtener la información de tu perfil:", error);
     }
   }
 
+  // Se llama a la función al cargar la página
   getProfileInfo();
 
 
@@ -123,6 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // ¡Magia! Recargamos la tabla de la base de datos automáticamente
       cargarAdmins(); 
+      // 🔥 NUEVO: Recargamos tu perfil por si modificaste tus propios datos
+      getProfileInfo();
     }
   });
 
@@ -161,14 +182,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === confirmDeleteModal) confirmDeleteModal.style.display = "none";
   });
 
-  document.getElementById("btnConfirmarDelete").addEventListener("click", () => {
-    console.log("Eliminando en backend el admin ID:", adminIdToDelete);
-    // Cuando el backend esté listo descomenta esto:
-    // await axios.delete(`/api/admins/${adminIdToDelete}`);
-    
-    confirmDeleteModal.style.display = "none";
-    adminIdToDelete = null;
-    // cargarAdmins();
+  // 🔥 NUEVO: BOTÓN DE CONFIRMAR ELIMINACIÓN CONECTADO A LA API REAL
+  document.getElementById("btnConfirmarDelete").addEventListener("click", async () => {
+    try {
+      console.log("Eliminando en backend el admin ID:", adminIdToDelete);
+      
+      // 1. Llamada REAL a la base de datos mediante tu API importada
+      await deleteAdministrator(adminIdToDelete); 
+      
+      // 2. Cerramos el modal y limpiamos la variable
+      confirmDeleteModal.style.display = "none";
+      adminIdToDelete = null;
+      
+      // 3. Recargamos la tabla para que el admin desaparezca de la pantalla al instante
+      cargarAdmins(); 
+      
+      // 4. (Opcional) Borramos cualquier mensaje fantasma de la memoria
+      localStorage.removeItem("mensajeExito"); 
+      sessionStorage.removeItem("mensajeExito");
+
+    } catch (error) {
+      console.error("Error al eliminar al administrador:", error);
+      alert("Hubo un error al intentar eliminar el registro. Revisa la consola.");
+    }
   });
 
   // Búsqueda rápida (filtro visual en el navegador)
