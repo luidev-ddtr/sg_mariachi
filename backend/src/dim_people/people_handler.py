@@ -65,7 +65,7 @@ class PeopleHandler:
                 return "Error al crear la persona", 500,  ""
         except Exception as e:
             print(f"Error al crear la persona: {e}")
-            return "Error al crear la persona", 500,  ""
+            return f"Error al crear la persona: {str(e)}", 500,  ""
         finally:
             # Solo cerramos la conexión si fue creada aquí (no si vino de fuera)
             if not conn:

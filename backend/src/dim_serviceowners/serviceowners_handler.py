@@ -3,8 +3,6 @@ from .serviceowners_service import ServiceownersService
 from src.dim_serviceowners.serviceowners_model import ServiceOwnerModel
 from .repositorio.insert_owners import upsert_google_user
 from src.utils.id_generator import create_id_fact_reservation
-from src.utils.encryptPass import hash_password, verify_password
-# --- Imports para la funcionalidad de actualización ---
 from src.dim_employ.employ_service import EmployService
 from src.dim_people.people_services import PeopleService
 # ----------------------------------------------------
@@ -28,7 +26,7 @@ class ServiceownersHandler:
         """
 
         conexion = conn or Conexion()
-        # IMPORTANTE: Debemos instanciar la clase pasando la conexión
+        # Debemos instanciar la clase pasando la conexión
         serviceowner_service = ServiceownersService(conexion)
 
         try:
@@ -46,8 +44,8 @@ class ServiceownersHandler:
             user_data = serviceowner_service.verify_credentials(username, password)
 
             if user_data:
-                # ¡Éxito! El servicio ya verificó la contraseña de forma segura.
-                # Por seguridad, el servicio ya ha eliminado la contraseña del diccionario.
+                # El servicio verifica la contraseña de forma segura.
+                # Por seguridad, el servicio elimina la contraseña del diccionario.
                 return 200, "Login exitoso", user_data
             else:
                 # El servicio retornó None, lo que significa que el usuario no existe
@@ -172,16 +170,12 @@ class ServiceownersHandler:
             serviceOwner = ServiceOwnerModel (
                 DIM_ServiceOwnersId= "",
                 DIM_Username= _owner['DIM_Username'],
-                DIM_Password= "",
+                DIM_Password= _owner['DIM_Password'],
                 DIM_EmployeeId= _owner['DIM_EmployeeId']
             )
 
             serviceOwner_id = create_id_fact_reservation([_owner['DIM_Username'], _owner['DIM_Password'], _owner['DIM_EmployeeId']])
             serviceOwner.DIM_ServiceOwnersId = serviceOwner_id
-
-            # Hashear la contraseña usando la función segura de bcrypt
-            hashed_pwd = hash_password(_owner['DIM_Password'])
-            serviceOwner.DIM_Password = hashed_pwd
 
              # 3. Usar el servicio para crear el ingreso facturado
             created, message = ServiceOwners.createOwner(serviceOwner)
@@ -232,7 +226,20 @@ class ServiceownersHandler:
             # 2. Obtener IDs relacionados (PeopleId) a partir del EmployeeId
             employee_info = employ_service.get_employ_by_id(employee_id)
             if not employee_info:
-                return 404, f"No se encontró un empleado con el ID {employee_id}", None
+                # FALLBACK INTELIGENTE:
+                # Si no encontramos al empleado, es probable que el frontend haya enviado
+                # el DIM_ServiceOwnersId (desde la sesión) en lugar del DIM_EmployeeId.
+                # Intentamos buscar los detalles usando el ID como si fuera de ServiceOwner.
+                admin_details = owner_service.get_admin_details(employee_id)
+                
+                if admin_details and admin_details.get('DIM_EmployeeId'):
+                    # ¡Encontrado! Corregimos el ID para usar el de empleado real
+                    employee_id = admin_details['DIM_EmployeeId']
+                    employee_info = employ_service.get_employ_by_id(employee_id)
+                
+                # Si aún así no existe, entonces sí es un error 404 real
+                if not employee_info:
+                    return 404, f"No se encontró un empleado con el ID {employee_id}", None
             
             people_id = employee_info.DIM_PersonId
 

@@ -4,6 +4,7 @@ from flask import Blueprint, request, session
 from flask.wrappers import Response
 from typing import Any
 from src.dim_reservations.reservation_handler import ReservationService
+from src.fact_revenues.fact_revenues_handler import FactRevenuesHandler
 
 from src.routes.handle_message import send_error, send_success
 
@@ -11,6 +12,7 @@ from src.routes.handle_message import send_error, send_success
 from src.utils.decorators import login_required
 
 reservation_options = ReservationService()
+revenue_options = FactRevenuesHandler()
 reservation_route = Blueprint('reservation_route', __name__, url_prefix='/api/reservation/')
 
 from flask_jwt_extended import jwt_required,  get_jwt, get_jwt_identity

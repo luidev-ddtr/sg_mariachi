@@ -17,7 +17,7 @@ def login():
         status, message, user_data = auth_handler.validation_login(data)
         
         if status == 200 and user_data:
-            # 2. ¡AQUÍ ES DONDE SE CREA LA SESIÓN!
+            # 2. Aquí es donde se crea la sesión
             # Guardamos datos mínimos necesarios en la cookie firmada del navegador
             session['user_id'] = user_data['DIM_ServiceOwnersId']
             session['username'] = user_data['DIM_Username']
