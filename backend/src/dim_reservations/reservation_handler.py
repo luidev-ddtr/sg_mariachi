@@ -137,7 +137,8 @@ class ReservationService:
                 "DIM_SecondLastName":_reservation["DIM_SecondLastName"],
                 "DIM_Address": _reservation["DIM_Address"],
                 "DIM_PhoneNumber": _reservation["DIM_PhoneNumber"],
-                "DIM_SecondPhoneNumber": _reservation["DIM_SecondPhoneNumber"]
+                "DIM_SecondPhoneNumber": _reservation["DIM_SecondPhoneNumber"],
+                "DIM_Email": _reservation.get("DIM_Email", "")
             }
 
             # Instanciamos el servicio aquí, con la conexión correcta

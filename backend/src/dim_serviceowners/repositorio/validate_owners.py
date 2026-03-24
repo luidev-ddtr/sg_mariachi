@@ -32,7 +32,6 @@ def validate_email(email: str, conexion: Conexion) -> dict:
     :rtype: dict
     """
 
-    # NOTA: En producción, las contraseñas deberían compararse usando hashes (ej. bcrypt)
     query = """
         SELECT DIM_PeopleId FROM dim_people
         WHERE DIM_Email = %s

@@ -11,9 +11,15 @@ def get_all_admins_repo(conn: Conexion) -> list[dict]:
             so.DIM_EmployeeId,
             so.DIM_Username,
             dp.DIM_Name,
+            dp.DIM_SecondName,
             dp.DIM_LastName,
+            dp.DIM_SecondLastName,
             dp.DIM_Email,
-            de.DIM_Position
+            dp.DIM_PhoneNumber,
+            dp.DIM_SecondPhoneNumber,
+            dp.DIM_Address,
+            de.DIM_Position,
+            so.DIM_Timestamp
         FROM dim_serviceowners so
         JOIN dim_employe de ON so.DIM_EmployeeId = de.DIM_EmployeeId
         JOIN dim_people dp ON de.DIM_PersonId = dp.DIM_PeopleId;
@@ -47,7 +53,7 @@ def get_admin_by_id_repo(employee_id: str, conn: Conexion) -> dict | None:
         FROM dim_serviceowners so
         JOIN dim_employe de ON so.DIM_EmployeeId = de.DIM_EmployeeId
         JOIN dim_people dp ON de.DIM_PersonId = dp.DIM_PeopleId
-        WHERE so.DIM_EmployeeId = %s;
+        WHERE so.DIM_ServiceOwnersId = %s;
     """
     try:
         conn.cursor.execute(query, (employee_id,))

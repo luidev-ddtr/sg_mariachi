@@ -42,7 +42,7 @@ class ServiceownersService:
             # 2. Extraer la contraseña hasheada y verificarla
             hashed_password_from_db = user_data.get('DIM_Password')
 
-            # El hash en la BD puede ser bytes o una cadena, bcrypt necesita bytes.
+            # El hash en la BD puede ser bytes o una cadena
             if isinstance(hashed_password_from_db, str):
                 hashed_password_from_db = hashed_password_from_db.encode('utf-8')
             
@@ -59,7 +59,6 @@ class ServiceownersService:
             else:
                 # La contraseña es incorrecta
                 return None
-
         except Exception as e:
             print(f"Error al verificar credenciales en el servicio: {e}")
             return None
@@ -101,6 +100,10 @@ class ServiceownersService:
         :return: Tupla (éxito, mensaje) indicando el resultado de la operación.
         """
         try:
+            # Hashear la contraseña antes de insertar para garantizar seguridad en la capa de negocio
+            if newOwner.DIM_Password:
+                newOwner.DIM_Password = hash_password(newOwner.DIM_Password)
+
             # 1. Insertamos los datos del admin
             success = insert_serviceowners(newOwner, self.conn)
             return success, "Administrador registrado" if success else "Fallo en la inserción del repositorio"
