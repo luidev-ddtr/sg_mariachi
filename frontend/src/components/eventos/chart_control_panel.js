@@ -12,6 +12,9 @@ function getChartElement() {
 
 // Inicializar gráfica de manera segura
 let chart = null;
+// Estado global para filtros
+let currentFilter = 'month'; // Valor por defecto
+let currentYear = new Date().getFullYear();
 
 function initializeChart() {
   try {
@@ -26,7 +29,20 @@ function initializeChart() {
       chart: {
         type: 'bar',
         height: 350,
-        toolbar: { show: false }
+        toolbar: { show: false },
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800,
+            animateGradually: {
+                enabled: true,
+                delay: 150
+            },
+            dynamicAnimation: {
+                enabled: true,
+                speed: 350
+            }
+        }
       },
       colors: ['#00b050'],
       plotOptions: {
@@ -39,21 +55,21 @@ function initializeChart() {
         enabled: false
       },
       xaxis: {
-        categories: [],
-        labels: { 
-          style: { colors: '#8e8e8e' }
-        }
-      },
-      yaxis: {
-        labels: { 
-          formatter: val => `$${val ? val.toLocaleString() : '0'}` 
+            categories: [], // Se llenará dinámicamente
+            labels: { style: { fontSize: '12px' } }
         },
-        min: 0
-      },
+      yaxis: {
+            labels: {
+                formatter: (value) => { return `$${value}` }
+            }
+        },
       noData: {
-        text: 'Consultando datos...',
+        //text: 'Consultando datos...',
         style: { color: '#00b050', fontSize: '16px' }
-      }
+      },
+      grid: {
+            borderColor: '#f1f1f1',
+        }
     };
 
     chart = new ApexCharts(chartElement, options);
@@ -67,7 +83,7 @@ function initializeChart() {
 
 // Función para procesar datos de manera segura
 // Busca esta función en tu archivo y reemplázala por completo:
-function processStatsData(stats) {
+function processStatsData(stats, filterType) {
   console.log("Procesando datos estadísticos:", stats);
   
   // Mapa para convertir números a nombres de meses
@@ -101,7 +117,12 @@ function processStatsData(stats) {
     
     // 2. Convertir número a nombre si es necesario
     // Si rawLabel es "1" o 1, se convierte a "Ene"
-    let label = monthNames[String(rawLabel)] || rawLabel;
+    let label = rawLabel;
+    if (filterType === 'month') {
+        label = monthNames[String(rawLabel)] || rawLabel;
+    } else if (filterType === 'week') {
+        label = `Semana ${rawLabel}`;
+    }
     
     // 3. Extraer valor (ingresos)
     let value = item.total || item.ingreso || item.total_revenue || item.monto || item.amount || 0;
@@ -141,16 +162,17 @@ function updateChartData(labels, values) {
   try {
     // Usar setTimeout para evitar conflictos de renderizado
     setTimeout(() => {
-      // Actualizar series y categorías en un solo paso
+      // Separamos updateOptions y updateSeries para lograr el efecto de "deslizamiento" fluido
       chart.updateOptions({
-        series: [{
-          name: "Ingresos",
-          data: values
-        }],
         xaxis: {
           categories: labels
         }
-      }, true, true); // true, true = actualizar series y redibujar
+      });
+
+      chart.updateSeries([{
+        name: "Ingresos",
+        data: values
+      }]);
       
       console.log("Gráfica actualizada con", values.length, "datos");
     }, 100);
@@ -191,7 +213,7 @@ function updateSummaryCards(totalIngresos) {
 
 // Función principal para actualizar el dashboard
 async function updateDashboard() {
-  console.log("=== ACTUALIZANDO DASHBOARD ===");
+  console.log(`=== ACTUALIZANDO DASHBOARD (${currentFilter} - ${currentYear}) ===`);
   
   try {
     // Inicializar gráfica si no está inicializada
@@ -199,13 +221,13 @@ async function updateDashboard() {
       initializeChart();
     }
     
-    const currentYear = new Date().getFullYear();
-    console.log("Obteniendo estadísticas para el año:", currentYear);
+    // Actualizar etiqueta de periodo en el HTML
+    updatePeriodLabel();
     
     // Obtener datos de la API
     let stats;
     try {
-      stats = await GetStats('month', currentYear);
+      stats = await GetStats(currentFilter, currentYear);
       console.log("Datos obtenidos de GetStats:", stats);
     } catch (apiError) {
       console.error("Error al obtener datos de la API:", apiError);
@@ -213,7 +235,7 @@ async function updateDashboard() {
     }
     
     // Procesar datos
-    const { labels, values } = processStatsData(stats);
+    const { labels, values } = processStatsData(stats, currentFilter);
     console.log("Labels procesados:", labels);
     console.log("Values procesados:", values);
     
@@ -239,6 +261,56 @@ async function updateDashboard() {
   }
 }
 
+// Función para actualizar el texto del periodo (ej: "Año 2025")
+function updatePeriodLabel() {
+    const labelElement = document.querySelector('.current-period');
+    if (labelElement) {
+        if (currentFilter === 'year') {
+            labelElement.textContent = "Histórial Anual";
+        } else {
+            labelElement.textContent = `Año ${currentYear}`;
+        }
+    }
+}
+
+// Función para configurar los botones (listeners)
+function setupEventListeners() {
+    // Botones de navegación (Año anterior/siguiente)
+    document.getElementById('prev')?.addEventListener('click', () => {
+        currentYear--;
+        updateDashboard();
+    });
+
+    document.getElementById('next')?.addEventListener('click', () => {
+        currentYear++;
+        updateDashboard();
+    });
+
+    document.getElementById('today')?.addEventListener('click', () => {
+        currentYear = new Date().getFullYear();
+        updateDashboard();
+    });
+
+    // Botones de tipo de gráfica (Semana, Mes, Año)
+    const btnWeek = document.getElementById('grafic_week');
+    const btnMonth = document.getElementById('grafic_month');
+    const btnYear = document.getElementById('grafic_year');
+
+    const handleFilterChange = (type, btnClicked) => {
+        currentFilter = type;
+        
+        // Actualizar clases visuales (active)
+        [btnWeek, btnMonth, btnYear].forEach(btn => btn?.classList.remove('active'));
+        btnClicked?.classList.add('active');
+
+        updateDashboard();
+    };
+
+    btnWeek?.addEventListener('click', () => handleFilterChange('week', btnWeek));
+    btnMonth?.addEventListener('click', () => handleFilterChange('month', btnMonth));
+    btnYear?.addEventListener('click', () => handleFilterChange('year', btnYear));
+}
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM cargado, inicializando dashboard...");
@@ -257,8 +329,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inicializar gráfica
   initializeChart();
   
+  // Configurar botones
+  setupEventListeners();
+
+  // Forzar el estado visual inicial (por defecto Mes)
+  const btnMonth = document.getElementById('grafic_month');
+  if(btnMonth) btnMonth.click(); // Esto disparará updateDashboard
+  else updateDashboard(); // Fallback si no hay botón
+  
   // Cargar datos después de un breve delay
-  setTimeout(updateDashboard, 1000);
+  // setTimeout(updateDashboard, 1000); // Ya no es necesario si hacemos click arriba
 });
 
 // Función para recargar datos manualmente (útil para debugging)

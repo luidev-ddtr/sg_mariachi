@@ -3,7 +3,7 @@ window.map = null;
 window.marker = null;
 
 async function initMap() {
-    // Coordenadas iniciales (Ixmiquilpan, Hidalgo). [1]
+    // Coordenadas iniciales (Ixmiquilpan, Hidalgo)
     const initialPosition = { lat: 20.47841, lng: -99.21697 };
 
     const { Map } = await google.maps.importLibrary("maps");

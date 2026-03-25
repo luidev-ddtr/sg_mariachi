@@ -3,6 +3,7 @@
  * Preparada para navegación completa y eventos reales con panel lateral de detalles
  */
 import { GetReservationStatsCalendar } from "../../api/api_reservation_stats_calendar.js";
+import { GetReservaciones } from "../../api/api_reservacion_read.js";
 
 // IMPORTANTE: Agregamos una función sencilla para buscar eventos en la base de datos
 // (Asegúrate de importar axios en tu HTML de la agenda si no lo tienes)
@@ -39,37 +40,50 @@ document.addEventListener('DOMContentLoaded', function () {
         const end = fetchInfo.end;
         
         const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
-        const isDetailView = diffDays <= 10; 
-        const isYearView = diffDays > 100;
+        // MODIFICADO: Aumentamos el rango a < 60 días para incluir la vista de MES como vista detallada
+        const isDetailView = diffDays < 60; 
+        const isYearView = !isDetailView;
 
         const midDate = new Date((start.getTime() + end.getTime()) / 2);
         const year = midDate.getFullYear();
         let formattedEvents = [];
 
-        // --- VISTA DE SEMANA O DÍA (Nombres reales de la API) ---
+        // --- VISTA DE SEMANA, DÍA O MES (Eventos reales) ---
         if (isDetailView) {
-          // 🔥 LLAMADA A LA API REAL PARA OBTENER LOS DETALLES DE LA SEMANA/DÍA 🔥
-          // (Alec necesita habilitar un endpoint que devuelva las reservas en un rango de fechas)
-          // Ejemplo de cómo se vería: 
-          // const response = await axios.get(`/api/reservations/range?start=${start.toISOString()}&end=${end.toISOString()}`);
-          // const data = response.data.body || [];
+          // Calculamos TODOS los meses involucrados en el rango de fechas (Inicio -> Fin)
+          const monthsToFetch = new Set();
+          let current = new Date(start);
+          
+          while (current < end) {
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            monthsToFetch.add(`${y}-${m}`);
+            // Avanzamos al primer día del siguiente mes para la siguiente iteración
+            current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+          }
 
-          // Mientras Alec termina eso, dejamos un array vacío (la tabla se verá en blanco)
-          // Una vez que el backend esté listo, borra "const data = [];" y descomenta lo de arriba.
-          const data = []; 
+          // Llamamos a la API para traer eventos de esos meses
+          const promises = Array.from(monthsToFetch).map(dateParam => GetReservaciones(dateParam));
+          const results = await Promise.all(promises);
+          const data = results.flat();
+          
+          // Filtramos duplicados por ID (por si la semana cruza meses y se empalman consultas)
+          const uniqueEvents = new Map();
+          data.forEach(item => uniqueEvents.set(item.DIM_ReservationId, item));
 
-          formattedEvents = data.map(item => {
+          formattedEvents = Array.from(uniqueEvents.values()).map(item => {
             return {
-              id: `evt-${item.id || item.DIM_ReservationId}`,
-              title: item.client_name || item.DIM_Name, 
-              start: `${item.date || item.DIM_StartDate.split(' ')[0]}T${item.time || item.DIM_StartDate.split(' ')[1]}`, 
-              backgroundColor: '#198754', 
+              id: `evt-${item.DIM_ReservationId}`,
+              title: item.DIM_fullname || "Cliente", // Solo mostramos el nombre del cliente
+              start: item.DIM_StartDate, // Formato ISO directo
+              end: item.DIM_EndDate,
+              backgroundColor: '#00b050', 
               extendedProps: {
                 isDetail: true, 
-                client: item.client_name || `${item.DIM_Name} ${item.DIM_LastName}`,
-                phone: item.phone || item.DIM_PhoneNumber,
-                address: item.address || item.DIM_EventAddress,
-                time: item.time || item.DIM_StartDate.split(' ')[1]
+                client: item.DIM_fullname || "Sin Nombre",
+                phone: item.DIM_PhoneNumber,
+                address: item.DIM_EventAddress || "Dirección no disponible",
+                time: item.DIM_StartDate ? new Date(item.DIM_StartDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''
               }
             };
           });

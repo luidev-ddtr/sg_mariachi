@@ -103,14 +103,13 @@
   <!-- Librería de Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- Lógica para manejar la respuesta de Google, Aun no ridirigira a ninguna pagina ya que aun no hay una tabla para usuarios que inicien sesion con  google -->
+  <!-- Lógica para manejar la respuesta de Google-->
   <script type="module">
     // Importamos la función que acabamos de crear
     import { loginWithGoogle } from '/src/api/api_auth.js';
 
     // Hacemos la función global para que el callback de Google la encuentre
     window.handleCredentialResponse = async function(response) {
-        console.log("Token de Google recibido:", response.credential);
         const result = await loginWithGoogle(response.credential);
 
         if (result && result.status === 'success') {
