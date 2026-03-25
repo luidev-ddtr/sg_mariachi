@@ -61,3 +61,19 @@ export const loginWithGoogle = async (token) => {
         return { status: 'error', message: 'Error de conexión con el servidor' };
     }
 };
+
+export const GetAdminInfo = async (id) => {
+    try{
+        if (!id) return null;
+        console.log("ID enviado a api/admin/profile:", id);
+        const data = { 'DIM_EmployeeId': id };
+        
+        const response = await axiosInstance.post('admin/profile', data);
+        console.log("Respuesta del servidor al obtener información del administrador:", response.data);
+        return response.data.body;
+    }
+    catch (error) {
+        console.error();
+
+    }
+}

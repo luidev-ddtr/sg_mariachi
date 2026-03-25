@@ -1,18 +1,16 @@
 import axiosInstance from "./axiosInstance";
 
-export const GetAdminInfo = async (id) => {
+export const GetAdminInfo = async () => {
     try{
-        if (!id) return null;
-        console.log("ID enviado a api/admin/profile:", id);
-        const data = { 'DIM_EmployeeId': id };
-        
-        const response = await axiosInstance.post('admin/profile', data);
-        console.log("Respuesta del servidor al obtener información del administrador:", response.data);
-        return response.data.body;
+        // Hacemos GET en lugar de POST. No enviamos ID explícito, 
+        // el backend lo toma de la cookie de sesión (g.user).
+        const response = await axiosInstance.get('admin/profile');
+        return response.data; // El backend devuelve { status, message, body: {...} }
     }
     catch (error) {
-        console.error();
-
+        console.error("Error en GetAdminInfo:", error);
+        // Retornar null para que la UI sepa que falló
+        return null;
     }
 }
 

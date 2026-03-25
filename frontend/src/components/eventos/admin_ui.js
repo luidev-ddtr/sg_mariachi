@@ -23,18 +23,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await GetAdminInfo(); 
       
       // 2. Validar que la petición fue exitosa
-      if (response && response.data && response.data.success) {
-        const adminData = response.data.body;
+      // Axios ya nos da 'data' en response, y tu API devuelve 'body' o 'result'
+      if (response && (response.body || response.result)) {
+        const adminData = response.body || response.result;
         
         // 3. Armar el nombre completo
         const nombreCompleto = `${adminData.DIM_Name || ''} ${adminData.DIM_LastName || ''}`.trim();
         
         // 4. Inyectar los datos en el HTML
         // (Asegúrate de que las etiquetas en tu HTML tengan estos 'id')
-        const domName     = document.getElementById("profileName");
+        const domName     = document.getElementById("profileFullName");
         const domEmail    = document.getElementById("profileEmail");
         const domUsername = document.getElementById("profileUsername");
-        const domPosition = document.getElementById("profilePosition");
+        const domPosition = document.getElementById("profileRole");
 
         if (domName)     domName.textContent     = nombreCompleto || 'Administrador';
         if (domEmail)    domEmail.textContent    = adminData.DIM_Email || adminData.Email || 'Sin correo';
