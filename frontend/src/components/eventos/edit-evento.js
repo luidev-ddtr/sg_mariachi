@@ -1,11 +1,11 @@
 import { updateReservation } from '../../api/api_reservacion_update.js';
-import { GetContractInfo } from '../../api/api_reservacion_read.js'; 
+import { GetContractInfo } from '../../api/api_reservacion_read.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('event-form');
     const horaInicioInput = document.getElementById('hora_inicio');
     const horaFinalInput = document.getElementById('hora_final');
-    
+   
     // 1. OBTENER ID DE LA URL
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
@@ -22,13 +22,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. ARREGLO DEL MODAL (STOP PROPAGATION)
     const stopAndCalculate = (e) => {
-        e.stopPropagation(); 
+        e.stopPropagation();
         calcularTotalHoras();
     };
 
     // Listeners corregidos
     horaInicioInput.addEventListener('change', stopAndCalculate);
-    horaInicioInput.addEventListener('click', (e) => e.stopPropagation()); 
+    horaInicioInput.addEventListener('click', (e) => e.stopPropagation());
 
     horaFinalInput.addEventListener('change', stopAndCalculate);
     horaFinalInput.addEventListener('click', (e) => e.stopPropagation());
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     this.value = valorLimpio;
                 }
             });
-            
+           
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
                 const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
@@ -73,29 +73,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // =======================================================
+    // 🔥 NUEVO: LÓGICA PARA FORZAR HORAS EXACTAS EN LA EDICIÓN
+    // =======================================================
+    const timeInputs = document.querySelectorAll('input[type="time"]');
+    
+    timeInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        if (e.target.value) {
+          // Separamos la hora de los minutos
+          const [hora, minutos] = e.target.value.split(':');
+          
+          // Si los minutos NO son "00", los forzamos
+          if (minutos !== '00') {
+            e.target.value = `${hora}:00`;
+            
+            // Avisamos al script para que recalcule el total de horas automáticamente
+            const event = new Event('change');
+            e.target.dispatchEvent(event);
+          }
+        }
+      });
+    });
+
+
     // 4. ENVIAR CAMBIOS (UPDATE)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        e.stopPropagation(); 
+        e.stopPropagation();
 
         // --- PREPARACIÓN DE DATOS ---
         const nombreInput = document.getElementById('nombre').value.trim();
         const partesNombre = nombreInput.split(/\s+/);
         const primerNombre = partesNombre[0] || "";
-        const segundoNombre = partesNombre.slice(1).join(" ") || ""; 
+        const segundoNombre = partesNombre.slice(1).join(" ") || "";
 
         const paterno = document.getElementById('apellido_paterno').value;
         const materno = document.getElementById('apellido_materno').value;
 
-        const fecha = document.getElementById('fecha').value; 
-        const horaInicio = document.getElementById('hora_inicio').value; 
+        const fecha = document.getElementById('fecha').value;
+        const horaInicio = document.getElementById('hora_inicio').value;
         const horaFin = document.getElementById('hora_final').value;
         const totalHoras = document.getElementById('total_horas').value.split(':')[0];
 
         // --- OBJETO SQL ---
         const datosParaEnviar = {
             DIM_ReservationId: eventId,
-            
+           
             DIM_Name: primerNombre,
             DIM_SecondName: segundoNombre,
             DIM_LastName: paterno,
@@ -105,10 +129,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             DIM_StartDate: `${fecha} ${horaInicio}:00`,
             DIM_EndDate: `${fecha} ${horaFin}:00`,
-            
-            DIM_EventAddress: document.getElementById('direccion').value, 
+           
+            DIM_EventAddress: document.getElementById('direccion').value,
             DIM_Notes: document.getElementById('descripcion').value,      
-            
+           
             DIM_TotalAmount: document.getElementById('dim_totalamount').value,
             DIM_NHours: parseInt(totalHoras) || 0
         };
@@ -116,16 +140,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             console.log("Enviando actualización...", datosParaEnviar);
             await updateReservation(datosParaEnviar);
-            
+           
             // --- NUEVO MODAL DE ÉXITO (Espera a que el usuario de clic) ---
             await mostrarModalCustom("¡Éxito!", "¡Evento actualizado correctamente!", "success");
-            
+           
             if (window.parent && window.parent.finalizarEdicionExitoso) {
                 window.parent.finalizarEdicionExitoso();
             } else {
                 window.history.back();
             }
-            
+           
         } catch (error) {
             console.error(error);
             await mostrarModalCustom("Error", "Hubo un problema al actualizar el evento.", "error");
@@ -154,36 +178,42 @@ async function cargarDatosEnFormulario(id) {
         } else {
             const nombreCompleto = datos.contratante_nombre || datos.nombre || '';
             if (nombreCompleto) {
-                const partes = nombreCompleto.trim().split(/\s+/); 
+                const partes = nombreCompleto.trim().split(/\s+/);
                 if (partes.length > 0) document.getElementById('nombre').value = partes[0];
                 if (partes.length > 1) document.getElementById('apellido_paterno').value = partes[1];
-                if (partes.length > 2) document.getElementById('apellido_materno').value = partes.slice(2).join(' '); 
+                if (partes.length > 2) document.getElementById('apellido_materno').value = partes.slice(2).join(' ');
             }
         }
 
         document.getElementById('telefono').value = datos.DIM_PhoneNumber || datos.contratante_telefono || "";
         document.getElementById('telefono_secundario').value = datos.DIM_SecondPhoneNumber || datos.contratante_segundo_telefono || "";
 
-        // FECHA
+// ==========================================
+        // FECHA (Lógica Mejorada)
+        // ==========================================
         let fechaParaInput = "";
-        if (datos.DIM_StartDate) {
+        
+        // Agregamos este console.log para que puedas ver en tu consola exactamente qué te manda la API
+        console.log("Datos del contrato:", datos);
+
+        // 1ra Opción: Le damos prioridad a los datos separados (que suele usar la tabla)
+        if (datos.evento_anio && datos.evento_mes && datos.evento_dia) {
+            fechaParaInput = `${datos.evento_anio}-${String(datos.evento_mes).padStart(2,'0')}-${String(datos.evento_dia).padStart(2,'0')}`;
+        }
+        // 2da Opción: Si no están los anteriores, usamos DIM_StartDate
+        else if (datos.DIM_StartDate) {
             const separador = datos.DIM_StartDate.includes('T') ? 'T' : ' ';
-            fechaParaInput = datos.DIM_StartDate.split(separador)[0];
-        } 
+            fechaParaInput = datos.DIM_StartDate.split(separador)[0]; // Toma solo la parte YYYY-MM-DD
+        }
+        // 3ra Opción: Como último recurso, DIM_DateId
         else if (datos.DIM_DateId) {
             const fechaStr = String(datos.DIM_DateId);
             if (fechaStr.length === 8) {
-                const y = fechaStr.substring(0, 4);
-                const m = fechaStr.substring(4, 6);
-                const d = fechaStr.substring(6, 8);
-                fechaParaInput = `${y}-${m}-${d}`;
+                fechaParaInput = `${fechaStr.substring(0, 4)}-${fechaStr.substring(4, 6)}-${fechaStr.substring(6, 8)}`;
             }
         }
-        else if (datos.evento_anio && datos.evento_mes && datos.evento_dia) {
-            fechaParaInput = `${datos.evento_anio}-${String(datos.evento_mes).padStart(2,'0')}-${String(datos.evento_dia).padStart(2,'0')}`;
-        }
+        
         document.getElementById('fecha').value = fechaParaInput;
-
         // HORAS
         let horaInicioStr = datos.DIM_StartDate || datos.evento_hora_inicio || "";
         let horaFinStr = datos.DIM_EndDate || datos.evento_hora_fin || "";
@@ -224,7 +254,7 @@ function calcularTotalHoras() {
         const horas = Math.floor(diff / 1000 / 60 / 60);
         const minutos = Math.floor((diff / 1000 / 60) % 60);
 
-        document.getElementById('total_horas').value = 
+        document.getElementById('total_horas').value =
             `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
     }
 }

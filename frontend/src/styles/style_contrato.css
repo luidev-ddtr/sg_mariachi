@@ -6,7 +6,8 @@ body {
     margin: 0;
     padding: 30px;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* 🔥 Esto apila el contrato y el botón de arriba hacia abajo */
+    align-items: center;    /* 🔥 Centra ambos elementos en la pantalla */
 }
 
 .contrato-container {
@@ -79,7 +80,7 @@ ol li {
 }
 
 .linea-firma {
-    width: 60%;
+    width: 100%; /* Cambia de 60% a 100% para respetar el div padre */
     margin: 40px auto 5px auto;
     border-top: 1px solid #000;
     height: 1px;

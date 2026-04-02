@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de Evento</title>
 
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="/src/styles/form_nvo_evento.css">
 </head>
 <body>
@@ -19,8 +17,14 @@
 
       <h2>Nuevo evento</h2>
 
-      <!-- PASO 1 -->
-      <!-- ENVOLTORIO NUEVO -->
+      <h3 id="step-title" class="step-title">Datos personales</h3>
+
+      <div class="progress-container">
+        <div class="progress" id="progress"></div>
+        <div class="circle active">1</div>
+        <div class="circle">2</div>
+        <div class="circle">3</div>
+      </div>
       <section class="wizard-step active" data-step="1">
         <h2>Datos personales</h2>
 
@@ -58,7 +62,6 @@
         </div>
       </section>
 
-      <!-- PASO 2-->
       <section class="wizard-step" data-step="2">
         <h2>Dirección</h2>
 
@@ -82,27 +85,21 @@
           <input type="text" id="direccion" name="direccion" required>
         </div>
 
-        <!-- Contenedor del mapa -->
         <div id="map"></div>
 
-        <!-- 1. Carga de la API de Google Maps -->
-        <!-- Se añade &libraries=marker para poder usar los marcadores avanzados. -->
         <script
           src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBP-nTtbdTsh-URWYy3SE33oYpGadfs3T8&loading=async&callback=initMap&libraries=marker" defer>
         </script>
 
-        <!-- 2. Script para inicializar el mapa y el marcador -->
         <script src="/src/components/eventos/maps.js"></script>
 
       </section>
 
-      <!-- PASO 3 -->
       <section class="wizard-step" data-step="3">
         <h2>Datos del evento</h2>
 
         <div class="form-row">
-          <div class="form-group"><!-- fecha se cambio a la sección de Datos del evento -->
-            <label for="fecha">Fecha *</label>
+          <div class="form-group"><label for="fecha">Fecha *</label>
             <input type="date" id="fecha" name="fecha" required>
           </div>
           <div class="form-group">
@@ -131,7 +128,6 @@
         </div>
       </section>
 
-      <!-- Botones del wizard -->
       <div class="wizard-buttons">
         <button type="button" id="prevBtn" disabled>Anterior</button>
         <button type="button" id="nextBtn">Siguiente</button>
@@ -145,11 +141,141 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // === 1. LÓGICA DE LA BARRA DE PROGRESO Y TÍTULO DINÁMICO ===
+    const progress = document.getElementById('progress');
+    const circles = document.querySelectorAll('.circle');
+    const steps = document.querySelectorAll('.wizard-step');
+    const stepTitle = document.getElementById('step-title');
+
+    // Los nombres de cada apartado
+    const stepTitles = ["Datos personales", "Dirección", "Datos del evento"];
+
+    function updateProgress() {
+      const activeStepElement = document.querySelector('.wizard-step.active');
+      if (!activeStepElement) return;
+
+      const currentStep = parseInt(activeStepElement.getAttribute('data-step'));
+
+      // A) Cambiar el título con un pequeño efecto de transición
+      stepTitle.style.opacity = 0;
+      setTimeout(() => {
+        stepTitle.textContent = stepTitles[currentStep - 1];
+        stepTitle.style.opacity = 1;
+      }, 150);
+
+      // B) Actualizar los círculos (iluminar u oscurecer)
+      circles.forEach((circle, idx) => {
+        const stepNum = idx + 1;
+        if (stepNum < currentStep) {
+          circle.classList.add('completed', 'active');
+        } else if (stepNum === currentStep) {
+          circle.classList.add('active');
+          circle.classList.remove('completed');
+        } else {
+          circle.classList.remove('active', 'completed');
+        }
+      });
+
+      // C) Calcular el ancho de la línea azul
+      calculateLineWidth(activeStepElement, currentStep);
+    }
+
+    // Función que calcula el porcentaje de la línea según los campos llenos
+    function calculateLineWidth(activeStepElement, currentStep) {
+      const fields = activeStepElement.querySelectorAll('input:not([readonly]), select, textarea');
+      let totalFields = 0;
+      let filledFields = 0;
+
+      fields.forEach(field => {
+         // 🔥 SOLUCIÓN: Si el campo es Segundo Nombre o Teléfono 2, lo ignoramos matemáticamente
+         if (field.id === 'segundo_nombre' || field.id === 'telefono_secundario') {
+             return; // Salta este campo y no lo cuenta
+         }
+
+         totalFields++;
+         if (field.value.trim() !== '') {
+            filledFields++;
+         }
+      });
+
+      let stepProgress = totalFields > 0 ? (filledFields / totalFields) : 0;
+
+      // Cada espacio entre círculos vale 50% (porque hay 3 círculos)
+      const gapSize = 50; 
+      const basePercentage = (currentStep - 1) * gapSize;
+
+      let newWidth = basePercentage;
+
+      // Si no estamos en el último paso, sumamos el progreso del paso actual
+      if (currentStep < circles.length) {
+          newWidth += (stepProgress * gapSize);
+      } else {
+          // En el paso 3, la barra ya debe llegar al final (100%)
+          newWidth = 100;
+      }
+
+      progress.style.width = newWidth + '%';
+    }
+
+    // Observador para detectar cuándo das clic en "Siguiente" o "Anterior"
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const target = mutation.target;
+          if (target.classList.contains('active')) {
+            updateProgress();
+          }
+        }
+      });
+    });
+
+    steps.forEach(step => observer.observe(step, { attributes: true }));
+
+    // Escuchar cada vez que escribes en cualquier input para mover la línea en tiempo real
+    const allFields = document.querySelectorAll('input, select, textarea');
+    allFields.forEach(field => {
+        const triggers = ['input', 'change']; // Detecta cuando escribes y cuando seleccionas fechas/horas
+        triggers.forEach(evt => {
+           field.addEventListener(evt, () => {
+               const activeStepElement = document.querySelector('.wizard-step.active');
+               if(activeStepElement) {
+                   const currentStep = parseInt(activeStepElement.getAttribute('data-step'));
+                   calculateLineWidth(activeStepElement, currentStep);
+               }
+           });
+        });
+    });
+
+    // Llamada inicial al cargar la página
+    updateProgress();
+
+
+    // === 2. LÓGICA CORREGIDA PARA FORZAR HORAS EXACTAS ===
+    const timeInputs = document.querySelectorAll('input[type="time"]');
+    
+    timeInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        if (e.target.value) {
+          const [hora, minutos] = e.target.value.split(':');
+          
+          if (minutos !== '00') {
+            e.target.value = `${hora}:00`;
+            const event = new Event('change');
+            e.target.dispatchEvent(event);
+          }
+        }
+      });
+    });
+  });
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- JS DEL WIZARD (Para el formualrio "Agregar Evento") -->
 <script type="module" src="/src/components/eventos/wizard-evento.js"></script>
 
-<!-- JS registro-evento-->
 <script type="module" src="/src/components/eventos/registro-evento.js"></script>
 
 </body>

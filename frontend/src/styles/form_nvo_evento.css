@@ -283,3 +283,90 @@ select option[disabled] {
   border: 1px solid #ccc;
   /* Borde sutil */
 }
+/* =======================================================
+   NUEVO: ESTILOS DE LA BARRA DE PROGRESO
+   ======================================================= */
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 35px;
+  max-width: 100%;
+  width: 350px; /* Ancho de la barra */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Línea gris de fondo (progreso restante) */
+.progress-container::before {
+  content: '';
+  background-color: #e5e7eb;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  z-index: 1;
+  border-radius: 2px;
+}
+
+/* Línea azul (progreso completado) */
+.progress {
+  background-color: #3b82f6;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 0%; /* Empieza en 0% */
+  z-index: 1;
+  transition: width 0.4s ease;
+  border-radius: 2px;
+}
+
+/* Círculos de los pasos */
+.circle {
+  background-color: #ffffff;
+  color: #9ca3af; /* Texto gris por defecto */
+  border-radius: 50%;
+  height: 35px;
+  width: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #e5e7eb; /* Borde gris por defecto */
+  transition: all 0.4s ease;
+  z-index: 2;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Paso actual (círculo azul, fondo blanco) */
+.circle.active {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Pasos ya completados (fondo azul sólido) */
+.circle.completed {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.step-title {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #3b82f6; /* Azul que combina con tu barra */
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  transition: opacity 0.3s ease; /* Efecto de desvanecimiento suave */
+}
+
+/* Ocultamos los títulos viejos que estaban dentro de los pasos */
+.wizard-step h2 {
+  display: none !important;
+}

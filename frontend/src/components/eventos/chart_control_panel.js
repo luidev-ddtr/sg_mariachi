@@ -22,10 +22,11 @@ function initializeChart() {
     if (!chartElement) return false;
 
     const options = {
-      series: [{
-        name: "Ingresos",
-        data: []
-      }],
+      // 1. AHORA TENEMOS DOS SERIES: INGRESOS Y GANANCIAS
+      series: [
+        { name: "Ingresos Totales", data: [] },
+        { name: "Ganancia Neta", data: [] }
+      ],
       chart: {
         type: 'bar',
         height: 350,
@@ -34,28 +35,37 @@ function initializeChart() {
             enabled: true,
             easing: 'easeinout',
             speed: 800,
-            animateGradually: {
-                enabled: true,
-                delay: 150
-            },
-            dynamicAnimation: {
-                enabled: true,
-                speed: 350
-            }
+            animateGradually: { enabled: true, delay: 150 },
+            dynamicAnimation: { enabled: true, speed: 350 }
         }
       },
-      colors: ['#00b050'],
+      // 2. COLORES: Azul para ingresos, Verde para ganancias
+      colors: ['#0d6efd', '#00b050'], 
       plotOptions: {
-        bar: { 
-          borderRadius: 6, 
-          columnWidth: '40%'
+        bar: {
+          borderRadius: 4,
+          columnWidth: '60%',
+          dataLabels: {
+            position: 'top', // Coloca los números en la parte superior de la barra
+          },
         }
       },
+      // 3. ACTIVAR LOS NÚMEROS SOBRE LAS BARRAS
       dataLabels: {
-        enabled: false
+        enabled: true,
+        formatter: function (val) {
+          if (val === 0) return ""; // Si es 0, no mostramos nada para que se vea limpio
+          // Formateamos el número para que se vea como moneda (ej: $1,500)
+          return "$" + val.toLocaleString('es-MX'); 
+        },
+        offsetY: -20,
+        style: {
+          fontSize: '11px',
+          colors: ["#304758"]
+        }
       },
       xaxis: {
-            categories: [], // Se llenará dinámicamente
+            categories: [], 
             labels: { style: { fontSize: '12px' } }
         },
       yaxis: {
@@ -64,12 +74,16 @@ function initializeChart() {
             }
         },
       noData: {
-        //text: 'Consultando datos...',
         style: { color: '#00b050', fontSize: '16px' }
       },
       grid: {
             borderColor: '#f1f1f1',
-        }
+        },
+      // Agregamos la leyenda arriba para identificar los colores
+      legend: {
+        position: 'top',
+        horizontalAlign: 'center'
+      }
     };
 
     chart = new ApexCharts(chartElement, options);
@@ -82,7 +96,6 @@ function initializeChart() {
 }
 
 // Función para procesar datos de manera segura
-// Busca esta función en tu archivo y reemplázala por completo:
 function processStatsData(stats, filterType) {
   console.log("Procesando datos estadísticos:", stats);
   
@@ -116,7 +129,6 @@ function processStatsData(stats, filterType) {
     let rawLabel = item.label || item.mes || item.month || (index + 1);
     
     // 2. Convertir número a nombre si es necesario
-    // Si rawLabel es "1" o 1, se convierte a "Ene"
     let label = rawLabel;
     if (filterType === 'month') {
         label = monthNames[String(rawLabel)] || rawLabel;
@@ -149,6 +161,7 @@ function processStatsData(stats, filterType) {
   
   return { labels, values };
 }
+
 // Actualizar gráfica con datos
 function updateChartData(labels, values) {
   if (!chart) {
@@ -160,19 +173,27 @@ function updateChartData(labels, values) {
   }
   
   try {
-    // Usar setTimeout para evitar conflictos de renderizado
     setTimeout(() => {
-      // Separamos updateOptions y updateSeries para lograr el efecto de "deslizamiento" fluido
       chart.updateOptions({
         xaxis: {
           categories: labels
         }
       });
 
-      chart.updateSeries([{
-        name: "Ingresos",
-        data: values
-      }]);
+      // 4. CALCULAMOS LAS GANANCIAS PARA LA GRÁFICA
+      const gananciasValues = values.map(val => parseFloat((val * 0.78).toFixed(2)));
+
+      // Actualizamos ambas barras
+      chart.updateSeries([
+        {
+          name: "Ingresos Totales",
+          data: values
+        },
+        {
+          name: "Ganancia Neta",
+          data: gananciasValues
+        }
+      ]);
       
       console.log("Gráfica actualizada con", values.length, "datos");
     }, 100);
@@ -236,8 +257,6 @@ async function updateDashboard() {
     
     // Procesar datos
     const { labels, values } = processStatsData(stats, currentFilter);
-    console.log("Labels procesados:", labels);
-    console.log("Values procesados:", values);
     
     // Actualizar gráfica
     updateChartData(labels, values);
@@ -251,7 +270,6 @@ async function updateDashboard() {
   } catch (error) {
     console.error("Error crítico en updateDashboard:", error);
     
-    // Intentar mostrar un estado de error
     try {
       updateChartData(['Error'], [0]);
       updateSummaryCards(0);
@@ -261,7 +279,7 @@ async function updateDashboard() {
   }
 }
 
-// Función para actualizar el texto del periodo (ej: "Año 2025")
+// Función para actualizar el texto del periodo
 function updatePeriodLabel() {
     const labelElement = document.querySelector('.current-period');
     if (labelElement) {
@@ -275,7 +293,7 @@ function updatePeriodLabel() {
 
 // Función para configurar los botones (listeners)
 function setupEventListeners() {
-    // Botones de navegación (Año anterior/siguiente)
+    // Botones de navegación
     document.getElementById('prev')?.addEventListener('click', () => {
         currentYear--;
         updateDashboard();
@@ -291,7 +309,7 @@ function setupEventListeners() {
         updateDashboard();
     });
 
-    // Botones de tipo de gráfica (Semana, Mes, Año)
+    // Botones de tipo de gráfica
     const btnWeek = document.getElementById('grafic_week');
     const btnMonth = document.getElementById('grafic_month');
     const btnYear = document.getElementById('grafic_year');
@@ -299,7 +317,6 @@ function setupEventListeners() {
     const handleFilterChange = (type, btnClicked) => {
         currentFilter = type;
         
-        // Actualizar clases visuales (active)
         [btnWeek, btnMonth, btnYear].forEach(btn => btn?.classList.remove('active'));
         btnClicked?.classList.add('active');
 
@@ -315,34 +332,14 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DOM cargado, inicializando dashboard...");
   
-  // Verificar que los elementos necesarios existan
-  const chartElement = document.querySelector("#chart");
-  const ingresosElement = document.getElementById('ingresos-monto');
-  const gananciaElement = document.getElementById('ganancia-monto');
-  
-  console.log("Elementos encontrados:", {
-    chart: !!chartElement,
-    ingresosMonto: !!ingresosElement,
-    gananciaMonto: !!gananciaElement
-  });
-  
-  // Inicializar gráfica
   initializeChart();
-  
-  // Configurar botones
   setupEventListeners();
 
-  // Forzar el estado visual inicial (por defecto Mes)
   const btnMonth = document.getElementById('grafic_month');
-  if(btnMonth) btnMonth.click(); // Esto disparará updateDashboard
-  else updateDashboard(); // Fallback si no hay botón
-  
-  // Cargar datos después de un breve delay
-  // setTimeout(updateDashboard, 1000); // Ya no es necesario si hacemos click arriba
+  if(btnMonth) btnMonth.click(); 
+  else updateDashboard(); 
 });
 
-// Función para recargar datos manualmente (útil para debugging)
 window.reloadDashboard = updateDashboard;
 
-// Exportar funciones
 export { updateDashboard, initializeChart };
