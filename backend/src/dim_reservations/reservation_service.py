@@ -8,7 +8,7 @@ from src.dim_reservations.reservation_model import Reservation
 from src.dim_reservations.repositorio.update_reservation import update_reservation
 
 from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
-
+from src.dim_reservations.repositorio.get_global_totals import get_global_totals_repo
 
 class ReservaService:
     """
@@ -222,3 +222,14 @@ class ReservaService:
             return []
         finally:
             self.conn.close_conexion()
+
+    def get_global_totals(self) -> dict:
+        """
+        Obtiene los totales globales consolidados (Activos + Históricos).
+        """
+        try:
+            # No cerramos la conexión aquí porque el Handler la gestiona
+            return get_global_totals_repo(self.conn)
+        except Exception as e:
+            print(f"Error en servicio al obtener totales globales: {e}")
+            return {"pendientes": 0, "completados": 0, "totales": 0}

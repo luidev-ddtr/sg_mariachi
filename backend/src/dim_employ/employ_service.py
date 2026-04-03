@@ -4,7 +4,6 @@ from src.dim_employ.repository.assing_position_employ import create_employ
 from src.dim_employ.repository.get_employ import get_employ_by_id_repo
 from src.dim_employ.repository.update_employ import update_employ_repo
 
-
 class EmployService:
     """
     Servicio proporcionado para aplicarlo a la lógica de negocio relacionada con empleados.

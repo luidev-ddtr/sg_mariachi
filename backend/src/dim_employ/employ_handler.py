@@ -5,7 +5,6 @@ from src.dim_dates.dim_date import DIM_DATE
 from src.utils.conexion import Conexion
 from datetime import datetime
 
-
 class EmployHandler:
     """
     Handler proporcionado para manejar las solicitudes relacionadas con empleados.
@@ -32,10 +31,9 @@ class EmployHandler:
         
         # Actualizamos la conexión del servicio para asegurar consistencia
         self.service.conn = conexion
-        
         dim_date = DIM_DATE(conexion)
 
-        # Asumimos que _employee['DIM_DateId'] viene como string de fecha "YYYY-MM-DD" desde el front
+        # _employee['DIM_DateId'] viene como string de fecha "YYYY-MM-DD" desde el front
         # O usamos la fecha actual si no viene
         date_str = _employee.get('DIM_DateId', datetime.now().isoformat())
         employ_date = datetime.fromisoformat(date_str)

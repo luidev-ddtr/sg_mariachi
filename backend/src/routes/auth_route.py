@@ -21,6 +21,7 @@ def login():
             # Guardamos datos mínimos necesarios en la cookie firmada del navegador
             session['user_id'] = user_data['DIM_ServiceOwnersId']
             session['username'] = user_data['DIM_Username']
+            session['role'] = user_data.get('DIM_Position')
             
             # Opcional: Quitamos la contraseña del objeto antes de enviarlo al frontend por seguridad
             if 'DIM_Password' in user_data:
@@ -44,7 +45,8 @@ def check_session():
     if 'user_id' in session:
         return send_success("Sesión activa", {
             "user_id": session.get('user_id'),
-            "username": session.get('username')
+            "username": session.get('username'),
+            "DIM_Position": session.get('role')
         }, 200)
     return send_error("No hay sesión activa", 401)
 
@@ -55,10 +57,10 @@ def loginGoogle():
         data = request.get_json()
         status, message, user_data = auth_handler.loginWithGoogle(data)
         if status == 200 and user_data:
-            # 2. ¡AQUÍ ES DONDE SE CREA LA SESIÓN!
             # Guardamos datos mínimos necesarios en la cookie firmada del navegador
             session['user_id'] = user_data['DIM_ServiceOwnersId']
             session['username'] = user_data['DIM_Name']
+            session['role'] = user_data.get('DIM_Position')
             return send_success(message, user_data, 200)
         else:
             return send_error(message, status)

@@ -21,8 +21,7 @@ from src.dim_reservations.repositorio.status_complete_auto import update_past_re
 
 from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
 
-
-handler_people = PeopleHandler() # PeopleHandler puede seguir global si no maneja conexiones en su init
+handler_people = PeopleHandler()
 
 class ReservationService:
     """
@@ -118,7 +117,7 @@ class ReservationService:
 
         # Extraer la fecha del evento para usarla como DIM_DateId
         event_date = datetime.fromisoformat(_reservation['DIM_StartDate'])
-        #date_id = dim_date_service.dateId
+
         #Nueva forma de obtener el dateId basado en la fecha del evento
         event_date_id = dim_date_service.get_id_by_object_date(event_date.year, event_date.month, event_date.day)
 
@@ -151,7 +150,7 @@ class ReservationService:
             #La funcion no devolvio nada
             if not data:
                 #Se inserta la persona puesto que no existe
-                # IMPORTANTE: Pasamos 'conexion' para mantener la transacción atómica
+                # Pasamos 'conexion' para mantener la transacción atómica
                 message, code, id = handler_people.create_people(data_people, conexion)
                 if code != 201:
                     return 500, message
@@ -159,8 +158,6 @@ class ReservationService:
                 people_id = id
             else:
                 people_id = data
-
-
 
             # 2. Extracción y parseo de datos
             new_start_str = _reservation['DIM_StartDate']
@@ -175,13 +172,11 @@ class ReservationService:
             if new_start >= new_end:
                 return 400, "La hora de inicio debe ser anterior a la hora de fin"
 
-
             # 4. Generación de IDs y métricas
             year, month, day = dim_date_service.full_date
             res_id = create_id_fact_reservation([people_id, day, _reservation['DIM_EventAddress']])
             print(res_id)
-            
-            
+               
             if not event_date_id or "No se pudo" in event_date_id:
                 return 500, "esta fecha no existe"
 
@@ -192,13 +187,12 @@ class ReservationService:
                 DIM_ReservationId=res_id,
                 DIM_PeopleId=people_id,
                 DIM_StatusId= get_status_pending(),
-                
+    
                 # Linea original del DIM_DateId
                 #DIM_DateId=date_id,
-
                 # Nueva linea para el DIM_DateId basado en la fecha del evento
                 DIM_DateId=event_date_id,
-
+                
                 DIM_ServiceOwnersId=service_owners_id,
                 DIM_EventAddress=_reservation['DIM_EventAddress'],
                 DIM_StartDate=new_start.isoformat(),
@@ -221,7 +215,6 @@ class ReservationService:
                 return  201, f"Reserva creada exitosamente (ID: {res_id})"
             else:
                 return 500, "No se pudo insertar la reserva en la base de datos."
-
 
         except ValueError as ve:
             print(f"⚠️ Validación fallida: {ve}")
@@ -623,13 +616,9 @@ class ReservationService:
             success = cancelled_reservation_by_id(reservation_id, conexion)
 
             if success:
-                # Después de cancelar, obtenemos los datos actualizados
-                updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
-                if not updated_reservation:
-                    # Esto sería raro, pero es un buen control de seguridad
-                    return 404, "La reservación fue cancelada, pero no se pudo recuperar la información actualizada.", []
-                
-                return 200, "Reservación cancelada exitosamente.", [updated_reservation]
+                # Al ser una eliminación física, ya no podemos consultar el ID en la tabla principal.
+                # Retornamos los datos que ya teníamos en memoria antes de la eliminación.
+                return 200, "Reservación cancelada y movida al archivo exitosamente.", [existing_reservation]
             else:
                 # Si la función de cancelado falla, devolvemos un error de servidor.
                 return 500, "Ocurrió un error al intentar cancelar la reservación.", []
@@ -693,3 +682,20 @@ class ReservationService:
         finally:
             if not conn:
                 conexion.close_conexion()
+
+    def get_global_totals(self, conn: Conexion = None) -> tuple[int, str, dict]:
+        """
+        Obtiene los totales globales para las cards del dashboard, 
+        sumando eventos activos e históricos del log.
+        """
+        conexion = conn or Conexion()
+        reserva_service = ReservaService(conexion)
+        try:
+            # Llamamos a la lógica a través de la capa de servicio
+            data = reserva_service.get_global_totals()
+            
+            return 200, "Totales obtenidos exitosamente.", data
+        except Exception as e:
+            return 500, f"Error en el handler al obtener totales: {e}", {}
+        finally:
+            if not conn: conexion.close_conexion()
