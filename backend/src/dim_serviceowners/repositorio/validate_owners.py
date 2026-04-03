@@ -11,7 +11,12 @@ def get_owner_by_username(username: str, conexion: Conexion) -> dict | None:
     :return: Un diccionario con los datos del administrador si se encuentra, de lo contrario None.
     :rtype: dict | None
     """
-    query = "SELECT * FROM dim_serviceowners WHERE DIM_Username = %s"
+    query = """
+        SELECT s.*, e.DIM_Position 
+        FROM dim_serviceowners s
+        JOIN dim_employe e ON s.DIM_EmployeeId = e.DIM_EmployeeId
+        WHERE s.DIM_Username = %s
+    """
     try:
         conexion.cursor.execute(query, (username,))
         user = conexion.cursor.fetchone()
@@ -55,11 +60,11 @@ def validateowner(people_id: str, conexion: Conexion) -> dict:
 
     # NOTA: En producción, las contraseñas deberían compararse usando hashes (ej. bcrypt)
     query = """
-        SELECT s.DIM_ServiceOwnersId, p.DIM_Name, p.DIM_LastName
+        SELECT s.DIM_ServiceOwnersId, p.DIM_Name, p.DIM_LastName, e.DIM_Position
         FROM dim_serviceowners s
         JOIN dim_employe e ON s.DIM_EmployeeId = e.DIM_EmployeeId
         JOIN dim_people p ON e.DIM_PersonId = p.DIM_PeopleId
-        WHERE e.DIM_Position = 'Administrador' AND p.DIM_PeopleId = %s;
+        WHERE e.DIM_Position IN ('Administrador principal', 'Administrador') AND p.DIM_PeopleId = %s;
     """    
     try:
         conexion.cursor.execute(query, (people_id,))

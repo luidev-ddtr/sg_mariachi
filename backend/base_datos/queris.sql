@@ -249,3 +249,63 @@ WHERE Vrsv.DIM_ReservationId = %s;
     -- Aqui se tendran que agregar los datos de pago despues
     -- Todo lo de fact revenue.
     WHERE Vrsv.DIM_ReservationId = %s;
+
+-- ======================================================================
+-- ESTRUCTURA PARA EVENTOS FINALIZADOS Y CANCELADOS
+-- ======================================================================
+
+-- 1. Tabla de Log para lo que sí se concretó (Métricas de éxito)
+CREATE TABLE IF NOT EXISTS dim_reservation_log (
+    LogId INT AUTO_INCREMENT PRIMARY KEY,
+    DIM_ReservationId VARCHAR(50),
+    Final_StatusId VARCHAR(50), -- Solo 'completo' o 'archivado'
+    CompletionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TotalAmount INT,
+    FOREIGN KEY (DIM_ReservationId) REFERENCES dim_reservation(DIM_ReservationId)
+);
+
+-- 2. Tabla para Eventos Cancelados (Graveyard/Auditoría)
+-- Aquí guardamos todo antes de borrarlo de la tabla principal
+CREATE TABLE IF NOT EXISTS dim_reservation_cancelled_archive (
+    ArchiveId INT AUTO_INCREMENT PRIMARY KEY,
+    Old_ReservationId VARCHAR(50),
+    Client_PeopleId VARCHAR(50),
+    CancellationDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Original_EventDate DATETIME,
+    Reason_Notes TEXT
+);
+
+-- 3. Trigger para registrar solo estados finales (Completo/Archivado)
+DELIMITER //
+CREATE TRIGGER trg_log_finished_reservations
+AFTER UPDATE ON dim_reservation
+FOR EACH ROW
+BEGIN
+    -- IDs: Completo (d9664265-818c-52dc), Archivado (cw42055f-3ecb-9099)
+    IF NEW.DIM_StatusId IN ('d9664265-818c-52dc', 'cw42055f-3ecb-9099') 
+       AND OLD.DIM_StatusId <> NEW.DIM_StatusId THEN
+        
+        INSERT INTO dim_reservation_log 
+        (DIM_ReservationId, Final_StatusId, TotalAmount)
+        VALUES 
+        (NEW.DIM_ReservationId, NEW.DIM_StatusId, NEW.DIM_TotalAmount);
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- 4. Trigger para respaldar antes de eliminar (Limpieza de la tabla principal)
+-- Este trigger se activa cuando tu backend ejecute un DELETE
+DELIMITER //
+CREATE TRIGGER trg_archive_before_delete
+BEFORE DELETE ON dim_reservation
+FOR EACH ROW
+BEGIN
+    -- Si se borra porque fue cancelada (o por limpieza), guardamos la info clave
+    INSERT INTO dim_reservation_cancelled_archive 
+    (Old_ReservationId, Client_PeopleId, Original_EventDate, Reason_Notes)
+    VALUES 
+    (OLD.DIM_ReservationId, OLD.DIM_PeopleId, OLD.DIM_StartDate, OLD.DIM_Notes);
+END;
+//
+DELIMITER ;

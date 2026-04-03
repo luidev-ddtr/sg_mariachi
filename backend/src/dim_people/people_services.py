@@ -4,7 +4,10 @@ from src.dim_people.repository.update_people import update_people
 
 
 class PeopleService:
-    """Clase que manejara los servicios, validaciones y API pulbica de personas con otras entidades del programa:"""
+    """
+    Clase que manejara los servicios, validaciones y 
+    API pulbica de personas con otras entidades del programa:
+    """
 
     def __init__(self, conn: Conexion):
         self.conn = conn

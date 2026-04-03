@@ -219,3 +219,14 @@ def stats_calendar() -> tuple[Any]:
     except Exception as e:
         print(e)
         return send_error(str(e), 500)
+
+@reservation_route.route('/global_totals', methods=['GET'])
+@login_required
+def get_global_totals():
+    """
+    Endpoint para obtener los contadores de las cards informativas
+    """
+    status, message, data = reservation_options.get_global_totals()
+    if status != 200:
+        return send_error(message, status)
+    return send_success(message, data, 200)
