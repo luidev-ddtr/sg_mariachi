@@ -5,13 +5,10 @@
 import { GetReservationStatsCalendar } from "../../api/api_reservation_stats_calendar.js";
 import { GetReservaciones } from "../../api/api_reservacion_read.js";
 
-// IMPORTANTE: Agregamos una función sencilla para buscar eventos en la base de datos
-// (Asegúrate de importar axios en tu HTML de la agenda si no lo tienes)
 const buscarEventoPorNombre = async (nombre) => {
   try {
-    // 🔥 Reemplaza '/api/reservations/search' por la ruta real que Alec te indique
     const response = await axios.get(`/api/reservations/search?name=${encodeURIComponent(nombre)}`);
-    return response.data.body || response.data; // Ajusta según la estructura de tu backend
+    return response.data.body || response.data;
   } catch (error) {
     console.error("Error al buscar el evento en la API:", error);
     return null;
@@ -24,62 +21,77 @@ document.addEventListener('DOMContentLoaded', function () {
   const detailPanel = document.getElementById('detailPanel');
   const panelContent = document.getElementById('panelContent');
   const closePanelBtn = document.getElementById('closePanel');
+  const spinnerEl = document.getElementById('loading-spinner'); // Referencia al spinner
+
+  // 🔥 NUEVO: Memoria caché para no descargar 2 veces el mismo mes
+  const cacheEventos = {};
+  const cacheEstadisticas = {};
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
     locale: 'es',
     initialView: 'timeGridWeek',
-    allDaySlot: true, 
+    allDaySlot: true,
     height: 'auto',
     headerToolbar: false,
-    slotMinTime: "08:00:00", 
-    slotMaxTime: "23:59:00", 
+    slotMinTime: "08:00:00",
+    slotMaxTime: "23:59:00",
+
+    // 🔥 NUEVO: Control del Spinner nativo de FullCalendar
+    loading: function(isLoading) {
+      if (spinnerEl) {
+        if (isLoading) spinnerEl.classList.remove('spinner-oculto');
+        else spinnerEl.classList.add('spinner-oculto');
+      }
+    },
 
     events: async function(fetchInfo, successCallback, failureCallback) {
       try {
         const start = fetchInfo.start;
         const end = fetchInfo.end;
-        
+       
         const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
-        // MODIFICADO: Aumentamos el rango a < 60 días para incluir la vista de MES como vista detallada
-        const isDetailView = diffDays < 60; 
+        const isDetailView = diffDays < 60;
         const isYearView = !isDetailView;
 
         const midDate = new Date((start.getTime() + end.getTime()) / 2);
         const year = midDate.getFullYear();
         let formattedEvents = [];
 
-        // --- VISTA DE SEMANA, DÍA O MES (Eventos reales) ---
+        // --- VISTA DE SEMANA, DÍA O MES ---
         if (isDetailView) {
-          // Calculamos TODOS los meses involucrados en el rango de fechas (Inicio -> Fin)
           const monthsToFetch = new Set();
           let current = new Date(start);
-          
+         
           while (current < end) {
             const y = current.getFullYear();
             const m = String(current.getMonth() + 1).padStart(2, '0');
             monthsToFetch.add(`${y}-${m}`);
-            // Avanzamos al primer día del siguiente mes para la siguiente iteración
             current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
           }
 
-          // Llamamos a la API para traer eventos de esos meses
-          const promises = Array.from(monthsToFetch).map(dateParam => GetReservaciones(dateParam));
+          // 🔥 OPTIMIZACIÓN: Solo consulta la API si no está en la memoria caché
+          const promises = Array.from(monthsToFetch).map(async (dateParam) => {
+             if (cacheEventos[dateParam]) return cacheEventos[dateParam]; // Retorna desde caché
+             const data = await GetReservaciones(dateParam);
+             cacheEventos[dateParam] = data; // Guarda en caché para la próxima
+             return data;
+          });
+
           const results = await Promise.all(promises);
           const data = results.flat();
-          
-          // Filtramos duplicados por ID (por si la semana cruza meses y se empalman consultas)
+         
           const uniqueEvents = new Map();
           data.forEach(item => uniqueEvents.set(item.DIM_ReservationId, item));
 
           formattedEvents = Array.from(uniqueEvents.values()).map(item => {
             return {
               id: `evt-${item.DIM_ReservationId}`,
-              title: item.DIM_fullname || "Cliente", // Solo mostramos el nombre del cliente
-              start: item.DIM_StartDate, // Formato ISO directo
+              title: item.DIM_fullname || "Cliente",
+              start: item.DIM_StartDate,
               end: item.DIM_EndDate,
-              backgroundColor: '#00b050', 
+              backgroundColor: '#00b050',
               extendedProps: {
-                isDetail: true, 
+                isDetail: true,
                 client: item.DIM_fullname || "Sin Nombre",
                 phone: item.DIM_PhoneNumber,
                 address: item.DIM_EventAddress || "Dirección no disponible",
@@ -87,21 +99,32 @@ document.addEventListener('DOMContentLoaded', function () {
               }
             };
           });
-        } 
-        // --- VISTA DE AÑO O MES (Estadísticas - ¡Esto ya lo tienes funcionando!) ---
+        }
+        // --- VISTA DE AÑO O MES (Estadísticas) ---
         else {
           let rawData = [];
           if (isYearView) {
             const promesas = [];
             for (let m = 1; m <= 12; m++) {
-              promesas.push(GetReservationStatsCalendar('month', year, m).catch(() => []));
+              const cacheKey = `stats-${year}-${m}`;
+              // 🔥 OPTIMIZACIÓN: Solo consulta la API si no está en la memoria caché
+              if (cacheEstadisticas[cacheKey]) {
+                  promesas.push(Promise.resolve(cacheEstadisticas[cacheKey]));
+              } else {
+                  promesas.push(
+                      GetReservationStatsCalendar('month', year, m).then(data => {
+                          cacheEstadisticas[cacheKey] = data;
+                          return data;
+                      }).catch(() => [])
+                  );
+              }
             }
             const resultadosMeses = await Promise.all(promesas);
             resultadosMeses.forEach((mesData, index) => {
               if (mesData && mesData.length > 0) mesData.forEach(item => rawData.push({ ...item, monthForDate: index + 1 }));
             });
           } else {
-            const month = midDate.getMonth() + 1; 
+            const month = midDate.getMonth() + 1;
             const data = await GetReservationStatsCalendar('month', year, month);
             if (data && data.length > 0) data.forEach(item => rawData.push({ ...item, monthForDate: month }));
           }
@@ -112,10 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const dateString = `${year}-${mesFormateado}-${diaFormateado}`;
 
             return {
-              id: `stat-${dateString}`, 
-              title: `${item.total_events} reserva(s)`, 
+              id: `stat-${dateString}`,
+              title: `${item.total_events} reserva(s)`,
               start: dateString,
-              allDay: true, 
+              allDay: true,
               backgroundColor: '#0d6efd',
               extendedProps: { isDetail: false, total: item.total_events }
             };
@@ -128,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
         failureCallback(error);
       }
     },
-    
+   
     eventClick: function(info) {
       const isDetail = info.event.extendedProps.isDetail;
       if (!isDetail) {
@@ -188,20 +211,20 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('prev').onclick = () => calendar.prev();
   document.getElementById('next').onclick = () => calendar.next();
   document.getElementById('today').onclick = () => calendar.today();
-  
+ 
   function changeView(view, button) {
     calendar.changeView(view);
     document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
   }
-  
+ 
   document.getElementById('day').onclick = function () { changeView('timeGridDay', this); };
   document.getElementById('week').onclick = function () { changeView('timeGridWeek', this); };
   document.getElementById('month').onclick = function () { changeView('dayGridMonth', this); };
   document.getElementById('year').onclick = function () { changeView('multiMonthYear', this); };
 
   /* =======================================================
-     BÚSQUEDA DINÁMICA DE CLIENTE (SIN DATOS FALSOS)
+     BÚSQUEDA DINÁMICA DE CLIENTE
      ======================================================= */
   const searchInput = document.querySelector('input[type="search"]');
 
@@ -209,26 +232,22 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('keypress', async function (e) {
       if (e.key === 'Enter') {
         const query = this.value.trim().toLowerCase();
-        if (!query) return; 
+        if (!query) return;
 
         try {
-          // Ya no hay mockDB. Usamos la función real que consulta al backend.
           const resultados = await buscarEventoPorNombre(query);
 
           if (resultados && resultados.length > 0) {
-            const eventoEncontrado = resultados[0]; 
-            
-            // Extraemos la fecha (Aseguramos formato ISO YYYY-MM-DDTHH:MM:SS)
-            // Esto asume que el backend devuelve un string como "2026-03-24 10:00:00"
-            const fechaString = eventoEncontrado.DIM_StartDate || eventoEncontrado.date; 
+            const eventoEncontrado = resultados[0];
+            const fechaString = eventoEncontrado.DIM_StartDate || eventoEncontrado.date;
             const separador = fechaString.includes('T') ? '' : 'T';
             const fechaDelEvento = fechaString.replace(' ', separador);
 
             calendar.changeView('timeGridDay', fechaDelEvento);
-            
+           
             document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('day').classList.add('active');
-            this.value = ''; 
+            this.value = '';
 
           } else {
             alert(`No se encontró ningún evento agendado para: "${query}"`);

@@ -1,4 +1,4 @@
-// ✅ modal_pagos.js actualizado
+// ✅ modal_pagos.js actualizado con Modal Custom
 import { GetContractInfo } from '../../api/api_reservacion_read.js'; 
 import { registrarPago } from '../../api/api_fact_revenues_create.js';
 
@@ -54,26 +54,98 @@ document.addEventListener('DOMContentLoaded', async () => {
             Amount: monto
         };
 
+        // Cambiar el botón mientras procesa
+        const submitBtn = formPago.querySelector('button[type="submit"]');
+        const btnOriginalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Procesando...";
+
         try {
             const result = await registrarPago(payload);
             if (result.success) {
-                alert("¡Pago registrado con éxito!");
+                // 🔥 AQUÍ REEMPLAZAMOS EL ALERT POR TU MODAL BONITO
+                await mostrarModalCustom("¡Éxito!", "¡Pago registrado con éxito!", "success");
                 
-                // Cerramos el modal
+                // Cerramos el modal padre si existe la función
                 const overlay = window.parent.document.getElementById('modalOverlay');
                 if (overlay) overlay.classList.remove('visible');
 
                 // Opcional: Recargar la tabla en la ventana principal
                 window.parent.location.reload(); 
+            } else {
+                await mostrarModalCustom("Error", result.message || "No se pudo registrar el pago.", "error");
             }
         } catch (error) {
-            alert("Error al registrar: " + error.message);
+            await mostrarModalCustom("Error de conexión", "Fallo al conectar: " + error.message, "error");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = btnOriginalText;
         }
     });
 
-    // Lógica para cerrar modal
+    // Lógica para cerrar modal desde la X (si la tienes activa)
     document.querySelector('.close-btn')?.addEventListener('click', () => {
         const overlay = window.parent.document.getElementById('modalOverlay');
         if (overlay) overlay.classList.remove('visible');
     });
 });
+
+// =======================================================
+// NUEVO: Sistema de Notificaciones (Modal Customizado)
+// =======================================================
+function mostrarModalCustom(titulo, mensaje, tipo = 'info') {
+    return new Promise((resolve) => {
+        let colorBoton = "#0d6efd"; // azul por defecto
+        if (tipo === 'success') colorBoton = "#198754"; // verde
+        if (tipo === 'error') colorBoton = "#dc3545"; // rojo
+        if (tipo === 'warning') colorBoton = "#fd7e14"; // naranja
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; transition: opacity 0.3s ease;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: white; border-radius: 8px; width: 400px; max-width: 90%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;
+            transform: translateY(-20px); transition: transform 0.3s ease;
+        `;
+
+        modal.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #e9ecef;">
+                <h3 style="margin: 0; font-size: 1.1rem; color: #333; font-weight: bold;">${titulo}</h3>
+                <button id="btn-cerrar-x" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #888;">&times;</button>
+            </div>
+            <div style="padding: 25px 20px; text-align: center; color: #555; font-size: 1rem;">
+                ${mensaje}
+            </div>
+            <div style="padding: 15px 20px; display: flex; justify-content: flex-end; gap: 10px; background: #f8f9fa; border-top: 1px solid #e9ecef; border-radius: 0 0 8px 8px;">
+                <button id="btn-aceptar" style="background: ${colorBoton}; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500;">Aceptar</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            modal.style.transform = 'translateY(0)';
+        }, 10);
+
+        const cerrarModal = (resultado) => {
+            overlay.style.opacity = '0';
+            modal.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                document.body.removeChild(overlay);
+                resolve(resultado);
+            }, 300);
+        };
+
+        modal.querySelector('#btn-cerrar-x').onclick = () => cerrarModal(false);
+        modal.querySelector('#btn-aceptar').onclick = () => cerrarModal(true);
+    });
+}

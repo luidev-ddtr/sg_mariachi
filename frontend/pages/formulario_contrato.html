@@ -6,49 +6,51 @@
     <link rel="stylesheet" href="/src/styles/style_contrato.css">
     
     <style>
-        /* Estilo bonito para el botón */
-        .btn-imprimir {
-            background-color: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            display: block;
-            margin-left: auto; /* Para alinearlo a la derecha */
-        }
-        .btn-imprimir:hover {
-            background-color: #0b5ed7;
-        }
+/* 🖨️ Nuevo estilo para el botón de imprimir */
+    .btn-imprimir {
+        background-color: #1f2937; /* Gris oscuro/casi negro elegante que contrasta perfecto */
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 15px;
+        font-family: "Segoe UI", Arial, sans-serif; /* Fuente moderna para UI, no Times New Roman */
+        font-weight: 600;
+        text-transform: uppercase; /* Letras mayúsculas para más presencia */
+        letter-spacing: 1px;
+        border-radius: 8px; /* Bordes redondeados modernos */
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para que se vea flotante y despegado del fondo */
+        transition: all 0.3s ease;
+        white-space: nowrap; /* 🔥 CLAVE: Evita que el texto se parta en dos líneas */
+    }
 
-        /* 🔥 MAGIA: Todo lo que tenga la clase 'no-print' desaparecerá en el papel */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            /* Opcional: Quitar márgenes extra de la página al imprimir */
-            body {
-                margin: 0;
-                padding: 0;
-            }
-        }
+    .btn-imprimir:hover {
+        background-color: #374151; /* Se aclara ligeramente al pasar el mouse */
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+        transform: translateY(-3px); /* Efecto de salto hacia arriba */
+    }
+
+    .btn-imprimir:active {
+        transform: translateY(0); /* Vuelve a su lugar al hacer clic */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
     </style>
 </head>
 <body>
     
-    <button id="btnImprimir" class="btn-imprimir no-print">🖨️ Imprimir Contrato</button>
-
     <div class="contrato-container">
         <img src="/images/logo_cn_fondo.png" alt="Logo Mariachi" class="logo">
 
         <h1>Mariachi San Nicolas</h1>
         <h2>DE LOS HNOS. HERNANDEZ</h2>
-        <p>#si señor</p>
+
         <p>Oficina (759) 7233732 7721516602 7721451172 7721513364 7721177996</p>
         <h2>Contrato</h2>
-
+        <hr>
         <p>
             Bajo este presente contrato la agrupación musical mariachi San
             Nicolás y por otra parte el señor(a) <span id="contratante_nombre"></span>
@@ -66,10 +68,11 @@
             </li>
             <li>
                 <p>
-                    El contratante se compromete a pagar la cantidad de
-                    $<span id="pago_total"></span> de la siguiente forma $<span id="pago_anticipo"></span> al firmar el
-                    presente contrato y la cantidad restante $<span id="pago_restante"></span> al
-                    concluir el evento.
+                    El contratante se compromete a pagar la cantidad total de
+                    $<span id="pago_total"></span> de la siguiente forma: se pagará un anticipo de
+                    <strong>$<span id="pago_anticipo"></span> (equivalente al 50% del total) al momento de firmar
+                    el presente contrato</strong> para apartar y confirmar la fecha del evento,
+                    y la cantidad restante de $<span id="pago_restante"></span> al concluir el evento.
                 </p>
             </li>
             <li>
@@ -77,7 +80,30 @@
             </li>
         </ol>
 
-        <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
+        <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de 
+           <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
+
+        <div class="firmas">
+            <div style="display: flex; justify-content: space-between; margin-top: 60px;">
+                <div style="text-align: center; width: 45%;">
+                    <div class="linea-firma"></div>
+                    <p>Mariachi San Nicolás</p>
+                    <p><em>Representante</em></p>
+                </div>
+                <div style="text-align: center; width: 45%;">
+                    <div class="linea-firma"></div>
+                    <p><span id="contratante_nombre_firma"></span></p>
+                    <p><em>Contratante</em></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nota">
+            <p>⚠️<strong>Nota:</strong> El anticipo del 50% no es reembolsable en caso de cancelación
+            por parte del contratante.</p>
+        </div>
+    </div> <div class="contenedor-boton no-print">
+        <button id="btnImprimir" class="btn-imprimir">🖨️ Imprimir Contrato</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -85,7 +111,7 @@
         import { GetContractInfo } from '/src/api/api_reservacion_read.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // 🔥 NUEVO: Funcionalidad del botón imprimir
+            // Funcionalidad del botón imprimir
             document.getElementById('btnImprimir').addEventListener('click', () => {
                 window.print();
             });
@@ -104,6 +130,17 @@
                     const data = Array.isArray(info) ? info[0] : info;
 
                     if (data) {
+                        
+                        // 🔥 SOLUCIÓN: Lógica para calcular el 50% automáticamente
+                        if (data.pago_total) {
+                            const total = parseFloat(data.pago_total);
+                            if (!isNaN(total)) {
+                                const mitad = total / 2;
+                                data.pago_anticipo = mitad.toFixed(2); // Agrega el valor a la data
+                                data.pago_restante = mitad.toFixed(2); // Agrega el valor a la data
+                            }
+                        }
+
                         Object.keys(data).forEach(key => {
                             const el = document.getElementById(key);
                             if (el) {
@@ -116,11 +153,15 @@
                             }
                         });
 
+                        const nombreFirma = document.getElementById('contratante_nombre_firma');
+                        if (nombreFirma && data['contratante_nombre']) {
+                            nombreFirma.textContent = data['contratante_nombre'];
+                        }
+
                         const hoy = new Date();
                         document.getElementById('contrato_dia').textContent = hoy.getDate();
                         document.getElementById('contrato_mes').textContent = meses[hoy.getMonth()];
                         document.getElementById('contrato_anio').textContent = hoy.getFullYear();
-
                     } else {
                         console.warn("La API no devolvió datos para el ID:", id);
                     }

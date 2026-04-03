@@ -9,13 +9,71 @@
   <link rel="icon" href="/images/logo_cn_fondo.png" type="image/png">
   <!-- Fuente de íconos de Google -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <style>
+    /* Estilos adicionales para el botón de mostrar/ocultar contraseña */
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-group .icon {
+      position: absolute;
+      left: 12px;
+      pointer-events: none;
+      color: #aaa;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #c0392b;
+      box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.2);
+    }
+
+    /* Botón toggle (ojo) dentro del input de contraseña */
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 1.3rem;
+      transition: color 0.2s;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #c0392b;
+    }
+
+    .toggle-password:focus {
+      outline: none;
+    }
+
+    /* Ajuste para el contenedor de la contraseña (para que el ícono lock y el toggle no choquen) */
+    .input-group:has(#password) input {
+      padding-right: 40px;
+    }
+  </style>
 </head>
 
 <body>
   <div class="background"></div>
 
-
-  <!-- contenedor del logo mariachis-->
   <div class="login-container">
     <div class="login-card">
       <img src="/images/logo_cn_fondo.png" alt="Logo Mariachis San Nicolás" class="logo">
@@ -33,6 +91,9 @@
         <div class="input-group">
           <span class="material-symbols-outlined icon">lock</span>
           <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required>
+          <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Mostrar contraseña">
+            <span class="material-symbols-outlined">visibility_off</span>
+          </button>
         </div>
 
         <button type="submit" class="btn">Iniciar sesión</button>
@@ -47,7 +108,6 @@
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
           data-shape="rectangular" data-logo_alignment="left">
         </div>
-
       </form>
 
       <footer>
@@ -69,20 +129,19 @@
       // 1. Verificar si ya hay sesión activa
       const session = await checkSession();
       if (session && (session.status === 'success' || session.status === 200)) {
-        window.location.href = '/index.html'; // Redirigir al dashboard si ya hay sesión
+        window.location.href = '/index.html';
         return;
       }
 
       // 2. Manejar el envío del formulario
       const form = document.getElementById('loginForm');
       form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault();
 
         const username = document.getElementById('usuario').value;
         const password = document.getElementById('password').value;
-        const btn = form.querySelector('button');
+        const btn = form.querySelector('button[type="submit"]');
 
-        // Feedback visual
         const originalText = btn.innerText;
         btn.innerText = "Verificando...";
         btn.disabled = true;
@@ -90,12 +149,27 @@
         const result = await loginUser({ username, password });
 
         if (result && (result.status === 'success' || result.status === 200)) {
-          window.location.href = '/index.html'; // Redirigir al dashboard al iniciar sesión
+          window.location.href = '/index.html';
         } else {
           alert(result.message || "Error al iniciar sesión");
           btn.innerText = originalText;
           btn.disabled = false;
         }
+      });
+
+      // 3. Lógica para mostrar/ocultar contraseña
+      const toggleBtn = document.getElementById('togglePasswordBtn');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = toggleBtn.querySelector('.material-symbols-outlined');
+
+      toggleBtn.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        // Cambiar ícono
+        eyeIcon.textContent = type === 'password' ? 'visibility_off' : 'visibility';
+        // Cambiar aria-label
+        const label = type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña';
+        toggleBtn.setAttribute('aria-label', label);
       });
     });
   </script>
@@ -103,20 +177,16 @@
   <!-- Librería de Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- Lógica para manejar la respuesta de Google-->
   <script type="module">
-    // Importamos la función que acabamos de crear
     import { loginWithGoogle } from '/src/api/api_auth.js';
 
-    // Hacemos la función global para que el callback de Google la encuentre
-    window.handleCredentialResponse = async function(response) {
-        const result = await loginWithGoogle(response.credential);
-
-        if (result && result.status === 'success') {
-            window.location.href = "/index.html";
-        } else {
-            alert(result.message || "Error al iniciar sesión con Google");
-        }
+    window.handleCredentialResponse = async function (response) {
+      const result = await loginWithGoogle(response.credential);
+      if (result && result.status === 'success') {
+        window.location.href = "/index.html";
+      } else {
+        alert(result.message || "Error al iniciar sesión con Google");
+      }
     }
   </script>
 </body>
