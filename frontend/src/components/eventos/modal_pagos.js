@@ -1,12 +1,18 @@
 // ✅ modal_pagos.js actualizado con Modal Custom
 import { GetContractInfo } from '../../api/api_reservacion_read.js'; 
 import { registrarPago } from '../../api/api_fact_revenues_create.js';
+import { GetPaymentHistory } from '../../api/api_fact_revenues_historial.js';
+import { checkSession } from '../../api/api_auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
     if (!eventId) return;
+
+    // Obtener sesión para saber qué administrador está registrando el pago
+    const session = await checkSession();
+    const adminLogueadoId = session?.body?.DIM_ServiceOwnersId;
 
     const inputFecha = document.getElementById('fecha');
     const inputMonto = document.getElementById('monto_pagado');
@@ -35,6 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('nombre').value = partes[0] || "";
             document.getElementById('apellido_paterno').value = partes[1] || "";
             document.getElementById('apellido_materno').value = partes.slice(2).join(' ') || "";
+
+            // 3. Renderizar Historial de Pagos
+            renderizarHistorial(data.historial_pagos);
         }
     } catch (error) {
         console.error("Error al cargar datos del evento:", error);
@@ -66,10 +75,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // 🔥 AQUÍ REEMPLAZAMOS EL ALERT POR TU MODAL BONITO
                 await mostrarModalCustom("¡Éxito!", "¡Pago registrado con éxito!", "success");
                 
-                // Cerramos el modal padre si existe la función
-                const overlay = window.parent.document.getElementById('modalOverlay');
-                if (overlay) overlay.classList.remove('visible');
-
+                // En lugar de cerrar inmediatamente, podemos refrescar el historial visualmente
+                const nuevoHistorial = await GetPaymentHistory(eventId);
+                renderizarHistorial(nuevoHistorial);
+                
+                // Opcional: Limpiar el input de monto
+                if (inputMonto) inputMonto.value = "";
+                
                 // Opcional: Recargar la tabla en la ventana principal
                 window.parent.location.reload(); 
             } else {
@@ -148,4 +160,33 @@ function mostrarModalCustom(titulo, mensaje, tipo = 'info') {
         modal.querySelector('#btn-cerrar-x').onclick = () => cerrarModal(false);
         modal.querySelector('#btn-aceptar').onclick = () => cerrarModal(true);
     });
+}
+
+// =======================================================
+// Función para pintar la tabla de historial
+// =======================================================
+function renderizarHistorial(pagos) {
+    const tabla = document.getElementById('tabla-historial');
+    const tbody = document.getElementById('tbody-historial');
+    const msgSinPagos = document.getElementById('sin-pagos-msg');
+
+    if (!pagos || pagos.length === 0) {
+        if (tabla) tabla.style.display = 'none';
+        if (msgSinPagos) msgSinPagos.style.display = 'block';
+        return;
+    }
+
+    // Mostramos la tabla y ocultamos el mensaje de "vacío"
+    if (msgSinPagos) msgSinPagos.style.display = 'none';
+    if (tabla) tabla.style.display = 'table';
+
+    if (tbody) {
+        tbody.innerHTML = pagos.map(p => `
+            <tr>
+                <td>${p.fecha}</td>
+                <td>$${parseFloat(p.monto).toFixed(2)}</td>
+                <!--<td>${p.administrador}</td>-->
+            </tr>
+        `).join('');
+    }
 }

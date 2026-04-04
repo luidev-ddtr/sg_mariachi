@@ -11,21 +11,24 @@ import axiosInstance from "./axiosInstance";
  */
 export const registrarPago = async (data) => {
     try {
-        if (!data || !data.DIM_ReservationId || !data.Amount || !data.DIM_DateId) {
-            throw new Error("Faltan datos obligatorios para registrar el pago (ID de reservación, ID de fecha o Monto).");
+        // DIM_DateId es opcional si el backend lo genera, pero validamos lo esencial
+        if (!data || !data.DIM_ReservationId || !data.Amount) {
+            throw new Error("Faltan datos obligatorios para registrar el pago (ID de reservación o Monto).");
         }
 
         // Construimos el payload que el backend espera.
-        // El backend espera 'FACT_PaymentAmount', no 'Amount'.
         const payload = {
             DIM_ReservationId: data.DIM_ReservationId,
-            DIM_DateId: data.DIM_DateId,
-            FACT_PaymentAmount: data.Amount // Mapeo de 'Amount' a 'FACT_PaymentAmount'
+            // Enviamos el DateId si existe, pero lo ideal es que el backend lo asigne
+            DIM_DateId: data.DIM_DateId || null, 
+            // Aseguramos que el monto sea un número decimal
+            FACT_PaymentAmount: parseFloat(data.Amount),
+            // Sugerencia: Incluir quién registra el pago si está disponible en la sesión
+            DIM_ServiceOwnersId: data.DIM_ServiceOwnersId || null 
         };
 
         console.log("Enviando pago a api/revenues/create:", payload);
 
-        // La ruta 'revenue/create' es correcta.
         const response = await axiosInstance.post('revenues/create', payload);
         
         console.log("Respuesta del servidor al registrar pago:", response.data);

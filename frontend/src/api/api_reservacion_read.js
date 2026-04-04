@@ -101,3 +101,16 @@ export const GetContractInfo = async (id) => {
         throw new Error(errorMessage);
     }
 };
+
+/**
+ * Obtiene los totales consolidados (Activos + Log) para las cards.
+ */
+export const GetGlobalTotals = async () => {
+    try {
+        const response = await axiosInstance.get('reservation/global_totals');
+        return response.data.body;
+    } catch (error) {
+        console.error("Error al obtener totales globales:", error);
+        return { pendientes: 0, completados: 0, totales: 0 };
+    }
+};
