@@ -6,6 +6,20 @@
     <title>Registro de pagos</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/styles/style_modal_pago.css">
+    <style>
+      .tabla-historial {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: #fff;
+      }
+      .tabla-historial th, .tabla-historial td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+      }
+    </style>
 </head>
 <body>
 
@@ -61,7 +75,19 @@
 
     <div class="historial">
       <h3>Historial de pagos</h3>
-      <p class="sin-pagos">No hay pagos registrados aún.</p>
+      <div id="contenedor-historial">
+        <p id="sin-pagos-msg" class="sin-pagos">No hay pagos registrados aún.</p>
+        <table id="tabla-historial" class="tabla-historial" style="display: none;">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <!--<th>Registró</th>-->
+            </tr>
+          </thead>
+          <tbody id="tbody-historial"></tbody>
+        </table>
+      </div>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

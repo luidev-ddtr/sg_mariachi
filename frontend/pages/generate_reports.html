@@ -67,7 +67,7 @@
       </section>
 
       <!-- GESTIÓN ADMINS -->
-      <section class="section-block">
+      <section class="section-block" id="gestionAdminsSection">
         <h2 class="section-title">Gestión de Administradores</h2>
         <div class="table-card">
           <div class="table-toolbar">
@@ -167,6 +167,24 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="module">
+    import { checkSession } from '/src/api/api_auth.js';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      const session = await checkSession();
+      if (session) {
+        const userRole = session.body.DIM_Position || 'Administrador'; // Fallback a 'Administrador' si no se encuentra el rol
+        // Si no es el Administrador principal, ocultamos la gestión de otros usuarios
+        if (userRole !== 'Administrador principal') {
+          const section = document.getElementById('gestionAdminsSection');
+          if (section) section.style.display = 'none';
+          
+          // También podrías ocultar botones específicos de edición en el perfil
+          // document.getElementById('btnEditProfile').style.display = 'none';
+        }
+      }
+    });
+  </script>
   <script type="module" src="/src/components/eventos/admin_ui.js"></script>
 </body>
 </html>

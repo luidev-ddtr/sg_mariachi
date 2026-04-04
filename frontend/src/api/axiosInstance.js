@@ -16,8 +16,8 @@ const axiosInstance = axios.create({
    * Tiempo máximo de espera para una petición (en milisegundos).
    */
   timeout: 10000,
-  // ¡ESTA ES LA LÍNEA CLAVE! Le dice a Axios que envíe y reciba cookies
-  // en peticiones a otros dominios/puertos (Cross-Origin).
+  // Esta linea es clave ya que permite al Axios envíar y recibir cookies
+  // en peticiones de otros dominios/puertos (Cross-Origin).
   withCredentials: true,
 });
 

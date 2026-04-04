@@ -116,9 +116,22 @@
         window.location.replace('/pages/login.html');  // Usamos 'replace' para que no puedan volver atrás con el botón del navegador
         return;
       }
+
+      // 2. CONTROL DE PERMISOS: Ocultar opciones según el rol
+      // Usamos DIM_Position que es el campo que viene de tu DB
+      const userRole = session.body.DIM_Position || 'Administrador'; 
+      if (userRole !== 'Administrador principal'&& userRole !== 'Administrador') {
+        const adminLink = document.querySelector('a[href="/pages/generate_reports.html"]');
+        if (adminLink) {
+          adminLink.style.display = 'none';
+        }
+      }
+
+      console.log(userRole);
+
       // 3. Si llegamos aquí, hay sesión. Mostramos el dashboard.
       document.body.classList.add('visible');
-      // 2. FUNCIONALIDAD LOGOUT: Conectar el botón con la API
+      // 4. FUNCIONALIDAD LOGOUT: Conectar el botón con la API
       const btnLogout = document.getElementById('logoutBtn');
       if (btnLogout) {
         btnLogout.addEventListener('click', async (e) => {
