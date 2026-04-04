@@ -3,6 +3,7 @@ from src.fact_revenues.fact_revenues_service import FactRevenuesService
 from src.fact_revenues.fact_revenues_model import FactRevenues
 from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
 from src.fact_revenues.repositorio.get_total_paid import get_total_paid
+from src.fact_revenues.repositorio.get_payments_history import get_payments_history
 from src.utils.conexion import Conexion
 from src.utils.id_generator import create_id_fact_reservation
 from datetime import datetime
@@ -32,7 +33,7 @@ class FactRevenuesHandler:
                 if field not in _revenue:
                     return 400, f"Falta el campo requerido: {field}", []
 
-            #2. Crear el objeto FactRevenues
+            # 2. Crear el objeto FactRevenues
             revenue = FactRevenues(
                 FACT_RevenueId="", # Se genera abajo
                 #FACT_PaymentAmount=_revenue['FACT_PaymentAmount'],
@@ -87,6 +88,23 @@ class FactRevenuesHandler:
             if not conn:
                 conexion.close_conexion()
 
+
+    def get_payment_history(self, reservation_id: str, conn: Conexion = None) -> tuple:
+        """
+        Obtiene el historial de pagos para una reservación específica.
+        """
+        conexion = conn or Conexion()
+        try:
+            if not reservation_id:
+                return 400, "ID de reservación requerido", []
+            
+            history = get_payments_history(reservation_id, conexion)
+            return 200, "Historial obtenido correctamente", history
+        except Exception as e:
+            return 500, f"Error al obtener historial: {e}", []
+        finally:
+            if not conn:
+                conexion.close_conexion()
 
     def get_revenue_info(self, _revenue: dict, conn: Conexion = None) -> tuple:
         """

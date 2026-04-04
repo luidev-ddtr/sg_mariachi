@@ -14,9 +14,16 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
     query = """
         SELECT 
             dd.FullDate AS fecha,
-            fr.FACT_PaymentAmount AS monto
+            fr.FACT_PaymentAmount AS monto,
+ --           su.fullname AS administrador
+ 			dp.DIM_Name AS administrador
         FROM fact_revenue fr
         INNER JOIN dim_date dd ON fr.DIM_DateId = dd.DIM_DateId
+        INNER JOIN dim_reservation dr ON fr.DIM_ReservationId = dr.DIM_ReservationId
+        INNER JOIN dim_serviceowners dso ON dr.DIM_ServiceOwnersId = dso.DIM_ServiceOwnersId
+--        LEFT JOIN securityusers su ON dso.DIM_ServiceOwnersId = su.DIM_ServiceOwnersId
+        LEFT JOIN dim_employe de ON dso.DIM_EmployeeId = de.DIM_EmployeeId
+        LEFT JOIN dim_people dp ON de.DIM_PersonId = dp.DIM_PeopleId
         WHERE fr.DIM_ReservationId = %s
         ORDER BY dd.FullDate DESC, fr.FACT_RevenueId DESC
     """
@@ -29,7 +36,8 @@ def get_payments_history(reservation_id: str, conn: Conexion) -> List[Dict]:
         for row in rows:
             history.append({
                 'fecha': str(row['fecha']), # Convertimos fecha a string
-                'monto': float(row['monto'])
+                'monto': float(row['monto']),
+                'administrador': row['administrador'] if row['administrador'] else "Sistema"
             })
             
         return history
