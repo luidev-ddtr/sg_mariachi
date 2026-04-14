@@ -13,6 +13,7 @@ body {
     width: 800px;
     background: white;
     padding: 40px 60px;
+    padding-bottom: 100px;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
@@ -106,6 +107,11 @@ ol li {
     gap: 20px;
     margin-top: 30px;
     padding-bottom: 50px;
+    display: flex;
+    justify-content: center; /* Centra el botón horizontalmente */
+    gap: 20px;
+    margin-top: 30px; /* Espacio entre la hoja y el botón */
+    padding-bottom: 50px; /* Espacio final para que no pegue al borde de la pantalla */
 }
 
 .btn-print {
@@ -119,6 +125,15 @@ ol li {
     font-weight: bold;
     font-size: 16px;
     transition: background 0.3s ease;
+
+    position: absolute;
+    bottom: 0px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 50px;
+    padding: 10px 20px;
+    /* Quita la barra lateral verde */
 }
 
 .btn-print:hover {
@@ -163,3 +178,4 @@ ol li {
         print-color-adjust: exact;
     }
 }
+

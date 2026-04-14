@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalFrame   = document.getElementById("modalFrame");
   const modalClose   = document.getElementById("modalClose");
   const tbodyAdmins  = document.getElementById("tbodyAdmins");
+  let currentAdminId = null; // Variable para almacenar el ID del admin logueado
 
   //URLS
   const URL_NUEVO_ADMIN  = "/pages/formulario_nvo_admin.html";
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Axios ya nos da 'data' en response, y tu API devuelve 'body' o 'result'
       if (response && (response.body || response.result)) {
         const adminData = response.body || response.result;
+        currentAdminId = adminData.DIM_EmployeeId; // Guardamos el ID real obtenido de la sesión
         
         // 3. Armar el nombre completo
         const nombreCompleto = `${adminData.DIM_Name || ''} ${adminData.DIM_LastName || ''}`.trim();
@@ -112,11 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnEditProfile").addEventListener("click", () => {
-    abrirModal(URL_EDITAR_ADMIN + "me");
+    if (currentAdminId) {
+      abrirModal(URL_EDITAR_ADMIN + currentAdminId);
+    } else {
+      console.error("No se pudo obtener el ID del administrador para editar.");
+    }
   });
 
   document.getElementById("btnChangePassword").addEventListener("click", () => {
-    abrirModal(URL_CAMBIAR_PASS);
+    if (currentAdminId) {
+      abrirModal(URL_CAMBIAR_PASS + "?id=" + currentAdminId);
+    }
   });
 
   modalClose.addEventListener("click", cerrarModal);
