@@ -121,13 +121,26 @@ class ServiceownersService:
         :return: Tupla (éxito, mensaje) indicando el resultado de la operación.
         """
         try:
-            # Si se está actualizando la contraseña, hay que hashearla.
-            if 'DIM_Password' in data_to_update:
-                new_password = data_to_update.get('DIM_Password')
+            # Mapeo de posibles nombres de campo para la contraseña que envía el frontend
+            pass_keys = ['DIM_Password', 'cp_nueva', 'password']
+            found_key = next((k for k in pass_keys if k in data_to_update), None)
+
+            if found_key:
+                new_password = data_to_update.get(found_key)
                 # Validar que la nueva contraseña no esté vacía
                 if not new_password or not new_password.strip():
                     return False, "La nueva contraseña no puede estar vacía."
+                
+                # Hasheamos la contraseña y normalizamos el nombre de la llave para el repositorio
                 data_to_update['DIM_Password'] = hash_password(new_password)
+                
+                # Limpieza: si la llave era diferente (ej. 'cp_nueva'), la quitamos para no ensuciar el query
+                if found_key != 'DIM_Password':
+                    del data_to_update[found_key]
+
+            # Si no hay nada que actualizar en esta tabla, evitamos llamar al repositorio
+            if not data_to_update:
+                return True, "No se detectaron cambios en las credenciales."
 
             # Llamar al repositorio para ejecutar la actualización
             success = update_owner_credentials(employee_id, data_to_update, self.conn)
@@ -137,6 +150,44 @@ class ServiceownersService:
         except Exception as e:
             print(f"Error en servicio al actualizar owner: {e}")
             return False, f"Error en servicio: {str(e)}"
+
+    def change_password(self, employee_id: str, old_password: str, new_password: str) -> tuple[bool, str]:
+        """
+        Lógica de negocio para cambiar la contraseña con validación previa.
+        """
+        try:
+            # 1. Obtener el hash actual de la base de datos para este ID
+            # Usamos una consulta directa para asegurar que obtenemos el campo DIM_Password
+            query = "SELECT DIM_Password FROM dim_serviceowners WHERE DIM_EmployeeId = %s"
+            self.conn.cursor.execute(query, (employee_id,))
+            result = self.conn.cursor.fetchone()
+
+            if not result:
+                return False, "Administrador no encontrado."
+
+            current_hash = result.get('DIM_Password')
+            if not current_hash:
+                return False, "No se encontró una contraseña registrada para este usuario."
+
+            # Asegurar que el hash esté en formato bytes para bcrypt
+            if isinstance(current_hash, str):
+                current_hash = current_hash.encode('utf-8')
+
+            # 2. Verificar que la contraseña 'actual' coincida
+            if not verify_password(old_password, current_hash):
+                return False, "La contraseña actual es incorrecta."
+
+            # 3. Hashear la nueva contraseña
+            hashed_new = hash_password(new_password)
+
+            # 4. Actualizar en el repositorio
+            success = update_owner_credentials(employee_id, {'DIM_Password': hashed_new}, self.conn)
+            
+            return success, "Contraseña actualizada" if success else "Error al guardar en base de datos"
+
+        except Exception as e:
+            print(f"Error en servicio change_password: {e}")
+            return False, f"Error interno: {str(e)}"
 
     def get_all_admins(self) -> list[dict]:
         """
