@@ -1,11 +1,16 @@
-
 // cambiar-pass.js
 // Lógica del formulario de cambiar contraseña
-//EDITAR 
+
+import { updateAdministratorPassword } from '../../api/api_serviceOwnersPassword.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
   const form    = document.getElementById('pass-form');
   const message = document.getElementById('form-message');
+
+  // 1. Obtener el ID del administrador desde la URL (?id=...)
+  const params = new URLSearchParams(window.location.search);
+  const adminId = params.get('id');
 
   //Botones mostrar/ocultar contraseña
   document.querySelectorAll('.btn-toggle-pass').forEach(btn => {
@@ -28,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!adminId) {
+      mostrarMensaje('Error: No se pudo identificar al administrador.', 'error');
+      return;
+    }
+
     const actual    = document.getElementById('cp_actual').value;
     const nueva     = document.getElementById('cp_nueva').value;
     const confirmar = document.getElementById('cp_confirmar').value;
@@ -45,20 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mostrarMensaje('Actualizando contraseña...', 'info');
 
-    // ── Conecta aquí con tu API ──
-    // try {
-    //   await axios.put('/api/admins/me/password', { actual, nueva });
-    //   mostrarMensaje('¡Contraseña actualizada correctamente!', 'success');
-    //   setTimeout(() => window.parent.postMessage('passActualizada', '*'), 1000);
-    // } catch (err) {
-    //   const msg = err.response?.data?.message || 'Contraseña actual incorrecta.';
-    //   mostrarMensaje(msg, 'error');
-    // }
+    try {
+      const payload = {
+        id: adminId,
+        cp_actual: actual,
+        cp_nueva: nueva
+      };
 
-    // Simulación visual:
-    console.log('Cambiar contraseña:', { actual, nueva });
-    mostrarMensaje('Contraseña actualizada. (conecta tu API)', 'success');
-    setTimeout(() => window.parent.postMessage('passActualizada', '*'), 1200);
+      const result = await updateAdministratorPassword(payload);
+      
+      mostrarMensaje('¡Contraseña actualizada correctamente!', 'success');
+      setTimeout(() => window.parent.postMessage('passActualizada', '*'), 1200);
+
+    } catch (err) {
+      mostrarMensaje(err.message || 'Error al actualizar la contraseña.', 'error');
+    }
   });
 
   function mostrarMensaje(texto, tipo) {
