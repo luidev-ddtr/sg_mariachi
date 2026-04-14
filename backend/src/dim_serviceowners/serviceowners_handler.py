@@ -219,7 +219,8 @@ class ServiceownersHandler:
 
         try:
             # 1. Validar que el input tenga el ID del empleado
-            employee_id = update_data.get('DIM_EmployeeId')
+            # Aceptamos 'id' o 'DIM_EmployeeId' para mayor compatibilidad con el frontend
+            employee_id = update_data.get('DIM_EmployeeId') or update_data.get('id')
             if not employee_id:
                 return 400, "Falta el campo 'DIM_EmployeeId' para identificar al administrador.", None
 
@@ -244,28 +245,71 @@ class ServiceownersHandler:
             people_id = employee_info.DIM_PersonId
 
             # 3. Procesar actualizaciones para cada módulo si se proporcionan datos
+            # Soporte para datos anidados (estándar) o planos (formularios de contraseña)
             
-            if 'people_data' in update_data:
-                success, msg = people_service.update_person(people_id, update_data['people_data'])
+            # --- DATOS PERSONALES ---
+            people_payload = update_data.get('people_data')
+            if people_payload:
+                success, msg = people_service.update_person(people_id, people_payload)
                 if not success:
                     raise Exception(f"Error al actualizar datos personales: {msg}")
 
-            if 'employ_data' in update_data:
-                success, msg = employ_service.update_employee(employee_id, update_data['employ_data'])
+            # --- DATOS DE ROL ---
+            employ_payload = update_data.get('employ_data')
+            if employ_payload:
+                success, msg = employ_service.update_employee(employee_id, employ_payload)
                 if not success:
                     raise Exception(f"Error al actualizar el rol: {msg}")
 
-            if 'serviceowner_data' in update_data:
-                success, msg = owner_service.update_owner(employee_id, update_data['serviceowner_data'])
+            # --- DATOS DE CUENTA (Contraseña/Usuario) ---
+            owner_payload = update_data.get('serviceowner_data')
+            # Si no viene anidado, revisamos si el objeto principal trae campos de contraseña
+            if not owner_payload and ('DIM_Password' in update_data or 'cp_nueva' in update_data or 'password' in update_data):
+                owner_payload = update_data
+
+            if owner_payload:
+                success, msg = owner_service.update_owner(employee_id, owner_payload)
                 if not success:
                     raise Exception(f"Error al actualizar las credenciales: {msg}")
-
             conexion.save_changes()
             return 200, "Administrador actualizado exitosamente.", None
 
         except Exception as e:
             print(f"Error al actualizar administrador: {e}")
             conexion.conn.rollback()
+            return 500, f"Error interno del servidor: {str(e)}", None
+        finally:
+            if not conn:
+                conexion.close_conexion()
+
+    def change_password(self, data: dict, conn: Conexion = None) -> tuple:
+        """
+        Handler enfocado exclusivamente en el cambio de contraseña.
+        Valida la contraseña actual antes de proceder.
+        """
+        conexion = conn or Conexion()
+        service = ServiceownersService(conexion)
+        try:
+            admin_id = data.get('id') or data.get('DIM_EmployeeId')
+            old_pass = data.get('cp_actual')
+            new_pass = data.get('cp_nueva')
+
+            if not all([admin_id, old_pass, new_pass]):
+                return 400, "Faltan campos obligatorios para el cambio de contraseña.", None
+
+            # Llamamos al servicio especializado
+            success, message = service.change_password(admin_id, old_pass, new_pass)
+            
+            if not success:
+                # Si el error es por contraseña incorrecta, devolvemos 401
+                code = 401 if "incorrecta" in message else 400
+                return code, message, None
+
+            conexion.save_changes()
+            return 200, "Contraseña actualizada exitosamente.", None
+
+        except Exception as e:
+            print(f"Error en handler change_password: {e}")
             return 500, f"Error interno del servidor: {str(e)}", None
         finally:
             if not conn:

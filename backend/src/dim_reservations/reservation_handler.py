@@ -612,13 +612,16 @@ class ReservationService:
             if current_status_id not in allowed_statuses:
                 return 400, "La reservación no puede ser cancelada porque su estatus no es 'Pendiente'.", []
 
-            # 2. Llamar a la función del repositorio para cancelar
+            # 4. Llamar a la función del repositorio para cancelar
             success = cancelled_reservation_by_id(reservation_id, conexion)
 
             if success:
                 # Al ser una eliminación física, ya no podemos consultar el ID en la tabla principal.
                 # Retornamos los datos que ya teníamos en memoria antes de la eliminación.
-                return 200, "Reservación cancelada y movida al archivo exitosamente.", [existing_reservation]
+                #return 200, "Reservación cancelada y movida al archivo exitosamente.", [existing_reservation]
+                conexion.save_changes()  # ✅ commit aquí, no en el repositorio
+                updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
+                return 200, "Reservación cancelada exitosamente.", [updated_reservation]
             else:
                 # Si la función de cancelado falla, devolvemos un error de servidor.
                 return 500, "Ocurrió un error al intentar cancelar la reservación.", []

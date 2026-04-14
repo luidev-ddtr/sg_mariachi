@@ -36,6 +36,22 @@ def update_admin() -> tuple[Any]:
     except Exception as e:
         return send_error(str(e), 500)
 
+@admin_route.route('/change-password', methods=['PUT'])
+@login_required
+def change_password() -> tuple[Any]:
+    """
+    Endpoint dedicado exclusivamente al cambio de contraseña.
+    Llama al handler especializado que valida la contraseña anterior.
+    """
+    try:
+        data = request.get_json()
+        status, message, result = admin_handler.change_password(data)
+        if status != 200:
+            return send_error(message, status)
+        return send_success(message, result, status)
+    except Exception as e:
+        return send_error(str(e), 500)
+
 @admin_route.route('/list', methods=['GET'])
 @login_required
 def list_admins() -> tuple[Any]:
