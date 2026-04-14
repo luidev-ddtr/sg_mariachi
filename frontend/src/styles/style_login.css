@@ -1,99 +1,137 @@
-/*Fondo general*/
+* {
+  box-sizing: border-box;
+}
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
-  padding: 0;
-  height: 100vh;
+  min-height: 100vh;
   background: url('../../public/images/fondo_login.jpg') no-repeat center center / cover;
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(8px);
 }
 
-/* Capa de desenfoque */
+/*FONDO OSCURO*/
 .background {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
   z-index: -1;
 }
 
-/*Contenedor principal*/
+/*CONTENEDOR */
 .login-container {
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  padding: 20px;
 }
 
-/* Tarjeta de login*/
+/*TARJETA*/
 .login-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
-  padding: 40px 50px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   text-align: center;
-  width: 600px;
-  height: 600px;
-  max-width: 90%;
+  width: 100%;
+  max-width: 500px;
   backdrop-filter: blur(10px);
 }
-
-/* Logo y título */
+/*LOGO*/
 .logo {
-  width: 200px;
+  width: 140px;
+  max-width: 60%;
+  margin-bottom: 10px;
+}
+
+/*TEXTOS */
+h1 {
+  font-size: 1.8rem;
   margin-bottom: 5px;
 }
-
-h1 {
-  color: #000000;
-  font-size: 2rem;
-  margin-bottom: 8px;
-}
-
 .subtitle {
-  font-size: 0.95rem;
-  color: #333;
-  margin-bottom: 30px;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
 }
 
-/* Campos de entrada */
+/*LABELS */
 label {
   display: block;
   text-align: left;
   font-weight: 600;
-  margin-bottom: 6px;
-  color: #555;
+  margin-bottom: 5px;
 }
 
+/*INPUT GROUP */
 .input-group {
+  position: relative;
   display: flex;
   align-items: center;
-  background-color: white;
+  background: white;
   border-radius: 8px;
   padding: 5px 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   border: 1px solid #ddd;
 }
 
-.icon {
+/* Icono dentro del input */
+.input-group .icon {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  color: #aaa;
   font-size: 1.3rem;
-  margin-right: 8px;
-  color: #0a9a44;
 }
 
+/* Inputs */
 .input-group input {
+  width: 100%;
   border: none;
   outline: none;
   flex: 1;
-  padding: 10px;
+  padding: 12px 12px 12px 40px;
   font-size: 1rem;
   border-radius: 8px;
+  transition: all 0.2s;
 }
 
-/* Botón */
+/* Focus */
+.input-group input:focus {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.2);
+}
+
+/* BOTÓN OJO */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  z-index: 2;
+  transition: color 0.2s;
+}
+.toggle-password:hover {
+  color: #c0392b;
+}
+.toggle-password:focus {
+  outline: none;
+}
+
+/* Ajuste para contraseña */
+.input-group:has(#password) input {
+  padding-right: 40px;
+}
+
+/* BOTÓN LOGIN  */
 .btn {
   background-color: #e53935;
   color: white;
@@ -106,25 +144,64 @@ label {
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
 .btn:hover {
   background-color: #c62828;
 }
 
-/*Footer */
-footer {
-  margin-top: 25px;
-  font-size: 0.85rem;
+/* TEXTO TÉRMINOS  */
+.terms {
+  font-size: 0.8rem;
+  margin-top: 15px;
   color: #444;
 }
-
-.social-icons {
-  margin-left: 5px;
-  vertical-align: middle;
+.terms a {
+  color: #c62828;
+  text-decoration: none;
+  font-weight: 600;
+}
+.terms a:hover {
+  text-decoration: underline;
 }
 
-.social-icons .material-symbols-outlined {
-  font-size: 1rem;
-  color: #0a9a44;
-  margin: 0 3px;
+/*  FOOTER  */
+footer {
+  margin-top: 20px;
+  font-size: 0.75rem;
+}
+
+/* RESPONSIVE  */
+
+/* Celulares */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px;
+    border-radius: 15px;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  .logo {
+    width: 120px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) {
+  .login-card {
+    max-width: 550px;
+  }
+}
+
+/* Pantallas grandes */
+@media (min-width: 1200px) {
+  .login-card {
+    max-width: 650px;
+    padding: 40px;
+  }
+  h1 {
+    font-size: 2.2rem;
+  }
+  .subtitle {
+    font-size: 1rem;
+  }
 }

@@ -9,66 +9,8 @@
   <link rel="icon" href="/images/logo_cn_fondo.png" type="image/png">
   <!-- Fuente de íconos de Google -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-  <style>
-    /* Estilos adicionales para el botón de mostrar/ocultar contraseña */
-    .input-group {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
 
-    .input-group .icon {
-      position: absolute;
-      left: 12px;
-      pointer-events: none;
-      color: #aaa;
-    }
 
-    .input-group input {
-      width: 100%;
-      padding: 12px 12px 12px 40px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s;
-    }
-
-    .input-group input:focus {
-      outline: none;
-      border-color: #c0392b;
-      box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.2);
-    }
-
-    /* Botón toggle (ojo) dentro del input de contraseña */
-    .toggle-password {
-      position: absolute;
-      right: 12px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #888;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      font-size: 1.3rem;
-      transition: color 0.2s;
-      z-index: 2;
-    }
-
-    .toggle-password:hover {
-      color: #c0392b;
-    }
-
-    .toggle-password:focus {
-      outline: none;
-    }
-
-    /* Ajuste para el contenedor de la contraseña (para que el ícono lock y el toggle no choquen) */
-    .input-group:has(#password) input {
-      padding-right: 40px;
-    }
-  </style>
 </head>
 
 <body>
@@ -111,12 +53,7 @@
       </form>
 
       <footer>
-        <p>© 2025 Agencia Mariachis San Nicolás.
-          <span class="social-icons">
-            <span class="material-symbols-outlined">public</span>
-            <span class="material-symbols-outlined">photo_camera</span>
-          </span>
-        </p>
+        <p class="terms"> Al iniciar sesión aceptas nuestros <a href="terminos.html">Términos y Condiciones</a> y <a href="privacidad.html">Políticas de Privacidad</a></p>
       </footer>
     </div>
   </div>

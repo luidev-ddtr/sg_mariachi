@@ -1,0 +1,90 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: url('../../public/images/fondo_login.jpg') no-repeat center center / cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Capa oscura */
+.background {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: -1;
+}
+
+
+header {
+    background-color: #800000;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.871);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #171313;
+    text-align: center
+}
+h2 {
+    color: #800000;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #800000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #a00000;
+}
+
+/* RESPONSIVE  */
+
+/* Celulares */
+@media (max-width: 480px) {
+  .container {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Pantallas grandes */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 800px;
+    padding: 40px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+}
+
