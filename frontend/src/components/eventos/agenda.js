@@ -5,6 +5,9 @@
 import { GetReservationStatsCalendar } from "../../api/api_reservation_stats_calendar.js";
 import { GetReservaciones } from "../../api/api_reservacion_read.js";
 
+ // Definimos una función global vacía para evitar el error "initMap is not a function"
+ window.initMap = () => {};
+
 const buscarEventoPorNombre = async (nombre) => {
   try {
     const response = await axios.get(`/api/reservations/search?name=${encodeURIComponent(nombre)}`);
@@ -200,9 +203,45 @@ document.addEventListener('DOMContentLoaded', function () {
           <div><small style="color: #666;">Dirección</small><p style="margin: 0;">${props.address || 'No registrada'}</p></div>
         </div>
       </div>
+      <div id="event-map-container" style="height: 220px; width: 100%; margin-top: 20px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);"></div>
     `;
     panelContent.innerHTML = htmlContent;
     detailPanel.classList.add('open');
+
+    // Simulamos la carga del mapa en una ubicación fija (como en el formulario de nuevo evento)
+    renderEventMap();
+  }
+
+  async function renderEventMap() {
+    try {
+        // Esperar un momento para que el panel termine de abrirse y el div tenga dimensiones reales
+        setTimeout(async () => {
+            const mapContainer = document.getElementById("event-map-container");
+            if (!mapContainer) return;
+
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+            // Coordenadas simuladas (Ixmiquilpan, Hidalgo) para la vista previa
+            const simulatedPosition = { lat: 20.47841, lng: -99.21697 };
+
+            const map = new Map(mapContainer, {
+                center: simulatedPosition,
+                zoom: 15,
+                mapId: "SG_MARIACHI_MAP_ID", 
+                disableDefaultUI: true,
+                zoomControl: true
+            });
+
+            new AdvancedMarkerElement({
+                map: map,
+                position: simulatedPosition,
+                title: "Ubicación Simulada"
+            });
+        }, 100); // Pequeño delay para asegurar que el DOM esté renderizado
+    } catch (e) {
+        console.warn("No se pudo cargar el mapa simulado:", e);
+    }
   }
 
   closePanelBtn.onclick = function() { detailPanel.classList.remove('open'); }

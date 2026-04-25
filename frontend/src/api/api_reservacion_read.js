@@ -114,3 +114,52 @@ export const GetGlobalTotals = async () => {
         return { pendientes: 0, completados: 0, totales: 0 };
     }
 };
+
+// ==============================================
+// FUNCIONES NUEVAS PARA REPORTES DE DÍA/MES/AÑO
+// ==============================================
+export const GetReservationToday = async (date) => {
+    try{
+        const response = await axiosInstance.get('reservation/read', { params: { date } });
+        return response.data.body || [];
+    } catch (error) {
+        console.error("Error al obtener reservaciones del día:", error);
+        return [];
+    }
+}
+
+export const GetReservationByMonth = async (month) => {
+    try{
+        const response = await axiosInstance.get('reservation/read', { params: { month } });
+        return response.data.body || [];
+    } catch (error) {
+        console.error("Error al obtener reservaciones del mes:", error);
+        return [];
+    }
+}
+
+export const GetReservationByYear = async (year) => {
+    try{
+        const response = await axiosInstance.get('reservation/read', { params: { year } });
+        return response.data.body || [];
+    } catch (error) {
+        console.error("Error al obtener reservaciones del año:", error);
+        return [];
+    }
+}
+
+/**
+ * Obtiene datos detallados para el reporte utilizando el endpoint unificado.
+ * @param {string} value - El filtro de fecha (ej: '2025', '2025-10', '2025-10-22')
+ */
+export const GetDetailedReport = async (value) => {
+    try {
+        const response = await axiosInstance.get('reservation/report-detailed', { 
+            params: { value } 
+        });
+        return response.data.body || [];
+    } catch (error) {
+        console.error("Error al obtener datos del reporte detallado:", error);
+        return [];
+    }
+};

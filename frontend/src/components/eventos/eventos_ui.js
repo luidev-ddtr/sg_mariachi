@@ -4,6 +4,8 @@ import { CancelarReservacion } from '../../api/api_reservacion_cancelar.js';
 import { renderReservationsTable } from './eventos_logic.js';
 import { TableDropdownManager } from './dropdown_manajer.js';
 
+const tbodyEvents = document.getElementById("tbodyEvents");
+
 // === FUNCIONES DE MODALES HTML ===
 const openModal = (url) => {
   const modalOverlay = document.getElementById('modalOverlay');
@@ -86,26 +88,27 @@ function mostrarModalCustom(titulo, mensaje, tipo = 'info', textoAceptar = 'Acep
     });
 }
 
-// === ACCIONES DIRECTAS ===
-const handleCancelation = async (reservationId) => {
-  // 🔥 Usamos nuestro modal custom en lugar de confirm()
+// === GESTIÓN DE MODAL CANCELAR ===
+const openCancelModal = async (reservationId) => {
   const confirmar = await mostrarModalCustom(
       "Cancelar Reservación", 
-      "¿Estás seguro de que deseas cancelar esta reservación?", 
+      "¿Estás seguro de que deseas cancelar esta reservación? Esta acción no se puede deshacer.", 
       "error", 
       "Sí, Cancelar", 
       true
   );
 
   if (confirmar) {
-    try {
-      await CancelarReservacion(reservationId);
-      await mostrarModalCustom("¡Cancelada!", "Reservación cancelada correctamente.", "success");
-      document.dispatchEvent(new CustomEvent('evento-actualizado'));
-    } catch (error) {
-      console.error('Error al cancelar:', error);
-      await mostrarModalCustom("Error", `No se pudo cancelar la reservación: ${error.message}`, "error");
-    }
+      try {
+        await CancelarReservacion(reservationId);
+        await mostrarModalCustom("¡Cancelada!", "La reservación se ha cancelado correctamente.", "success");
+        document.dispatchEvent(new CustomEvent('evento-actualizado'));
+        document.addEventListener('evento-actualizado', () => {
+          renderReservationsTable(currentMonth, statusSelect?.value || 'todos', searchInput?.value || ''); // Refrescamos la tabla después de cancelar
+        });
+      } catch (error) {
+        await mostrarModalCustom("Error", `No se pudo cancelar: ${error.message}`, "error");
+      }
   }
 };
 
@@ -172,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onArchive: (id) => openArchiveModal(id),
     onDetails: (id) => openContractModal(id),
     onPay: (id) => openPaymentModal(id),
-    onCancel: (id) => handleCancelation(id)
+    onCancel: (id) => openCancelModal(id)
   });
 
   document.addEventListener('evento-actualizado', () => {
@@ -182,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput?.value || ''
     );
   });
+  
 });
 
 // BÚSQUEDA EN TIEMPO REAL

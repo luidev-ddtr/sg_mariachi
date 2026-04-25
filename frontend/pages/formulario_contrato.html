@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Contrato Mariachi San Nicolas</title>
     <link rel="stylesheet" href="/src/styles/style_contrato.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
 </head>
 <body>
     <div class="contrato-container">
@@ -11,8 +12,8 @@
 
         <h1>Mariachi San Nicolas</h1>
         <h2>DE LOS HNOS. HERNANDEZ</h2>
-        <p>#si señor</p>
-        <p>Oficina (759) 7233732 7721516602 7721451172 7721513364 7721177996</p>
+        <p class="si_señor">#si señor</p>
+        <p class="phone">Oficina (759) 7233732 7721516602 7721451172 7721513364 7721177996</p>
         <h2>Contrato</h2>
 
         <p>
@@ -39,15 +40,46 @@
                 </p>
             </li>
             <li>
+                <p>
+                    El contratante se compromete a brindar todo tipo de garantías
+                    tanto a los integrantes del mariachi San Nicolás como a su equipo de trabajo.
+                </p>
+            </li>
+            <li>
+                <p>
+                    En caso de no llevarse acabo el evento organizado por causas de fuerza mayor deberá 
+                    cubrir el importe total que marca dicho contrato, esto como una compensación por los gastos
+                    realizados por el mariachi San Nicolás.
+                </p>
+            </li>
+            <li>
                 <p>Domicilio del contratante: <span id="contratante_domicilio"></span> con teléfono: <span id="contratante_telefono"></span></p>
             </li>
         </ol>
 
         <p>Ixmiquilpan Hgo a <span id="contrato_dia"></span> de <span id="contrato_mes"></span> del <span id="contrato_anio"></span></p>
+
+        <div class="firmas">
+            <div class="firma">
+                <div class="linea-firma">Contratante</div>
+            </div>
+            <div class="firma">
+                <div class="linea-firma">Mariachi San Nicolás</div>
+            </div>
+        </div>
+
+        <div class="nota">
+            <h6>
+                <b>Nota:</b> Estimado cliente, no reconocemos arreglos verbales, por lo que es importante que toda modificación a este contrato se realice por escrito y sea firmada por ambas partes para su validez. Cualquier cambio no documentado no será considerado parte del acuerdo original.
+            </h6>
+        </div>
     </div>
 
     <div class="footer-actions no-print">
-        <button id="btnImprimir" class="btn-print">Imprimir Contrato</button>
+        <button id="btnImprimir" class="btn-print">
+            <span class="material-symbols-outlined">print</span>
+            Imprimir Contrato
+        </button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

@@ -104,9 +104,9 @@ export const renderReservationsTable = async (dateParam, statusParam, searchPara
         <td>
           <center>
             <select class="btn-actions js-action-select" data-id="${item.DIM_ReservationId}">
-              <option value="" selected disabled>Acciones</option>
+              <option value="" selected disabled></option>
               <option value="details">Ver contrato</option>
-              <option value="archive">Archivar</option>
+              <!-- <option value="archive">Archivar</option> -->
               <option value="pay">Pagar</option>
               <option value="edit">Actualizar</option>
               <option value="cancel">Cancelar</option>

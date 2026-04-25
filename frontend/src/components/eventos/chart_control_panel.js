@@ -40,7 +40,7 @@ function initializeChart() {
         }
       },
       // 2. COLORES: Azul para ingresos, Verde para ganancias
-      colors: ['#0d6efd', '#00b050'], 
+      colors: ['#00b050', '#0d6efd'],
       plotOptions: {
         bar: {
           borderRadius: 4,

@@ -38,14 +38,14 @@ p {
 }
 
 /* Frase #si señor */
-p:nth-of-type(1) {
+.si_señor {
     text-align: center;
     font-style: italic;
     margin-top: 5px;
 }
 
 /* Teléfonos */
-p:nth-of-type(2) {
+.phone {
     text-align: center;
     margin-bottom: 25px;
 }
@@ -99,45 +99,44 @@ ol li {
     width: 190px;
     display: block;
     margin: 0 auto 0px auto;
+    margin-bottom: 5px;
+    margin-top: -20px;
 }
 
 .footer-actions {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-    padding-bottom: 50px;
-    display: flex;
-    justify-content: center; /* Centra el botón horizontalmente */
-    gap: 20px;
-    margin-top: 30px; /* Espacio entre la hoja y el botón */
-    padding-bottom: 50px; /* Espacio final para que no pegue al borde de la pantalla */
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    margin: 0;
+    padding: 0;
 }
 
 .btn-print {
     background-color: #37b24d;
-    /* Verde del sistema */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
     color: white;
     padding: 12px 25px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
     font-weight: bold;
-    font-size: 16px;
-    transition: background 0.3s ease;
-
+    /* bottom: -800px; */
     position: absolute;
-    bottom: 0px;
-    right: 20px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 50px;
-    padding: 10px 20px;
-    /* Quita la barra lateral verde */
+    width: 201px;
+    right: 37px; 
 }
 
 .btn-print:hover {
     background-color: #207718;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 @media print {
@@ -160,13 +159,8 @@ ol li {
         background: #fff;
     }
 
-    /*h1 {
-        font-size: 18pt;
-        margin-bottom: 10px;
-    }*/
-
     /* Asegurar que el logo y contenedores tengan el ancho correcto */
-    .contenedor-contrato {
+    .contrato-container {
         width: 100%;
         border: none;
         box-shadow: none;
@@ -179,3 +173,92 @@ ol li {
     }
 }
 
+/* Ajustes generales para optimizar espacio */
+:root {
+    --font-size-base: 14px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.contrato-container h1 {
+    font-size: 1.4rem;
+    margin: 5px 0;
+}
+
+.contrato-container h2 {
+    font-size: 1.1rem;
+    margin: 3px 0;
+}
+
+.contrato-container p,
+.contrato-container li {
+    font-size: var(--font-size-base);
+    margin: 4px 0;
+}
+
+/* Estilo para la previsualización en el MODAL (Pantalla) */
+@media screen {
+    body {
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 30px;
+    }
+
+    .contrato-container {
+        border: 1px solid #ccc;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        /* Escalamos para que quepa en el modal sin scroll */
+        transform: scale(1.03);
+        transform-origin: top center;
+        margin-bottom: -100px;
+        /* Compensa el espacio vacío dejado por el escalado */
+    }
+}
+
+/* Estilo optimizado para IMPRESIÓN (Una sola hoja) */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: none;
+    }
+
+    .contrato-container {
+        border: none;
+        padding: 0;
+        width: 100%;
+        transform: none;
+        margin: 0;
+    }
+
+    @page {
+        size: auto;
+        margin: 15mm;
+    }
+}
+
+.firmas {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 60px;
+}
+
+.firma {
+    text-align: center;
+    width: 40%;
+}
+
+.linea-firma {
+    border-top: 1px solid #000;
+    margin-top: 60px;
+    padding-top: 5px;
+}

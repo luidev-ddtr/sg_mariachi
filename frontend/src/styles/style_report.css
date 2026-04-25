@@ -1,0 +1,159 @@
+body {
+    background: white;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.option-group {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.option-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+select,
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.btn-generate {
+    width: 100%;
+    background: #3346dd;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.btn-generate:hover {
+    background: #2535b8;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Estilos para la previsualización y el documento del reporte */
+.report-container {
+    padding: 20px;
+    font-family: 'Roboto', Arial, sans-serif;
+    color: #333;
+    background-color: white;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #3346dd;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    margin-top: 1px;
+}
+
+.report-header img {
+    width: 100px;
+    height: auto;
+}
+
+.report-header-info {
+    text-align: right;
+}
+
+.report-header-info h1 {
+    margin: 0;
+    color: #3346dd;
+    font-size: 24px;
+}
+
+.report-period-badge {
+    background: #f4f4f4;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-left: 5px solid #3346dd;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.report-table thead {
+    background-color: #3346dd;
+    color: white;
+}
+
+.report-table th,
+.report-table td {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.report-total-row td {
+    background-color: #f8f9fa;
+    border-top: 2px solid #3346dd;
+    font-size: 14px;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+/* --- REGLAS DE IMPRESIÓN --- */
+@media print {
+    @page {
+        margin: 10mm;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .report-container {
+        padding: 0;
+        width: 100%;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 6px 8px; /* Reducción de relleno para ahorrar espacio vertical */
+    }
+
+    .report-header {
+        margin-bottom: 10px;
+    }
+}

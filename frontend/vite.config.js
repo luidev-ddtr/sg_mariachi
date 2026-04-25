@@ -25,6 +25,7 @@ export default defineConfig({
         'editar_admin': resolve(__dirname, 'pages/editar_admin.html'),
         'formulario-nvo-admin': resolve(__dirname, 'pages/formulario_nvo_admin.html'),
         'formulario-cambiar-pass': resolve(__dirname, 'pages/formulario_cambiar_pass.html'),
+        'report_wizard': resolve(__dirname, 'pages/report_wizard.html'),
       },
     },
   },

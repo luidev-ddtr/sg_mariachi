@@ -34,7 +34,7 @@ body {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -65,15 +65,16 @@ body {
 }
 
 /* GRAFICA*/
-.chart{
+.chart {
   width: 100%;
-   min-height: 400px;
+  min-height: 400px;
 }
+
 .chart-section {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .chart-controls {
@@ -83,6 +84,7 @@ body {
   gap: 15px;
   margin-bottom: 20px;
 }
+
 .view-buttons_c {
   display: flex;
   justify-content: center;
@@ -125,7 +127,8 @@ body {
 .graph-filters {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Alineado a la izquierda */
+  justify-content: flex-start;
+  /* Alineado a la izquierda */
   gap: 16px;
   margin: 20px 0;
 }
@@ -214,4 +217,38 @@ body {
   .cards-section {
     flex-direction: column;
   }
+}
+
+.kpi-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+}
+
+.btn-report {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-corte {
+  background: #dc3545;
+  color: white;
+  font-weight: 500;
+}
+
+.modal-content {
+  border-radius: 16px;
+}
+
+.difference-positive {
+  color: #28a745;
+}
+
+.difference-negative {
+  color: #dc3545;
 }

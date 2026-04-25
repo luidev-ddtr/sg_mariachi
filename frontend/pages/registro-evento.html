@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de eventos | Mariachis San Nicolás</title>
-  
+
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
 
   <link rel="stylesheet" href="/src/styles/styles_registro_eventos.css">
@@ -40,8 +41,8 @@
       </section>
 
       <section class="filters">
-        <input type="month" id="inputFecha" /> 
-        
+        <input type="month" id="inputFecha" />
+
         <select id="selectEstado">
           <option value="todos">Estado: Todos</option>
           <option value="completo">Completado</option>
@@ -51,40 +52,44 @@
 
         <!-- <input type="text" id="inputBuscarNombre" placeholder="Buscar por nombre..." style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; margin-right: 10px;" /> -->
         <div class="search-box">
-              <input type="text" id="inputBuscar" placeholder="Buscar..." />
-              <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" id="inputBuscar" placeholder="Buscar cliente..." />
+          <span class="material-symbols-outlined search-icon">search</span>
         </div>
 
         <button id="btnFiltrar" class="btn red">
-        <span class="material-symbols-outlined">search</span> Filtrar
+          <span class="material-symbols-outlined">search</span> Filtrar
         </button>
         <button id="btnNuevaReserva" class="btn green">
-        <span class="material-symbols-outlined">add</span> Nuevo evento
+          <span class="material-symbols-outlined">add</span> Nuevo evento
         </button>
       </section>
 
-      <section class="table-section">
-        <table id="tabla-eventos">
-          <thead>
-            <tr>
-              <th>No. Eventos</th>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Fecha</th>
-              <th>Hr Inicio</th>
-              <th>Hr Final</th>
-              <th>Monto</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyEvents">
-             <!-- Aquí se llenará dinámicamente con JavaScript -->
-          </tbody>
-        </table>
-      </section>
-    </main> 
-  </div> 
+      <div class="table-card">
+        <div class="table-wrapper">
+          <section class="table-section">
+            <table id="tabla-eventos">
+              <thead>
+                <tr>
+                  <th>No. Eventos</th>
+                  <th>Cliente</th>
+                  <th>Teléfono</th>
+                  <th>Fecha</th>
+                  <th>Hr Inicio</th>
+                  <th>Hr Final</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEvents">
+                <!-- Aquí se llenará dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal-container">
@@ -135,31 +140,48 @@
       window.cerrarModalInterface = closeModal;
 
       // 6. Función para finalizar edición (usada por edit-evento.js)
-      window.finalizarEdicionExitoso = function() {
-          console.log("Evento actualizado desde el modal de edición.");
-          closeModal();
-          const eventoUpdate = new CustomEvent('evento-actualizado');
-          document.dispatchEvent(eventoUpdate);
+      window.finalizarEdicionExitoso = function () {
+        console.log("Evento actualizado desde el modal de edición.");
+        closeModal();
+        const eventoUpdate = new CustomEvent('evento-actualizado');
+        document.dispatchEvent(eventoUpdate);
       }
 
       // ---------------------------------------------------------
       // 🔥 LISTENER PARA NUEVOS EVENTOS (Desde registro-evento.js)
       // ---------------------------------------------------------
       window.addEventListener('message', (event) => {
-          // Verificamos que el mensaje sea 'eventoRegistrado'
-          if (event.data === 'eventoRegistrado') {
-              console.log("✅ Nuevo evento detectado. Cerrando modal y recargando tabla...");
+        // Verificamos que el mensaje sea 'eventoRegistrado'
+        if (event.data === 'eventoRegistrado') {
+          console.log("✅ Nuevo evento detectado. Cerrando modal y recargando tabla...");
 
-              // A. Cerramos el modal
-              closeModal();
+          // A. Cerramos el modal
+          closeModal();
 
-              // B. Avisamos a eventos_ui.js que debe recargar la tabla
-              const eventoUpdate = new CustomEvent('evento-actualizado');
-              document.dispatchEvent(eventoUpdate);
-          }
+          // B. Avisamos a eventos_ui.js que debe recargar la tabla
+          const eventoUpdate = new CustomEvent('evento-actualizado');
+          document.dispatchEvent(eventoUpdate);
+        }
       });
     });
   </script>
+
+  <!-- Modal confirmar eliminar -->
+  <div id="confirmDeleteModal" class="modal-overlay" style="display:none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4>Confirmar eliminación</h4>
+        <button class="close-modal" id="confirmDeleteClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de eliminar este evento?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelarDelete">Cancelar</button>
+        <button class="btn btn-danger" id="btnConfirmarDelete">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/src/components/eventos/eventos_ui.js" type="module"></script>
   <script src="/src/components/eventos/archivar_eventos.js" type="module"></script>
@@ -182,4 +204,5 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 </body>
+
 </html>
