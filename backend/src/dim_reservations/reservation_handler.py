@@ -20,6 +20,7 @@ from src.dim_reservations.repositorio.cancelled_reservation import cancelled_res
 from src.dim_reservations.repositorio.status_complete_auto import update_past_reservations_to_complete
 
 from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
+from src.dim_reservations.repositorio.get_reports_info import get_report_data_filtered
 
 handler_people = PeopleHandler()
 
@@ -583,48 +584,56 @@ class ReservationService:
 
 #La cancelacion de una reservacion se hara de la misma forma que la de archivar
 # Esto esta aun en prueba
-    def cancelled_reservation(self, _reservation: dict, conn: Conexion = None) -> tuple[int, str]:
+    def cancelled_reservation(self, reservationId: str, conn: Conexion = None) -> tuple:
+        """
+        Orquesta la cancelación de una reserva existente.
+
+        Flujo:  
+        1. Valida que el ID de la reservación esté presente en la solicitud.
+        2. Obtiene los datos completos de la reserva existente desde la BD.
+        3. Verifica que el estatus actual permita la cancelación (ej. solo 'Pendiente').
+        4. Llama al repositorio para cambiar el estatus a 'Cancelada'.
+        """
+
         conexion = conn or Conexion()
         reserva_service = ReservaService(conexion)
         try:
-            # 1. Validar que el ID de la reservación venga en el diccionario
-            reservation_id = _reservation.get('DIM_ReservationId')
-            if not reservation_id:
-                return 400, "Falta el ID de la reservación (DIM_ReservationId).", []
 
-            # 2. Obtener la reservación para verificar su estatus
-            existing_reservation = reserva_service.get_reservation_by_id(reservation_id)
-            if not existing_reservation:
-                return 404, f"No se encontró una reserva con el ID {reservation_id}", []
+            # 1. Validar que el ID de la reservación esté presente
+            if not reservationId:
+                return 400, "Falta el ID de la reservación (DIM_ReservationId).", None
             
-            #3. Verificar si el estatus es cancelado, archivado o completado'
-            current_status_id = existing_reservation['DIM_StatusId']
+            # 2. Obtener datos completos de la reserva existente
+            existing_reservation_data = reserva_service.get_reservation_by_id(reservationId)
+            if not existing_reservation_data:
+                return 404, f"No se encontró una reserva con el ID {reservationId}", None
             
-            # Si ya está cancelada, retornamos éxito inmediatamente
-            if current_status_id == 'c842035f-aecb-5099':
-                return 200, "La reservación ya se encuentra cancelada.", [existing_reservation]
-
-            allowed_statuses = [
-                '6d0fa47f-1933-5928',  # ID de pendiente
-
-            ]
-
+            # 3. Verificar que el estatus actual permita la cancelación
+            current_status_id = existing_reservation_data['DIM_StatusId']
+            allowed_statuses = ['6d0fa47f-1933-5928']  # ID de pendiente
             if current_status_id not in allowed_statuses:
-                return 400, "La reservación no puede ser cancelada porque su estatus no es 'Pendiente'.", []
+                return 400, "La reservación no puede ser cancelada porque no está en estado 'Pendiente'.", None
+            
+            # 4. Llamar a la función del repositorio para cancelar la reserva
+            success, message =  reserva_service.cancelled_reservation(reservationId)
 
-            # 4. Llamar a la función del repositorio para cancelar
-            success = cancelled_reservation_by_id(reservation_id, conexion)
+            if not success:
+                conexion.conn.rollback()
 
-            if success:
-                # Al ser una eliminación física, ya no podemos consultar el ID en la tabla principal.
-                # Retornamos los datos que ya teníamos en memoria antes de la eliminación.
-                #return 200, "Reservación cancelada y movida al archivo exitosamente.", [existing_reservation]
-                conexion.save_changes()  # ✅ commit aquí, no en el repositorio
-                updated_reservation = reserva_service.get_reservation_by_id(reservation_id)
-                return 200, "Reservación cancelada exitosamente.", [updated_reservation]
-            else:
-                # Si la función de cancelado falla, devolvemos un error de servidor.
-                return 500, "Ocurrió un error al intentar cancelar la reservación.", []
+                if "no se encontró" in message.lower():
+                    return 404, message, None
+                elif "no puede ser cancelada" in message.lower():
+                    return 400, message, None
+                else:
+                    return 500, message, None
+            
+            conexion.save_changes()
+            # Después de cancelar, obtenemos los datos actualizados
+            # como el id de la reserva se elimino, ahora se actualizara la tabla
+            # con el id de otro evento que se encuentre en la misma fecha
+
+            return 200, "Reservación cancelada exitosamente.", []
+
         except Exception as e:
             print(f"Error en el handler al cancelar la reserva: {e}")
             # No hacemos rollback aquí porque la función de cancelado maneja su propia transacción.
@@ -702,3 +711,29 @@ class ReservationService:
             return 500, f"Error en el handler al obtener totales: {e}", {}
         finally:
             if not conn: conexion.close_conexion()
+
+    def get_detailed_report(self, request_data: dict, conn: Conexion = None) -> tuple[int, str, list]:
+        """
+        Handler unificado para generar datos de reportes basados en un periodo.
+        """
+        conexion = conn or Conexion()
+        try:
+            # 'value' puede ser '2025', '2025-10', '2025-10-22'
+            filter_value = request_data.get('value')
+            
+            if not filter_value:
+                # Por defecto tomamos el mes actual
+                filter_value = datetime.now().strftime('%Y-%m')
+
+            print(f"Generando reporte para el filtro: {filter_value}")
+
+            # Llamamos directamente al repositorio unificado
+            report_data = get_report_data_filtered(filter_value, conexion)
+            
+            return 200, "Datos del reporte generados.", report_data
+        except Exception as e:
+            print(f"Error en handler de reportes: {e}")
+            return 500, f"Error interno del servidor: {e}", []
+        finally:
+            if not conn:
+                conexion.close_conexion()

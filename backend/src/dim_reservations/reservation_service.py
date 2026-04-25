@@ -3,12 +3,13 @@ from datetime import datetime, date
 from src.dim_reservations.repositorio.get_dates_reservations import get_dates_reservations # Aseguramos que la importación sea correcta
 from src.dim_reservations.repositorio.get_reservation_by_id import get_reservation_by_id
 from src.dim_reservations.repositorio.insert_reservation import insert_reservation
+
 from src.dim_reservations.reservation_model import Reservation
-
 from src.dim_reservations.repositorio.update_reservation import update_reservation
-
 from src.dim_reservations.repositorio.data_reservation_calendar import get_reservation_stats
 from src.dim_reservations.repositorio.get_global_totals import get_global_totals_repo
+from src.dim_reservations.repositorio.cancelled_reservation import cancelled_reservation_by_id
+from src.dim_reservations.repositorio.get_reports_info import get_report_data_filtered
 
 class ReservaService:
     """
@@ -233,3 +234,34 @@ class ReservaService:
         except Exception as e:
             print(f"Error en servicio al obtener totales globales: {e}")
             return {"pendientes": 0, "completados": 0, "totales": 0}
+        
+    def cancelled_reservation(self, reservationId: str) -> tuple[bool, str]:
+        """
+        Servicio para cancelar una reserva de forma lógica.
+
+        Args:
+            reservationId (str): El ID de la reserva a cancelar.
+        Returns:
+            tuple[bool, str]: Una tupla donde el primer elemento es un booleano que indica el éxito de la operación,
+                              y el segundo elemento es un mensaje descriptivo del resultado.
+        """
+        try:
+
+            reservation_deleted = cancelled_reservation_by_id(reservationId, self.conn)
+            if not reservation_deleted:
+                return False, "Fallo al cancelar la reserva"
+
+            return  True, "Reserva cancelada exitosamente"
+        except Exception as e:
+            print(f"Error en servicio al cancelar la reserva: {e}")
+            return False, "Error al cancelar la reserva"
+        
+    def get_detailed_report_data(self, filter_value: str) -> list:
+        """
+        Servicio unificado para obtener datos de reportes.
+        """
+        try:
+            return get_report_data_filtered(filter_value, self.conn)
+        except Exception as e:
+            print(f"Error en el servicio de reportes: {e}")
+            return []
