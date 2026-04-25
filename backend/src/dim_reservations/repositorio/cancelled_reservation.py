@@ -23,8 +23,7 @@ def cancelled_reservation_by_id(id: str, connection: Conexion):
     :rtype: bool
     """
     query = """
-    UPDATE `dim_reservation`
-    SET `DIM_StatusId` = 'c842035f-aecb-5099'
+    DELETE FROM dim_reservation
     WHERE DIM_ReservationId = %s;
     """
     try:

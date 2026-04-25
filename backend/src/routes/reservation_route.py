@@ -152,21 +152,20 @@ def archive_reservation() -> tuple[Any]:
         return send_error(str(e), 500)
 
 
-@reservation_route.route('/cancel', methods=['POST'])
+@reservation_route.route('/cancel/<string:reservation_id>', methods=['DELETE'])
 @login_required
-def cancel_reservation() -> tuple[Any]:
+def cancel_reservation(reservation_id: str) -> tuple[Any]:
     """
     Cancela una reserva existente
     """
     try:
-        id_reservation = request.get_json()
-        status, message, data = reservation_options.cancelled_reservation(id_reservation)
+        status, message, data = reservation_options.cancelled_reservation(reservation_id)
         
         if status != 200:
             print(message)
             return send_error(message, status)
         
-        return send_success(message, data, 200)
+        return send_success(message, data, status)
     except Exception as e:
         print(e)
         return send_error(str(e), 500)
@@ -230,3 +229,26 @@ def get_global_totals():
     if status != 200:
         return send_error(message, status)
     return send_success(message, data, 200)
+
+@reservation_route.route('/report-detailed', methods=['GET'])
+@login_required
+def get_detailed_report():
+    """
+    Endpoint unificado para obtener información detallada de reportes.
+    Recibe el parámetro 'value' por URL (ej: ?value=2025-10).
+    """
+    try:
+        # Extraemos los parámetros de búsqueda (?value=...)
+        request_data = request.args.to_dict()
+        
+        # El handler orquesta la llamada al repositorio filtrado por LIKE
+        status, message, data = reservation_options.get_detailed_report(request_data)
+        
+        if status != 200:
+            return send_error(message, status)
+            
+        return send_success(message, data, status)
+        
+    except Exception as e:
+        print(f"Error en el endpoint de reportes: {e}")
+        return send_error(f"Error interno al procesar el reporte: {str(e)}", 500)
