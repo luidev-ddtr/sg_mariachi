@@ -6,12 +6,10 @@ export const CancelarReservacion = async (id) => {
             throw new Error("ID de reservación es requerido");
         }
 
-        console.log("Id enviada a api/reservation/cancel:", id);
-        const data = { 'DIM_ReservationId': id}
+        console.log("Enviando DELETE a api/reservation/cancel/ para el ID:", id);
 
-        console.log("infromacion final= ",data)
-        // Petición POST a cancel
-        const response = await axiosInstance.post('reservation/cancel', data);
+        // Petición DELETE con el ID en la URL
+        const response = await axiosInstance.delete(`reservation/cancel/${id}`);
         
         console.log("Respuesta del servidor al cancelar reservacion:", response.data);
         

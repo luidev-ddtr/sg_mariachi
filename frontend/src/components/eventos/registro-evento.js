@@ -207,6 +207,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+    // Ejemplo de integración de GEOLOCALIZACIÓN con Google Maps (Requiere que maps.js esté incluido en el HTML)
+    ['direccion', 'municipio', 'estado'].forEach(id => {
+        document.getElementById(id)?.addEventListener('blur', () => {
+            if (typeof window.buscarDireccion === 'function') {
+                window.buscarDireccion();
+            }
+        });
+    });
+
 });
 
 // =======================================================

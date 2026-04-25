@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,15 +10,24 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- para iconos -->
 
   <link rel="stylesheet" href="/src/styles/style_control_panel.css">
+  <!-- Reutilizamos estilos de modales para consistencia -->
+  <link rel="stylesheet" href="/src/styles/styles_registro_eventos.css">
   <!-- ApexCharts debe cargarse ANTES de tu script -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
+
 <body>
 
   <main class="main-content">
-    <header class="header">
-      <h1>Panel de Control</h1>
-      <p>Vista general del negocio</p>
+    <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1>Panel de Control</h1>
+        <p>Vista general del negocio</p>
+      </div>
+      <button id="btn-open-report-settings" class="btn-print"
+        style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: #3346dd; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        <span class="material-symbols-outlined">print</span> Generar Reporte
+      </button>
     </header>
 
     <!-- TARJETAS RESUMEN -->
@@ -39,39 +49,52 @@
       </div>
     </section>
 
- <!-- Filtro de fecha -->
-<div class="graph-filters">
+    <!-- MODAL DE SISTEMA (Iframe para reportes) -->
+    <div id="modalOverlay" class="modal-overlay">
+      <div class="modal-container" style="max-width: 600px; height: 80vh;">
+        <button id="modalClose" class="modal-close-btn">&times;</button>
+        <iframe id="modalFrame" src="about:blank" frameborder="0" style="width: 100%; height: 100%; border-radius: 20px;"></iframe>
+      </div>
+    </div>
 
-  <div class="nav-buttons">
-    <button id="prev"><span class="material-icons">chevron_left</span></button>
-    <button id="today"><span class="material-icons">calendar_today</span></button>
-    <button id="next"><span class="material-icons">chevron_right</span></button>
-  </div>
+    <!-- CONTENEDOR OCULTO PARA IMPRESIÓN (No se ve en pantalla, solo en el papel) -->
+    <div id="print-area" style="display: none;">
+        <!-- Se llena dinámicamente al presionar Generar -->
+    </div>
 
-  <!-- <div class="view-buttons_c">
-    <button id="grafic_week" class="view-btn active">
-      <span class="material-icons">view_week</span> Semana
-    </button> -->
+    <!-- Filtro de fecha -->
+    <div class="graph-filters">
 
-    <button id="grafic_month" class="view-btn">
-      <span class="material-icons">calendar_month</span> Mes
-    </button>
+      <div class="nav-buttons">
+        <button id="prev"><span class="material-icons">chevron_left</span></button>
+        <button id="today"><span class="material-icons">calendar_today</span></button>
+        <button id="next"><span class="material-icons">chevron_right</span></button>
+      </div>
 
-    <button id="grafic_year" class="view-btn">
-      <span class="material-icons">event</span> Año
-    </button>
-  </div>
+      <div class="view-buttons_c">
+        <button id="grafic_week" class="view-btn active">
+          <span class="material-icons">view_week</span> Semana
+        </button>
 
-  <div class="current-period">
-    Semana actual
-  </div>
+        <button id="grafic_month" class="view-btn">
+          <span class="material-icons">calendar_month</span> Mes
+        </button>
 
-</div>
+        <button id="grafic_year" class="view-btn">
+          <span class="material-icons">event</span> Año
+        </button>
+      </div>
+
+      <div class="current-period">
+        Semana actual
+      </div>
+
+    </div>
 
     <!-- Gráfica -->
     <section class="chart-section">
       <h2>Ingresos</h2>
-      <div id="chart" ></div>
+      <div id="chart"></div>
       <!-- <div id="chart" style="width: 100%; min-height: 400px;"> -->
     </section>
 
@@ -85,6 +108,30 @@
   <!--Script DESPUÉS de ApexCharts -->
   <script type="module" src="/src/components/eventos/chart_control_panel.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnOpenReport = document.getElementById("btn-open-report-settings");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalFrame = document.getElementById("modalFrame");
+      const modalClose = document.getElementById("modalClose");
+
+      btnOpenReport.addEventListener("click", () => {
+        modalFrame.src = "/pages/report_wizard.html";
+        modalOverlay.classList.add("visible");
+      });
+
+      const closeModal = () => {
+        modalOverlay.classList.remove("visible");
+        modalFrame.src = "about:blank";
+      };
+
+      modalClose.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
+    });
+  </script>
 
 </body>
 </html>

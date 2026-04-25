@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,21 +69,21 @@
 
       <!-- GESTIÓN ADMINS -->
       <section class="section-block" id="gestionAdminsSection">
-
+        <h2 class="section-title">Gestión de Administradores</h2>
         <div class="table-card">
           <div class="table-toolbar">
-            <div class="search-box">
-              <input type="text" id="inputBuscar" placeholder="Buscar administrador..." />
-              <span class="material-symbols-outlined search-icon">search</span>
-            </div>
             <div class="toolbar-right">
-              <!-- <button class="btn btn-outline-filter" id="btnFiltrar">
+              <button class="btn btn-outline-filter" id="btnFiltrar">
                 <span class="material-symbols-outlined">filter_list</span> Filtrar
-              </button> -->
+              </button>
               <!-- Este botón abre el mismo modal-overlay que ya existe -->
               <button class="btn btn-green" id="btnNuevoAdmin">
                 <span class="material-symbols-outlined">add</span> Nuevo Admin
               </button>
+            </div>
+            <div class="search-box">
+              <input type="text" id="inputBuscar" placeholder="Buscar administrador..." />
+              <span class="material-symbols-outlined search-icon">search</span>
             </div>
           </div>
 
@@ -161,7 +162,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="btnCancelarDelete">Cancelar</button>
-        <button class="btn btn-danger"    id="btnConfirmarDelete">Sí, Eliminar</button>
+        <button class="btn btn-danger" id="btnConfirmarDelete">Sí, Eliminar</button>
       </div>
     </div>
   </div>
@@ -169,7 +170,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script type="module">
     import { checkSession } from '/src/api/api_auth.js';
-    
+
     document.addEventListener('DOMContentLoaded', async () => {
       const session = await checkSession();
       if (session) {
@@ -178,7 +179,7 @@
         if (userRole !== 'Administrador principal') {
           const section = document.getElementById('gestionAdminsSection');
           if (section) section.style.display = 'none';
-          
+
           // También podrías ocultar botones específicos de edición en el perfil
           // document.getElementById('btnEditProfile').style.display = 'none';
         }

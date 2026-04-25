@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configurar Reporte</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <link rel="stylesheet" href="/src/styles/form_nvo_evento.css">
+  <link rel="stylesheet" href="/src/styles/style_report.css">
+</head>
+<body>
+  <div class="no-print">
+    <h2 style="margin-top: 0;">Personalizar Reporte</h2>
+    <p>Selecciona los parámetros para el reporte PDF/Impreso.</p>
+
+    <form id="form-report">
+      <div class="option-group">
+        <label>Periodo de tiempo</label>
+        <select id="report-period">
+          <option value="today">Hoy</option>
+          <option value="month">Este Mes</option>
+          <option value="year">Todo el Año</option>
+        </select>
+      </div>
+
+      <div class="option-group">
+        <label>Contenido del reporte</label>
+        <label class="checkbox-item"><input type="checkbox" id="check-events" checked> Lista de Eventos</label>
+        <label class="checkbox-item"><input type="checkbox" id="check-payments" checked> Detalle de Pagos</label>
+        <label class="checkbox-item"><input type="checkbox" id="check-summary" checked> Resumen de Totales</label>
+      </div>
+
+      <button type="submit" class="btn-generate">
+        <span class="material-symbols-outlined">print</span> Generar e Imprimir
+      </button>
+    </form>
+  </div>
+
+  <!-- Área donde se construirá el reporte para impresión -->
+  <div id="print-content" style="display: none;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="module" src="/src/components/eventos/report_logic.js"></script>
+</body>
+</html>

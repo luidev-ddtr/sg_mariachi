@@ -16,7 +16,7 @@ body {
 
 /* ── Layout ── */
 .container {
-  display: flex;
+  /* display: flex; */
   min-height: 100vh;
 }
 
